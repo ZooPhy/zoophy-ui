@@ -6,7 +6,6 @@ let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let redis_tool = require('./bin/redis_tool');
 let session_tool = require('./bin/session_tool');
-const ALLOWED_VALUES = require('./bin/allowed_values');
 
 let index = require('./routes/index');
 
@@ -28,9 +27,9 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 app.use(function(req, res) {
-  res.render('home', {allowed_values: ALLOWED_VALUES});
+  res.status(404).send();
 });
 
-console.log('App Started Up (:');
+console.log('App Started Up');
 
 module.exports = app;

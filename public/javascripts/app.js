@@ -1,8 +1,6 @@
 'use strict';
 
-function getServer() {
-  return location.protocol + '//' + location.hostname + ':' + location.port;
-}
+const SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
 
 angular.module('ZooPhy', []);
 

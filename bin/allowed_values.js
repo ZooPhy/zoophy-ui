@@ -2069,10 +2069,6 @@ const CONTINENTS = [
 
 const HOSTS = [
   {
-    name: 'All',
-    tax_id: 1
-  },
-  {
     name: 'Avian',
     tax_id: 8782
   },

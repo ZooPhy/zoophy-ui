@@ -6,8 +6,32 @@
     <script type="text/javascript" src="javascripts/home.js"></script>
   </head>
   <%- include('navbar'); %>
-  <body ng-app="ZooPhy">
-    <h1>Hello World <i class="fa fa-smile-o" aria-hidden="true"></i></h1>
+  <body ng-app="ZooPhy" ng-controller="homeController" ng-cloak>
+    <div class="container">
+      <div class="row text-center">
+        <a href="http://zoophy.wikispaces.asu.edu/" target="_new">
+          <div class="col col-xs-6 col-xs-offset-3 col-md-offset-2">
+            <img id="main-logo" class="img-rounded img-responsive" src="images/zoophy.png"/>
+            <div class="title">
+              <h2>ZooPhy</h2>
+              <h6 class="hidden-xs">Virus Spread via Phylogeography</h6>
+            </div>
+          </div>
+        </a>
+      </div>
+      <div class="row">
+        <div class="panel panel-info">
+          <ul class="nav nav-tabs">
+            <li role="presentation" class="active"><a href="#">Search</a></li>
+            <li role="presentation"><a href="#">Results</a></li>
+          </ul>
+          <div class="panel-body">
+            <%- include('search'); %>
+            <%- include('results'); %>
+          </div>
+        </div>
+      </div>
+    </div>
   </body>
   <%- include('footer'); %>
 </html>

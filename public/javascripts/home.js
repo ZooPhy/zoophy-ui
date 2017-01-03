@@ -2,26 +2,6 @@
 
 angular.module('ZooPhy').controller('homeController', function ($scope, $http, $timeout) {
 
-  $scope.viruses = [];
-  $scope.hosts = [];
-  $scope.genes = [];
-  $scope.continents = [];
-  $scope.countries = [];
-  $scope.regions = [];
-
-  $scope.fromYear = 1900;
-  $scope.toYear = 2017;
-  $scope.minSequenceLength = 0;
-  $scope.virus = null;
-  $scope.host = null;
-  $scope.gene = null;
-  $scope.continent = null;
-  $scope.country = null;
-  $scope.region = null;
-
-  $scope.file = null;
-
-
 
 });
 
