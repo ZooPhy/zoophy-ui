@@ -2,7 +2,7 @@
   <div class="row">
     <div class="col-md-3">
       <label for="virus">Virus</label>
-      <select id="virus" class="selectpicker" required>
+      <select id="virus" class="selectpicker" data-dropup-auto="false" required>
         <% for(let i = 0; i < allowed_values.viruses.length; i++) { %>
           <option value="<%= allowed_values.viruses[i].tax_id %>"><%= allowed_values.viruses[i].name %></option>
         <% } %>
@@ -10,7 +10,7 @@
     </div>
     <div class="col-md-3">
       <label for="host">Host</label>
-      <select id="host" class="selectpicker" required>
+      <select id="host" class="selectpicker">
         <option value="1">All</option>
         <% for(let i = 0; i < allowed_values.hosts.length; i++) { %>
           <option value="<%= allowed_values.hosts[i].tax_id %>"><%= allowed_values.hosts[i].name %></option>
@@ -19,7 +19,7 @@
     </div>
     <div class="col-md-3">
       <label for="continent">Continent</label>
-      <select id="continent" class="selectpicker" multiple required>
+      <select id="continent" class="selectpicker" data-dropup-auto="false">
         <option value="6295630" selected>All</option>
         <% for(let i = 0; i < allowed_values.continents.length; i++) { %>
           <option value="<%= allowed_values.continents[i].geoname_id %>"><%= allowed_values.continents[i].name %></option>
@@ -30,38 +30,25 @@
       <% const CURRENT_YEAR = Number(new Date().getFullYear()); %>
       <div class="col-md-6">
         <label for="from">From</label>
-        <select id="from" class="selectpicker date-select" required>
-          <% for(let i = 1900; i <= CURRENT_YEAR; i++) { %>
-            <option value="<%= i %>" <% if(i === 1900) {%> selected <% } %> ><%= i %></option>
-          <% } %>
-        </select>
+        <input id="from" type="number" ng-model="from" class="form-control" placeholder="YYYY"/>
       </div>
       <div class="col-md-6">
         <label for="to">To</label>
-        <select id="to" class="selectpicker date-select" required>
-          <% for(let i = 1900; i <= CURRENT_YEAR; i++) { %>
-            <option value="<%= i %>" <% if(i === CURRENT_YEAR) {%> selected <% } %> ><%= i %></option>
-          <% } %>
-        </select>
+        <input id="to" type="number" ng-model="to" class="form-control" placeholder="<%= CURRENT_YEAR %>"/>
       </div>
     </div>
   </div>
   <div class="row pushed-down">
     <div class="col-md-3">
       <label for="genes">Genes</label>
-      <select id="genes" class="form-control" data-dropup-auto="false" multiple required>
-        <option value="All" selected>All</option>
-        <% for(let i = 0; i < allowed_values.viruses[0].genes.length; i++) { %>
-          <option value="<%= allowed_values.viruses[0].genes[i] %>"><%= allowed_values.viruses[0].genes[i] %></option>
-        <% } %>
-        <option value="Complete">Complete</option>
-        <!-- TODO: make dynamic with angular -->
+      <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" class="form-control" multiple>
+        <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-md-3">
-      <div class="hidden"><!-- TODO: unhide when Avian is selected in Host -->
-        <label for="host">Avian Host</label>
-        <select id="host" class="selectpicker" required>
+      <div id="avian-host-container" class="hidden" ng-show="hostIsAvian">
+        <label for="avian-host">Avian Host</label>
+        <select id="avian-host" class="selectpicker" data-dropup-auto="false">
           <option value="1">All</option>
           <% for(let i = 0; i < allowed_values.avian_hosts.length; i++) { %>
             <option value="<%= allowed_values.avian_hosts[i].tax_id %>"><%= allowed_values.avian_hosts[i].name %></option>
@@ -71,27 +58,30 @@
     </div>
     <div class="col-md-3">
       <label for="countries">Countries</label>
-      <select id="countries" class="form-control" multiple required>
-        <option value="6295630" selected>All</option>
-        <% for(let i = 0; i < allowed_values.continents.length; i++) { %>
-          <% for(let j = 0; j < allowed_values.continents[i].countries.length; j++) { %>
-            <option value="<%= allowed_values.continents[i].countries[j].geoname_id %>"><%= allowed_values.continents[i].countries[j].name %></option>
-          <% } %>
-        <% } %>
-        <!-- TODO: make dynamic with angular -->
+      <select id="countries" ng-model="selectedCountries" ng-options="country as country.name for country in countries" class="form-control" multiple>
+        <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-md-3 text-center">
       <label for="minimumSequenceLength">Minimum Sequence Length</label>
       <div class="col-md-6 col-md-offset-3">
-        <input id="minimumSequenceLength" type="text" maxlength="5" class="form-control"></input>
+        <input id="minimumSequenceLength" type="number" ng-model="minimumSequenceLength" min="0" max="99999" placeholder="0" class="form-control"></input>
       </div>
+    </div>
+  </div>
+  <div class="row pushed-down">
+    <div id="regions-container" class="col-md-3 col-md-offset-6 hidden" ng-show="countryHasRegions">
+      <label for="regions">Regions</label>
+      <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" class="form-control" multiple>
+        <!-- handled by Angular -->
+      </select>
     </div>
   </div>
   <div class="row col-xs-12 pushed-down">
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
       <div class="col-md-3 text-center">
+        <!-- TODO: make pretty -->
         <label><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</label>
         <input id="data-upload" type="file">
       </div>
@@ -99,8 +89,8 @@
   </div>
   <div class="row">
     <div class="col-xs-12 pushed-down">
-      <button class="btn btn-warning pull-left">Reset</button>
-      <button class="btn btn-info pull-right search-button">Search</button>
+      <button class="btn btn-warning pull-left"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>
+      <button class="btn btn-info pull-right search-button"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
     </div>
   </div>
 </div>

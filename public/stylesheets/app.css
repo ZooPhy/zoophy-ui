@@ -28,6 +28,12 @@ label {
   margin-right: 3rem;
 }
 
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 @media(min-width:767px) {
   /* Small and Up */
   #main-logo {
