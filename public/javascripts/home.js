@@ -2,10 +2,6 @@
 
 angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
 
-  let virus;
-  let host;
-  let continent;
-
   $scope.allowed_values = null;
 
   $scope.genes = [];
@@ -109,7 +105,6 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
       $("#host").removeClass('hidden');
       $('#avian-host-container').removeClass('hidden');
       $('#regions-container').removeClass('hidden');
-      console.log($scope.allowed_values);
       $scope.genes = $scope.allowed_values.viruses[0].genes;
       let temp_countries = [];
       for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
@@ -121,6 +116,55 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
       console.log('Could not load necessary values: ', response.data.error);
     }
   });
+
+  $scope.search = function() {
+    let host = Number($("#host").val());
+    let virus = Number($("#virus").val());
+    let continent = Number($("#continent").val());
+    let query = 'TaxonID:'+virus+' AND HostID:'+host;
+    if ($scope.minimumSequenceLength > 0) {
+      let minLength = $scope.minimumSequenceLength+'';
+      while (minLength.length < 5) {
+        minLength = '0'+minLength;
+      }
+      query += ' AND SegmentLength:['+minLength+' TO 99999]';
+    }
+    if ($scope.from > 0) {
+      let fromYear = $scope.from+'';
+      let toYear = '';
+      while (fromYear.length < 4) {
+        fromYear = '0'+fromYear;
+      }
+      if ($scope.to > $scope.from) {
+        toYear = $scope.to + '';
+        while (toYear.length < 4) {
+          toYear = '0'+toYear;
+        }
+      }
+      else {
+        $scope.to = Number(new Date().getFullYear());
+        toYear = $scope.to + '';
+      }
+      query += 'Date:['+fromYear+' TO '+toYear+'1231]';
+    }
+    else if ($scope.to > 0) {
+      let toYear = $scope.to + '';
+      while (toYear.length < 4) {
+        toYear = '0'+toYear;
+      }
+      query += 'Date:[0000 TO '+toYear+'1231]';
+    }
+    query = encodeURI(query.trim());
+    $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
+      if (response.status === 200) {
+        console.log(response.data);
+        // updateResults(response.data);
+      }
+      else {
+        console.log('Could not load necessary values: ', response.data.error);
+      }
+    });
+  };
 
 });
 

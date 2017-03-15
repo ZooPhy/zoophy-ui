@@ -1,5 +1,8 @@
 'use strict';
 
+//TODO: update on server if using reverse proxy
+//const SERVER_URI = 'https://zodo.asu.edu/zoophy';
+
 const SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
 
 angular.module('ZooPhy', []);
