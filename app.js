@@ -6,6 +6,7 @@ let cookieParser = require('cookie-parser');
 let bodyParser = require('body-parser');
 let redis_tool = require('./bin/redis_tool');
 let session_tool = require('./bin/session_tool');
+let logger = require('./bin/logger_tool');
 
 let index = require('./routes/index');
 
@@ -30,6 +31,6 @@ app.use(function(req, res) {
   res.status(404).send();
 });
 
-console.log('App Started Up');
+logger.info('ZooPhy Started Up');
 
 module.exports = app;

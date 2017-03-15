@@ -15,8 +15,9 @@
     "express-session": "^1.14.0",
     "ioredis": "^2.3.0",
     "morgan": "~1.7.0",
-    "node-uuid": "^1.4.7",
-    "request": "^2.74.0"
+    "request": "^2.74.0",
+    "uuid": "^3.0.1",
+    "winston": "^2.3.1"
   },
   "repository": {
     "type": "git",

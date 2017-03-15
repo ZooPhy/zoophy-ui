@@ -1,6 +1,7 @@
 'use strict';
 
 let Redis = require('ioredis');
+let logger = require('./logger_tool');
 const REDIS_CONFIG = require('./settings').REDIS_CONFIG;
 
 let redis_tool = new Redis({
@@ -10,7 +11,7 @@ let redis_tool = new Redis({
 });
 
 redis_tool.on('connect', function () {
-  console.log('connected to redis');
+  logger.info('connected to redis');
 });
 
 

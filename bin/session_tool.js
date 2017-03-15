@@ -1,6 +1,6 @@
 'use strict';
 
-let uuid = require('node-uuid');
+let uuid = require('uuid/v4');
 let session = require('express-session');
 let redis_tool = require('./redis_tool');
 let RedisStore = require('connect-redis')(session);
@@ -14,7 +14,7 @@ const SESSION_SETTINGS = {
   name: SESSION_CONFIG.SESSION_NAME,
   store: new RedisStore(OPTIONS),
   genid: function(req) {
-    return uuid.v4();
+    return uuid();
   },
   secret: SESSION_CONFIG.SESSION_SECRET,
   saveUninitialized: true,
