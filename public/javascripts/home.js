@@ -21,6 +21,21 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
   $scope.hostIsAvian = false;
   $scope.countryHasRegions = false;
 
+  $scope.results = [];
+  $scope.searching = true;
+  $scope.showDetails = false;
+  $scope.selectedRecord = null;
+  $scope.searchError = null;
+
+  $scope.switchTabs = function(isSearching) {
+    if (isSearching === undefined || isSearching === null) {
+      $scope.searching = !$scope.searching;
+    }
+    else {
+      $scope.searching = isSearching;
+    }
+  };
+
   function setCountries(country_list) {
     country_list.sort(function(a, b) {
       return a.name.localeCompare(b.name);
@@ -145,23 +160,47 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
         $scope.to = Number(new Date().getFullYear());
         toYear = $scope.to + '';
       }
-      query += 'Date:['+fromYear+' TO '+toYear+'1231]';
+      query += ' AND Date:['+fromYear+' TO '+toYear+'1231]';
     }
     else if ($scope.to > 0) {
       let toYear = $scope.to + '';
       while (toYear.length < 4) {
         toYear = '0'+toYear;
       }
-      query += 'Date:[0000 TO '+toYear+'1231]';
+      query += ' AND Date:[0000 TO '+toYear+'1231]';
     }
-    query = encodeURI(query.trim());
+    console.log(query);
+    query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
-        console.log(response.data);
-        // updateResults(response.data);
+        let searchResults = JSON.parse(response.data.records);
+        console.log('search call finished with '+searchResults.length+' results.')
+        if (searchResults.length > 0) {
+          console.log(searchResults);
+          $scope.loadDetails(searchResults[0].accession);
+          $scope.results = searchResults;
+          $scope.switchTabs(false);
+        }
+        else {
+          $scope.searchError = 'Search returned 0 results';
+        }
       }
       else {
         console.log('Could not load necessary values: ', response.data.error);
+        $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
+      }
+    });
+  };
+
+  $scope.loadDetails = function(accession) {
+    $http.get(SERVER_URI+'/record?accession='+accession.trim()).then(function(response) {
+      if (response.status === 200) {
+        console.log(response.data);
+        $scope.selectedRecord = response.data;
+        $scope.showDetails = true;
+      }
+      else {
+        console.log('Could not load record: ', response.data.error);
       }
     });
   };
