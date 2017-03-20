@@ -1,6 +1,6 @@
 <div id="results" class="container" ng-hide="searching">
   <div id="results-table" class="col-sm-9">
-    <table st-table="rowCollection" st-safe-src="records" class="table table-striped">
+    <table st-table="rowCollection" st-safe-src="results" class="table table-striped">
     	<thead>
       	<tr>
         	<th>Accession</th>
@@ -14,7 +14,7 @@
       	</tr>
     	</thead>
     	<tbody>
-      	<tr ng-repeat="record in records" ng-click="loadDetails('"{{record.accession}}"');">
+      	<tr ng-repeat="record in results" ng-click="loadDetails(record.accession);">
       		<td>{{record.accession}}</td>
       		<td>{{record.gene}}</td>
       		<td>{{record.virus}}</td>
@@ -33,13 +33,16 @@
         <h3 class="panel-title text-center">Record Details: {{selectedRecord.accession}}</h3>
       </div>
       <div class="panel-body" ng-show="showDetails">
-        <p>Accession: {{selectedRecord.accession}}</p>
-        <p>Gene(s): {{selectedRecord.gene}}</p>
-        <p>Virus: {{selectedRecord.virus}}</p>
         <p>Date: {{selectedRecord.date}}</p>
+        <p>PubMed ID: {{selectedRecord.pubmedID}}</p>
+        <p>Virus: {{selectedRecord.virus}}</p>
+        <p>Taxon: {{selectedRecord.taxon}}</p>
+        <p>Strain: {{selectedRecord.strain}}</p>
+        <p>Isolate: {{selectedRecord.isolate}}</p>
         <p>Host: {{selectedRecord.host}}</p>
-        <p>Country: {{selectedRecord.country}}</p>
-        <p>Segment Length: {{selectedRecord.segmentLength}}</p>
+        <p>Location: {{selectedRecord.location}}</p>
+        <p>Gene(s): {{selectedRecord.genes}}</p>
+        <p>Definition: {{selectedRecord.definition}}</p>
       </div>
     </div>
   </div>

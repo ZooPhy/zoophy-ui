@@ -173,7 +173,7 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
-        let searchResults = JSON.parse(response.data.records);
+        let searchResults = response.data.records;
         console.log('search call finished with '+searchResults.length+' results.')
         if (searchResults.length > 0) {
           console.log(searchResults);
@@ -196,7 +196,7 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
     $http.get(SERVER_URI+'/record?accession='+accession.trim()).then(function(response) {
       if (response.status === 200) {
         console.log(response.data);
-        $scope.selectedRecord = response.data;
+        $scope.selectedRecord = response.data.record;
         $scope.showDetails = true;
       }
       else {
