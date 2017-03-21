@@ -22,8 +22,8 @@
       <div class="row">
         <div class="panel panel-info">
           <ul class="nav nav-tabs">
-            <li role="presentation" class="active"><a href="" ng-click="switchTabs(true);">Search</a></li>
-            <li role="presentation"><a href="" ng-click="switchTabs(false);">Results</a></li>
+            <li role="presentation" ng-class="{'active':searching === true}"><a href="" ng-click="switchTabs(true);">Search</a></li>
+            <li role="presentation" ng-class="{'active':searching === false}"><a href="" ng-click="switchTabs(false);">Results</a></li>
           </ul>
           <div class="panel-body">
             <%- include('search'); %>

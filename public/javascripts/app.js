@@ -5,7 +5,7 @@
 
 const SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
 
-angular.module('ZooPhy', []);
+angular.module('ZooPhy', ['smart-table']);
 
 /*
 Copyright 2017 ASU Biodesign Center for Environmental Security's ZooPhy Lab

@@ -22,6 +22,7 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
   $scope.countryHasRegions = false;
 
   $scope.results = [];
+  $scope.displayedResults = [];
   $scope.searching = true;
   $scope.showDetails = false;
   $scope.selectedRecord = null;
@@ -176,9 +177,9 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
         let searchResults = response.data.records;
         console.log('search call finished with '+searchResults.length+' results.')
         if (searchResults.length > 0) {
-          console.log(searchResults);
           $scope.loadDetails(searchResults[0].accession);
           $scope.results = searchResults;
+          $scope.displayedResults = searchResults;
           $scope.switchTabs(false);
         }
         else {
@@ -195,7 +196,6 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
   $scope.loadDetails = function(accession) {
     $http.get(SERVER_URI+'/record?accession='+accession.trim()).then(function(response) {
       if (response.status === 200) {
-        console.log(response.data);
         $scope.selectedRecord = response.data.record;
         $scope.showDetails = true;
       }

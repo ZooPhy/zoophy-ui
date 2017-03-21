@@ -50,3 +50,7 @@ input::-webkit-inner-spin-button {
       margin-left: 4rem;
   }
 }
+
+#results-table {
+  font-size: 1.0rem;
+}

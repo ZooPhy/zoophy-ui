@@ -1,6 +1,6 @@
 <div id="search" class="container" ng-show="searching">
   <div class="row">
-    <div class="col-md-3">
+    <div class="col-sm-3 col-xs-6">
       <label for="virus">Virus</label>
       <select id="virus" class="selectpicker" data-dropup-auto="false" required>
         <% for(let i = 0; i < allowed_values.viruses.length; i++) { %>
@@ -8,7 +8,7 @@
         <% } %>
       </select>
     </div>
-    <div class="col-md-3">
+    <div class="col-sm-3">
       <label for="host">Host</label>
       <select id="host" class="selectpicker">
         <option value="1">All</option>
@@ -17,7 +17,7 @@
         <% } %>
       </select>
     </div>
-    <div class="col-md-3">
+    <div class="col-sm-3 col-xs-6">
       <label for="continent">Continent</label>
       <select id="continent" class="selectpicker" data-dropup-auto="false">
         <option value="6295630" selected>All</option>
@@ -26,26 +26,26 @@
         <% } %>
       </select>
     </div>
-    <div class="col-md-3 text-center">
+    <div class="col-sm-3 col-xs-6 text-center">
       <% const CURRENT_YEAR = Number(new Date().getFullYear()); %>
-      <div class="col-md-6">
+      <div class="col-xs-6">
         <label for="from">From</label>
         <input id="from" type="number" ng-model="from" class="form-control" placeholder="YYYY"/>
       </div>
-      <div class="col-md-6">
+      <div class="col-xs-6">
         <label for="to">To</label>
         <input id="to" type="number" ng-model="to" class="form-control" placeholder="<%= CURRENT_YEAR %>"/>
       </div>
     </div>
   </div>
   <div class="row pushed-down">
-    <div class="col-md-3">
+    <div class="col-sm-3 col-xs-6">
       <label for="genes">Genes</label>
       <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" class="form-control" multiple>
         <!-- handled by Angular -->
       </select>
     </div>
-    <div class="col-md-3">
+    <div class="col-sm-3 col-xs-6">
       <div id="avian-host-container" class="hidden" ng-show="hostIsAvian">
         <label for="avian-host">Avian Host</label>
         <select id="avian-host" class="selectpicker" data-dropup-auto="false">
@@ -56,21 +56,21 @@
         </select>
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-sm-3 col-xs-6">
       <label for="countries">Countries</label>
       <select id="countries" ng-model="selectedCountries" ng-options="country as country.name for country in countries" class="form-control" multiple>
         <!-- handled by Angular -->
       </select>
     </div>
-    <div class="col-md-3 text-center">
+    <div class="col-sm-3 col-xs-6 text-center">
       <label for="minimumSequenceLength">Minimum Sequence Length</label>
-      <div class="col-md-6 col-md-offset-3">
+      <div class="col-xs-6 col-sm-offset-3">
         <input id="minimumSequenceLength" type="number" ng-model="minimumSequenceLength" min="0" max="99999" placeholder="0" class="form-control"></input>
       </div>
     </div>
   </div>
   <div class="row pushed-down">
-    <div id="regions-container" class="col-md-3 col-md-offset-6 hidden" ng-show="countryHasRegions">
+    <div id="regions-container" class="col-sm-3 col-xs-6 col-sm-offset-6 hidden" ng-show="countryHasRegions">
       <label for="regions">Regions</label>
       <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" class="form-control" multiple>
         <!-- handled by Angular -->
@@ -80,7 +80,7 @@
   <div class="row col-xs-12 pushed-down">
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
-      <div class="col-md-3 text-center">
+      <div class="col-sm-3 col-xs-6 text-center">
         <!-- TODO: make pretty -->
         <label><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</label>
         <input id="data-upload" type="file">
