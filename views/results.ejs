@@ -4,9 +4,9 @@
     	<thead>
       	<tr>
         	<th class="col-sm-1" st-sort="accession">Accession</th>
-        	<th class="col-sm-2" st-sort="genes">Genes</th>
+        	<th class="col-sm-1" st-sort="genes">Genes</th>
         	<th class="col-sm-2 hidden-xs" st-sort="virus">Virus</th>
-        	<th class="col-sm-1" st-sort="date">Date</th>
+        	<th class="col-sm-2" st-sort="date">Date</th>
         	<th class="col-sm-2 hidden-xs" st-sort="host">Host</th>
           <th class="col-sm-2" st-sort="country">Country</th>
           <th class="col-sm-1 hidden-xs" st-sort="segmentLength">Segment Length</th>
@@ -16,16 +16,16 @@
     	<tbody>
       	<tr ng-repeat="record in displayedResults" ng-click="loadDetails(record.accession);">
       		<td class="col-sm-1">{{record.accession}}</td>
-      		<td class="col-sm-2">{{record.genes}}</td>
+      		<td class="col-sm-1">{{record.genes}}</td>
       		<td class="col-sm-2 hidden-xs">{{record.virus}}</td>
-      		<td class="col-sm-1">{{record.date}}</td>
+      		<td class="col-sm-2">{{record.date}}</td>
       		<td class="col-sm-2 hidden-xs">{{record.host}}</td>
           <td class="col-sm-2">{{record.country}}</td>
           <td class="col-sm-1 hidden-xs">{{record.segmentLength}}</td>
-          <td class="col-sm-1">{{record.isSelected}}</td>
+          <td class="col-sm-1"><input type="checkbox" ng-model="record.isSelected"></td>
       	</tr>
     	</tbody>
-      
+
     </table>
   </div>
   <div id="detail-panel" class="col-sm-3 hidden-xs">
