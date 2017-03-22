@@ -113,7 +113,7 @@ class LuceneRecord {
       this.country = UNKNOWN;
     }
     this.segmentLength = Number(searchApiRecord.sequence.segmentLength);
-    this.isSelected = false;
+    this.includeInJob = false;
   };
 
 };

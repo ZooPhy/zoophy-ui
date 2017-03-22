@@ -10,11 +10,11 @@
         	<th class="col-sm-2 hidden-xs" st-sort="host">Host</th>
           <th class="col-sm-2" st-sort="country">Country</th>
           <th class="col-sm-1 hidden-xs" st-sort="segmentLength">Segment Length</th>
-          <th class="col-sm-1" st-sort="isSelected">Selected</th>
+          <th class="col-sm-1 text-center">Select All<input type="checkbox" ng-checked="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
       	</tr>
     	</thead>
     	<tbody>
-      	<tr ng-repeat="record in displayedResults" ng-click="loadDetails(record.accession);">
+      	<tr st-select-row="record" st-select-mode="single" ng-repeat="record in displayedResults" ng-click="loadDetails(record.accession);">
       		<td class="col-sm-1">{{record.accession}}</td>
       		<td class="col-sm-1">{{record.genes}}</td>
       		<td class="col-sm-2 hidden-xs">{{record.virus}}</td>
@@ -22,28 +22,41 @@
       		<td class="col-sm-2 hidden-xs">{{record.host}}</td>
           <td class="col-sm-2">{{record.country}}</td>
           <td class="col-sm-1 hidden-xs">{{record.segmentLength}}</td>
-          <td class="col-sm-1"><input type="checkbox" ng-model="record.isSelected"></td>
+          <td class="col-sm-1 text-center" ng-click="record.includeInJob = !record.includeInJob; $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="record.includeInJob = !record.includeInJob; $event.stopPropagation();"></td>
       	</tr>
     	</tbody>
-
+      <tfoot>
+			<tr>
+				<td colspan="8" class="text-center">
+					<div st-pagination="" st-items-by-page="recordsPerPage" st-displayed-pages="10"></div>
+				</td>
+			</tr>
+		</tfoot>
     </table>
+    <div class="col-xs-6 col-xs-offset-3 text-center">
+      <label for="recordsPerPage">Records Per Page</label>
+      <select id="recordsPerPage" class="selectpicker col-xs-4" ng-options="num as num for num in pageNums" data-dropup-auto="true" ng-model="recordsPerPage">
+        <!-- handled by Angular -->
+      </select>
+    </div>
   </div>
   <div id="detail-panel" class="col-sm-3 hidden-xs">
     <div class="panel panel-info">
       <div class="panel-heading">
         <h3 class="panel-title text-center">Record Details: {{selectedRecord.accession}}</h3>
       </div>
-      <div class="panel-body" ng-show="showDetails">
-        <p>Date: {{selectedRecord.date}}</p>
-        <p>PubMed ID: {{selectedRecord.pubmedID}}</p>
-        <p>Virus: {{selectedRecord.virus}}</p>
-        <p>Taxon: {{selectedRecord.taxon}}</p>
-        <p>Strain: {{selectedRecord.strain}}</p>
-        <p>Isolate: {{selectedRecord.isolate}}</p>
-        <p>Host: {{selectedRecord.host}}</p>
-        <p>Location: {{selectedRecord.location}}</p>
-        <p>Genes: {{selectedRecord.genes}}</p>
-        <p>Definition: {{selectedRecord.definition}}</p>
+      <div id="detailed-view" class="panel-body" ng-show="showDetails">
+        <p><b>Date:</b> {{selectedRecord.date}}</p>
+        <p><b>PubMed ID:</b> {{selectedRecord.pubmedID}}</p>
+        <p><b>Virus:</b> {{selectedRecord.virus}}</p>
+        <p><b>Taxon:</b> {{selectedRecord.taxon}}</p>
+        <p><b>Strain:</b> {{selectedRecord.strain}}</p>
+        <p><b>Isolate:</b> {{selectedRecord.isolate}}</p>
+        <p><b>Host:</b> {{selectedRecord.host}}</p>
+        <p><b>Location:</b> {{selectedRecord.location}}</p>
+        <p><b>Genes:</b> {{selectedRecord.genes}}</p>
+        <p><b>Definition:</b> {{selectedRecord.definition}}</p>
+        <p class="text-center"><a ng-href="https://www.ncbi.nlm.nih.gov/nuccore/{{selectedRecord.accession}}" target="_new"><b>View Original Record</b></a></p>
       </div>
     </div>
   </div>

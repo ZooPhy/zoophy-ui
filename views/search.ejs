@@ -3,7 +3,7 @@
     <div class="col-sm-3 col-xs-6">
       <label for="virus">Virus</label>
       <select id="virus" class="selectpicker" data-dropup-auto="false" required>
-        <% for(let i = 0; i < allowed_values.viruses.length; i++) { %>
+        <% for (let i = 0; i < allowed_values.viruses.length; i++) { %>
           <option value="<%= allowed_values.viruses[i].tax_id %>"><%= allowed_values.viruses[i].name %></option>
         <% } %>
       </select>
@@ -12,7 +12,7 @@
       <label for="host">Host</label>
       <select id="host" class="selectpicker">
         <option value="1">All</option>
-        <% for(let i = 0; i < allowed_values.hosts.length; i++) { %>
+        <% for (let i = 0; i < allowed_values.hosts.length; i++) { %>
           <option value="<%= allowed_values.hosts[i].tax_id %>"><%= allowed_values.hosts[i].name %></option>
         <% } %>
       </select>
@@ -21,7 +21,7 @@
       <label for="continent">Continent</label>
       <select id="continent" class="selectpicker" data-dropup-auto="false">
         <option value="6295630" selected>All</option>
-        <% for(let i = 0; i < allowed_values.continents.length; i++) { %>
+        <% for (let i = 0; i < allowed_values.continents.length; i++) { %>
           <option value="<%= allowed_values.continents[i].geoname_id %>"><%= allowed_values.continents[i].name %></option>
         <% } %>
       </select>
@@ -50,7 +50,7 @@
         <label for="avian-host">Avian Host</label>
         <select id="avian-host" class="selectpicker" data-dropup-auto="false">
           <option value="1">All</option>
-          <% for(let i = 0; i < allowed_values.avian_hosts.length; i++) { %>
+          <% for (let i = 0; i < allowed_values.avian_hosts.length; i++) { %>
             <option value="<%= allowed_values.avian_hosts[i].tax_id %>"><%= allowed_values.avian_hosts[i].name %></option>
           <% } %>
         </select>

@@ -27,6 +27,9 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
   $scope.showDetails = false;
   $scope.selectedRecord = null;
   $scope.searchError = null;
+  $scope.recordsPerPage = 25;
+  $scope.pageNums = [25, 50, 100, 250, 500];
+  $scope.groupIsSelected = false;
 
   $scope.switchTabs = function(isSearching) {
     if (isSearching === undefined || isSearching === null) {
@@ -37,35 +40,35 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
     }
   };
 
-  function setCountries(country_list) {
-    country_list.sort(function(a, b) {
+  function setCountries(countryList) {
+    countryList.sort(function(a, b) {
       return a.name.localeCompare(b.name);
     });
     let allCountry = {
       name: 'All',
       geoname_id: Number($('#continent').val())
     };
-    country_list.splice(0, 0, allCountry);
-    $scope.countries = country_list.slice();
+    countryList.splice(0, 0, allCountry);
+    $scope.countries = countryList.slice();
     $scope.selectedCountries = [$scope.countries[0]];
-  }
+  };
 
-  function setRegions(country_list) {
+  function setRegions(countryList) {
     $scope.regions = [];
-    let temp_regions = [];
-    for (let i = 0; i < country_list.length; i++) {
-      temp_regions = [];
-      if (country_list[i].regions) {
-        temp_regions = country_list[i].regions.slice();
-        temp_regions.sort(function(a, b) {
+    let tempRegions = [];
+    for (let i = 0; i < countryList.length; i++) {
+      tempRegions = [];
+      if (countryList[i].regions) {
+        tempRegions = countryList[i].regions.slice();
+        tempRegions.sort(function(a, b) {
           return a.name.localeCompare(b.name);
         });
         let allRegion = {
-          name: 'All '+country_list[i].name,
-          geoname_id: Number(country_list[i].geoname_id)
+          name: 'All '+countryList[i].name,
+          geoname_id: Number(countryList[i].geoname_id)
         };
-        temp_regions.splice(0, 0, allRegion);
-        $scope.regions = $scope.regions.concat(temp_regions);
+        tempRegions.splice(0, 0, allRegion);
+        $scope.regions = $scope.regions.concat(tempRegions);
       }
     }
     if ($scope.regions.length > 0) {
@@ -122,15 +125,20 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
       $('#avian-host-container').removeClass('hidden');
       $('#regions-container').removeClass('hidden');
       $scope.genes = $scope.allowed_values.viruses[0].genes;
-      let temp_countries = [];
+      let tempCountries = [];
       for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
-        temp_countries = temp_countries.concat($scope.allowed_values.continents[i].countries);
+        tempCountries = tempCountries.concat($scope.allowed_values.continents[i].countries);
       }
-      setCountries(temp_countries.slice());
+      setCountries(tempCountries.slice());
     }
     else {
       console.log('Could not load necessary values: ', response.data.error);
     }
+    $("input[type=checkbox]").click(function(event) {
+      event.stopPropagation();
+      console.log("checkbox clicked");
+    });
+    console.log('overwrote checkbox handler');
   });
 
   $scope.search = function() {
@@ -203,6 +211,13 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
         console.log('Could not load record: ', response.data.error);
       }
     });
+  };
+
+  $scope.toggleAll = function() {
+    for (let i = 0; i < $scope.results.length; i++) {
+      $scope.results[i].includeInJob = !$scope.groupIsSelected;
+    }
+    $scope.groupIsSelected = !$scope.groupIsSelected;
   };
 
 });

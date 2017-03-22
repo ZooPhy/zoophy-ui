@@ -54,3 +54,11 @@ input::-webkit-inner-spin-button {
 #results-table {
   font-size: 1.0rem;
 }
+
+#detailed-view {
+  font-size: 1.25rem;
+}
+
+.st-selected {
+  background-color: #d9edf7 !important;
+}
