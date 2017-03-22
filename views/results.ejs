@@ -22,7 +22,7 @@
       		<td class="col-sm-2 hidden-xs">{{record.host}}</td>
           <td class="col-sm-2">{{record.country}}</td>
           <td class="col-sm-1 hidden-xs">{{record.segmentLength}}</td>
-          <td class="col-sm-1 text-center" ng-click="record.includeInJob = !record.includeInJob; $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="record.includeInJob = !record.includeInJob; $event.stopPropagation();"></td>
+          <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="toggleRecord(record); $event.stopPropagation();"></td>
       	</tr>
     	</tbody>
       <tfoot>

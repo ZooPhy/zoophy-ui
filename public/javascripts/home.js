@@ -30,6 +30,7 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
   $scope.recordsPerPage = 25;
   $scope.pageNums = [25, 50, 100, 250, 500];
   $scope.groupIsSelected = false;
+  $scope.numSelected = 0;
 
   $scope.switchTabs = function(tab) {
     $scope.tab = tab;
@@ -192,6 +193,7 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
     $(window).scroll(function() {
       $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
     });
+    $scope.numSelected = 0;
   };
 
   $scope.loadDetails = function(accession) {
@@ -206,9 +208,25 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
     });
   };
 
+  $scope.toggleRecord = function(record) {
+    if (record.includeInJob) {
+      $scope.numSelected--;
+    }
+    else {
+      $scope.numSelected++;
+    }
+    record.includeInJob = !record.includeInJob;
+  };
+
   $scope.toggleAll = function() {
     for (let i = 0; i < $scope.results.length; i++) {
       $scope.results[i].includeInJob = !$scope.groupIsSelected;
+    }
+    if ($scope.groupIsSelected) {
+      $scope.numSelected = 0;
+    }
+    else {
+      $scope.numSelected = $scope.results.length;
     }
     $scope.groupIsSelected = !$scope.groupIsSelected;
   };
