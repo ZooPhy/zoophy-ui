@@ -22,12 +22,14 @@
       <div class="row">
         <div class="panel panel-info">
           <ul class="nav nav-tabs">
-            <li role="presentation" ng-class="{'active':searching === true}"><a href="" ng-click="switchTabs(true);">Search</a></li>
-            <li role="presentation" ng-class="{'active':searching === false}"><a href="" ng-click="switchTabs(false);">Results</a></li>
+            <li role="presentation" ng-class="{'active':tab === 'search'}"><a href="" ng-click="switchTabs('search');">Search</a></li>
+            <li role="presentation" ng-class="{'active':tab === 'results'}"><a href="" ng-click="switchTabs('results');">Results</a></li>
+            <li role="presentation" ng-class="{'active':tab === 'run'}"><a href="" ng-click="switchTabs('run');">Run</a></li>
           </ul>
           <div class="panel-body">
             <%- include('search'); %>
             <%- include('results'); %>
+            <%- include('run'); %>
           </div>
         </div>
       </div>

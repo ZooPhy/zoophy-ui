@@ -23,7 +23,7 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
 
   $scope.results = [];
   $scope.displayedResults = [];
-  $scope.searching = true;
+  $scope.tab = 'search';
   $scope.showDetails = false;
   $scope.selectedRecord = null;
   $scope.searchError = null;
@@ -31,13 +31,8 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
   $scope.pageNums = [25, 50, 100, 250, 500];
   $scope.groupIsSelected = false;
 
-  $scope.switchTabs = function(isSearching) {
-    if (isSearching === undefined || isSearching === null) {
-      $scope.searching = !$scope.searching;
-    }
-    else {
-      $scope.searching = isSearching;
-    }
+  $scope.switchTabs = function(tab) {
+    $scope.tab = tab;
   };
 
   function setCountries(countryList) {
@@ -134,11 +129,6 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
     else {
       console.log('Could not load necessary values: ', response.data.error);
     }
-    $("input[type=checkbox]").click(function(event) {
-      event.stopPropagation();
-      console.log("checkbox clicked");
-    });
-    console.log('overwrote checkbox handler');
   });
 
   $scope.search = function() {
@@ -188,7 +178,7 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
           $scope.loadDetails(searchResults[0].accession);
           $scope.results = searchResults;
           $scope.displayedResults = searchResults;
-          $scope.switchTabs(false);
+          $scope.switchTabs('results');
         }
         else {
           $scope.searchError = 'Search returned 0 results';
