@@ -199,6 +199,9 @@ angular.module('ZooPhy').controller('homeController', function ($scope, $http) {
         $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
       }
     });
+    $(window).scroll(function() {
+      $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
+    });
   };
 
   $scope.loadDetails = function(accession) {
