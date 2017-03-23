@@ -2,8 +2,6 @@
 
 let app = require('../app');
 let express = require('express');
-let redis_tool = require('../bin/redis_tool');
-let session_tool = require('../bin/session_tool');
 let checkInput = require('../bin/validator_tool').checkInput;
 let logger = require('../bin/logger_tool');
 let request = require('request');
@@ -87,8 +85,8 @@ router.get('/search', function(req, res) {
 });
 
 router.get('/record', function(req, res) {
+  let result;
   try {
-    let result;
     if (checkInput(req.query.accession, 'string', ACCESSION_RE)) {
       let accession = req.query.accession.trim();
       logger.info('Retrieving Accession: '+accession);

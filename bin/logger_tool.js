@@ -8,7 +8,9 @@ let logger_tool = new (winston.Logger)({
       level: 'info',
       silent: false,
       colorize: true,
-      timestamp: true,
+      timestamp: function () {
+        return new Date();
+      },
       json: false,
       stringify: false,
       prettyPrint: false,

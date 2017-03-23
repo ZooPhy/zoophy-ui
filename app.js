@@ -9,6 +9,7 @@ let session_tool = require('./bin/session_tool');
 let logger = require('./bin/logger_tool');
 
 let index = require('./routes/index');
+let job = require('./routes/job');
 
 let app = express();
 
@@ -23,6 +24,7 @@ app.use(express.static('./public/javascripts'));
 app.use(session_tool);
 
 app.use('/', index);
+app.use('/job', job);
 
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
