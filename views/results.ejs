@@ -3,6 +3,7 @@
     <table st-table="displayedResults" st-safe-src="results" class="table table-striped">
     	<thead>
       	<tr>
+          <th class="col-sm-1 text-center">Select All<input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
         	<th class="col-sm-1" st-sort="accession">Accession</th>
         	<th class="col-sm-1" st-sort="genes">Genes</th>
         	<th class="col-sm-2 hidden-xs" st-sort="virus">Virus</th>
@@ -10,19 +11,18 @@
         	<th class="col-sm-2 hidden-xs" st-sort="host">Host</th>
           <th class="col-sm-2" st-sort="country">Country</th>
           <th class="col-sm-1 hidden-xs" st-sort="segmentLength">Segment Length</th>
-          <th class="col-sm-1 text-center">Select All<input type="checkbox" ng-checked="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
       	</tr>
     	</thead>
     	<tbody>
       	<tr st-select-row="record" st-select-mode="single" ng-repeat="record in displayedResults" ng-click="loadDetails(record.accession);">
-      		<td class="col-sm-1">{{record.accession}}</td>
+          <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="toggleRecord(record); $event.stopPropagation();"></td>
+          <td class="col-sm-1">{{record.accession}}</td>
       		<td class="col-sm-1">{{record.genes}}</td>
       		<td class="col-sm-2 hidden-xs">{{record.virus}}</td>
       		<td class="col-sm-2">{{record.date}}</td>
       		<td class="col-sm-2 hidden-xs">{{record.host}}</td>
           <td class="col-sm-2">{{record.country}}</td>
           <td class="col-sm-1 hidden-xs">{{record.segmentLength}}</td>
-          <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="toggleRecord(record); $event.stopPropagation();"></td>
       	</tr>
     	</tbody>
       <tfoot>
