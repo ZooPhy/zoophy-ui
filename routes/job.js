@@ -57,7 +57,7 @@ router.post('/run', function(req, res) {
         jobErrors += 'Invalid Job Name: '+req.body.jobName+', ';
       }
     }
-    let usingGLM = Boolean(req.body.usingGLM);
+    let usingGLM = Boolean(req.body.usingGLM === true);
     let predictors = null;
     if (usingGLM && req.body.predictors) {
       //TODO check predictors
@@ -86,8 +86,34 @@ router.post('/run', function(req, res) {
           logger.info('Job validation results: ', response.statusCode, body);
           if (response.statusCode === 200 && body === '') {
             logger.info('Starting ZooPhy Job for: '+email);
-            //TODO actually start job
-            res.sendStatus(202);
+            request({
+              url: API_URI+'/run',
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: zoophyJob
+            }, function(error, response, body) {
+              if (error) {
+                logger.error(error);
+              }
+              else {
+                logger.info('Job Started: ', response.statusCode, body);
+                if (response.statusCode === 202) {
+                  result = {
+                    status: 202,
+                    message: 'ZooPhy Job Successfully Started: '+body
+                  };
+                }
+                else {
+                  result = {
+                    status: 500,
+                    error: 'Unknown ZooPhy API Error during Start'
+                  };
+                }
+                res.status(result.status).send(result);
+              }
+            });
           }
           else if (body) {
             logger.warn(body);
@@ -101,7 +127,7 @@ router.post('/run', function(req, res) {
             logger.warn('Unknown ZooPhy API Error');
             result = {
               status: 400,
-              error: 'Unknown ZooPhy API Error'
+              error: 'Unknown ZooPhy API Error during Validation'
             };
             res.status(result.status).send(result);
           }
