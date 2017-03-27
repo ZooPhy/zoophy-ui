@@ -137,13 +137,13 @@ class SQLRecord {
       this.host = String(recordApiRecord.host.name || UNKNOWN);
     }
     else {
-      this.host = 'Unknown';
+      this.host = UNKNOWN;
     }
     if (recordApiRecord.geonameLocation) {
       this.location = String(recordApiRecord.geonameLocation.location || UNKNOWN);
     }
     else {
-        this.location = 'Unknown';
+        this.location = UNKNOWN;
     }
     this.genes = stringifyGenes(recordApiRecord.genes);
     this.definition = String(recordApiRecord.sequence.definition || UNKNOWN)

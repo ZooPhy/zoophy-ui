@@ -11,7 +11,23 @@ let redis_tool = new Redis({
 });
 
 redis_tool.on('connect', function () {
-  logger.info('connected to redis');
+  try {
+    redis_tool.set('foo', 'bar');
+    redis_tool.get('foo', function (err, result) {
+      if (err) {
+        throw err;
+      }
+      else if (result === 'bar') {
+        logger.info('Successfully connected to Redis.');
+      }
+      else {
+        logger.error('Redis connection test failed. Expected "bar", but got: '+String(result));
+      }
+    });
+  }
+  catch (error) {
+    logger.error('Failed to connect to Redis: '+error);
+  }
 });
 
 
