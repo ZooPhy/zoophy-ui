@@ -37,3 +37,6 @@ bin/secret_settings.js
 
 #redis crap
 *dump.rdb
+
+#testing
+coverage/*
