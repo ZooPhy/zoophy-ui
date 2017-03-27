@@ -13,10 +13,11 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   });
 
   $scope.runJob = function() {
+    console.log('starting job...');
     if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail)) {
       let jobAccessions = [];
       let records = RecordData.getRecords();
-      for (let i = 0; i < records; i++) {
+      for (let i = 0; i < records.length; i++) {
         if (records[i].includeInJob) {
           jobAccessions.push(records[i].accession);
         }
@@ -29,11 +30,20 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
         useGLM: false,
         predictors: null
       };
-      //$http.post(runUri, jobData)
-      console.log('job started...');
+      console.log(jobData);//TODO testing
+      $http.post(runUri, jobData).then(function success(response) {
+        if (response.status === 202) {
+          console.log('job started...');
+        }
+        else {
+          console.log(response.status);
+        }
+      }, function failure(response) {
+        console.log(response.statusText);
+      });
     }
     else {
-      console.log('invalid email')
+      console.log('invalid email');
     }
   };
 
