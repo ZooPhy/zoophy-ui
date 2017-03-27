@@ -27,8 +27,8 @@ router.post('/run', function(req, res) {
       jobErrors += 'Invalid number of Accessions: '+req.body.accessions.length+', ';
     }
     else {
+      accessions = [];
       for (let i = 0; i < req.body.accessions.length; i++) {
-        accessions = [];
         if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
           accessions.push(String(req.body.accessions[i]));
         }
@@ -57,19 +57,67 @@ router.post('/run', function(req, res) {
         jobErrors += 'Invalid Job Name: '+req.body.jobName+', ';
       }
     }
-    if (req.body.predictors) {
+    let usingGLM = Boolean(req.body.usingGLM);
+    let predictors = null;
+    if (usingGLM && req.body.predictors) {
       //TODO check predictors
     }
     if (jobErrors === BASE_ERROR) {
-      logger.info('Starting ZooPhy Job');
-      res.sendStatus(202);
+      const zoophyJob = JSON.stringify({
+        accessions: accessions,
+        replyEmail: email,
+        jobName: jobName,
+        usingGLM: usingGLM,
+        predictors: predictors
+      });
+      logger.info('Parameters valid, testing ZooPhy Job with '+accessions.length+' accessions:\n'+zoophyJob);
+      request({
+        url: API_URI+'/validate',
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: zoophyJob
+      }, function(error, response, body) {
+        if (error) {
+          logger.error(error);
+        }
+        else {
+          logger.info('Job validation results: ', response.statusCode, body);
+          if (response.statusCode === 200 && body === '') {
+            logger.info('Starting ZooPhy Job for: '+email);
+            //TODO actually start job
+            res.sendStatus(202);
+          }
+          else if (body) {
+            logger.warn(body);
+            result = {
+              status: 400,
+              error: String(body)
+            };
+            res.status(result.status).send(result);
+          }
+          else {
+            logger.warn('Unknown ZooPhy API Error');
+            result = {
+              status: 400,
+              error: 'Unknown ZooPhy API Error'
+            };
+            res.status(result.status).send(result);
+          }
+        }
+      });
     }
     else {
       if (jobErrors.endsWith(', ')) {
         jobErrors = jobErrors.substring(0,jobErrors.length-2);
       }
       logger.warn(jobErrors);
-      res.sendStatus(400);
+      result = {
+        status: 400,
+        error: jobErrors
+      };
+      res.status(result.status).send(result);
     }
   }
   catch (err) {
