@@ -5,8 +5,9 @@ let app = require('../app');
 let request = require('supertest');
 let assert = require('chai').assert;
 
-describe('Init Test', function() {
-  it('Job test ran', function(done) {
+describe('Run Job', function() {
+  it('Empty Job test ran', function(done) {
+    assert.fail('Empyt Test', 'Real Tet', 'Need to write Job tests');
     done();
   });
 });

@@ -107,6 +107,13 @@ router.get('/record', function(req, res) {
             record: record
           };
         }
+        else if (response && response.statusCode === 404) {
+          logger.warn('Record '+accession+' does not exist in DB.');
+          result = {
+            status: 404,
+            error: 'Record '+accession+' does not exist in DB.'
+          };
+        }
         else {
           let err = '';
           if (response) {

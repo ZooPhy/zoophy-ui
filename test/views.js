@@ -7,7 +7,7 @@ let chai = require('chai');
 let sinon = require('sinon');
 let ejs = require('ejs');
 
-describe('Init Test', function() {
+describe('Views Tests', function() {
   let spy = sinon.spy(ejs, '__express');
   it('Should get Lost status', function(done) {
     request(app)
