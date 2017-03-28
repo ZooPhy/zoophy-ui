@@ -182,6 +182,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
     });
     RecordData.setNumSelected(0);
+    RecordData.incrementSearchCount();
   };
 
 });

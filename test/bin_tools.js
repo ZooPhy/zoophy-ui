@@ -100,14 +100,14 @@ describe('Validator Tests', function() {
 
 describe('Redis Tests', function() {
   it('Should correctly set/get values', function(done) {
-    const TARGET_VALUE = 'merp'
+    const TARGET_VALUE = String(Math.ceil(Math.random()*100000));
     redisTool.set('derp', TARGET_VALUE);
     redisTool.get('derp', function (err, result) {
       if (err) {
         throw err;
       }
       else {
-        assert.strictEqual(result, TARGET_VALUE, 'Redis Tool correctly set/get value.');
+        assert.strictEqual(result, TARGET_VALUE, 'Redis Tool correctly set/get value '+TARGET_VALUE);
         done();
       }
     });

@@ -11,7 +11,8 @@ let ZooPhyApp = angular.module('ZooPhy', ['smart-table']);
 ZooPhyApp.factory('RecordData', function() {
   let data = {
     records: [],
-    numSelected: 0
+    numSelected: 0,
+    searchCount: 0
   };
   return {
     getRecords: function() {
@@ -25,6 +26,12 @@ ZooPhyApp.factory('RecordData', function() {
     },
     setNumSelected: function(newNum) {
       data.numSelected = Number(newNum);
+    },
+    getSearchCount: function() {
+      return data.searchCount;
+    },
+    incrementSearchCount: function() {
+      data.searchCount++;
     }
   };
 });

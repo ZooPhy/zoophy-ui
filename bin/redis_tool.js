@@ -12,16 +12,17 @@ let redis_tool = new Redis({
 
 redis_tool.on('connect', function () {
   try {
-    redis_tool.set('foo', 'bar');
+    let randomVal = 'bar'+String(Math.ceil(Math.random()*100000));
+    redis_tool.set('foo', randomVal);
     redis_tool.get('foo', function (err, result) {
       if (err) {
         throw err;
       }
-      else if (result === 'bar') {
+      else if (result === randomVal) {
         logger.info('Successfully connected to Redis.');
       }
       else {
-        logger.error('Redis connection test failed. Expected "bar", but got: '+String(result));
+        logger.error('Redis connection test failed. Expected '+randomVal+', but got: '+String(result));
       }
     });
   }

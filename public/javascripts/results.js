@@ -8,12 +8,17 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.displayedResults = RecordData.getRecords();
 
   $scope.$watch(function () {return RecordData.getRecords();}, function (newValue, oldValue) {
-        if (newValue !== oldValue) {
-          $scope.results = newValue;
-          $scope.groupIsSelected = false;
-          $scope.loadDetails(newValue[0].accession);
-        }
+    if (newValue !== oldValue) {
+      $scope.results = newValue;
+      $scope.loadDetails(newValue[0].accession);
+    }
   }, true);
+
+  $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
+    if (newValue !== oldValue) {
+      $scope.groupIsSelected = false;
+    }
+  });
 
   $scope.loadDetails = function(accession) {
     $http.get(SERVER_URI+'/record?accession='+accession.trim()).then(function(response) {
