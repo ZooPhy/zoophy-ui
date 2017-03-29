@@ -1,10 +1,40 @@
 'use strict';
 
-function getServer() {
-  return location.protocol + '//' + location.hostname + ':' + location.port;
-}
+//TODO: update on server if using reverse proxy
+//const SERVER_URI = 'https://zodo.asu.edu/zoophy';
+const SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
 
-angular.module('ZooPhy', []);
+// Main Angular App
+let ZooPhyApp = angular.module('ZooPhy', ['smart-table']);
+
+// Factory for sharing data between controllers
+ZooPhyApp.factory('RecordData', function() {
+  let data = {
+    records: [],
+    numSelected: 0,
+    searchCount: 0
+  };
+  return {
+    getRecords: function() {
+      return data.records;
+    },
+    setRecords: function (newRecords) {
+      data.records = newRecords;
+    },
+    getNumSelected: function() {
+      return data.numSelected;
+    },
+    setNumSelected: function(newNum) {
+      data.numSelected = Number(newNum);
+    },
+    getSearchCount: function() {
+      return data.searchCount;
+    },
+    incrementSearchCount: function() {
+      data.searchCount++;
+    }
+  };
+});
 
 /*
 Copyright 2017 ASU Biodesign Center for Environmental Security's ZooPhy Lab

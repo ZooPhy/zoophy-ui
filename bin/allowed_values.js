@@ -157,6 +157,11 @@ const HANTAVIRUS_SUB_TYPES = [
 
 const CONTINENTS = [
   {
+      name: 'All',
+      geoname_id: 1,
+      countries: []
+  },
+  {
     name: 'Asia',
     geoname_id: 6255147,
     countries: [
@@ -359,18 +364,13 @@ const CONTINENTS = [
         regions: null
       },
       {
-        name: 'Indonesia',
+        name: 'Israel',
         geoname_id: 294640,
         regions: null
       },
       {
-        name: 'Israel',
-        geoname_id: 1269750,
-        regions: null
-      },
-      {
         name: 'India',
-        geoname_id: 1282588,
+        geoname_id: 1269750,
         regions: null
       },
       {
@@ -2167,6 +2167,10 @@ const HOSTS = [
 ];
 
 const AVIAN_HOSTS = [
+  {
+    name: 'All Avian',
+    tax_id: 8782
+  },
   {
     name: 'African Stonechat',
     tax_id: 290047

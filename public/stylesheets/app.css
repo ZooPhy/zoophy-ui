@@ -2,3 +2,63 @@ body {
   background-color: #fcfcfc;
   color: #263238;
 }
+
+.title {
+  display: inline-block;
+}
+
+a, a:hover, a:active, a:visited {
+  color: rgb(46, 154, 254);
+  text-decoration: none !important;
+}
+
+label {
+  display: block;
+}
+
+.date-select {
+    max-width: 8rem;
+}
+
+.pushed-down {
+  margin-top: 2rem;
+}
+
+.search-button {
+  margin-right: 3rem;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+@media(min-width:767px) {
+  /* Small and Up */
+  #main-logo {
+    height: 9rem;
+    display: inline-block;
+    margin-left: 14rem;
+  }
+}
+
+@media(max-width:767px) {
+  /* XS Only */
+  #main-logo {
+      height: 7rem;
+      margin-left: 4rem;
+  }
+}
+
+#results-table {
+  font-size: 1.0rem;
+}
+
+#detailed-view {
+  font-size: 1.25rem;
+}
+
+.st-selected {
+  background-color: #d9edf7 !important;
+}
