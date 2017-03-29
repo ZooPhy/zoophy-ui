@@ -364,18 +364,13 @@ const CONTINENTS = [
         regions: null
       },
       {
-        name: 'Indonesia',
+        name: 'Israel',
         geoname_id: 294640,
         regions: null
       },
       {
-        name: 'Israel',
-        geoname_id: 1269750,
-        regions: null
-      },
-      {
         name: 'India',
-        geoname_id: 1282588,
+        geoname_id: 1269750,
         regions: null
       },
       {

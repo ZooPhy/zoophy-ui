@@ -72,6 +72,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.updateRegions = function() {
     let countryList = $scope.selectedCountries;
     $scope.regions = [];
+    $scope.selectedRegions = [];
     let tempRegions = [];
     for (let i = 0; i < countryList.length; i++) {
       tempRegions = [];
@@ -88,7 +89,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         $scope.regions = $scope.regions.concat(tempRegions);
       }
     }
-    $scope.selectedRegions = [];
     if ($scope.regions.length > 0) {
       $scope.countryHasRegions = true;
     }
@@ -145,9 +145,30 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       query += geneString;
     }
     let continent = Number($scope.continent);
-    if (continent !== 1) {
-      console.log(continent)
-      //TODO
+    let countries = $scope.selectedCountries;
+    let regions = $scope.selectedRegions;
+    console.log(continent);
+    console.log(countries);
+    console.log(regions);
+    if (!(continent === 1 && countries.length === 0)) {
+      let geoString = ' AND GeonameID:(';
+      if (countries.length === 0) {
+        geoString += continent;
+      }
+      else if (regions.length === 0) {
+        geoString += Number(countries[0].geoname_id);
+        for (let i = 1; i < countries.length; i++) {
+          geoString += ' OR '+Number(countries[i].geoname_id);
+        }
+      }
+      else {
+        geoString += Number(regions[0].geoname_id);
+        for (let i = 1; i < regions.length; i++) {
+          geoString += ' OR '+Number(regions[i].geoname_id);
+        }
+      }
+      geoString +=')';
+      query += geoString;
     }
     if ($scope.minimumSequenceLength > 0) {
       let minLength = $scope.minimumSequenceLength+'';
