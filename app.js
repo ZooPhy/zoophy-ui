@@ -7,6 +7,8 @@ let bodyParser = require('body-parser');
 let redis_tool = require('./bin/redis_tool');
 let session_tool = require('./bin/session_tool');
 let logger = require('./bin/logger_tool');
+let request = require('request');
+const API_URI = require('./bin/settings').API_CONFIG.ZOOPHY_URI;
 
 let index = require('./routes/index');
 let job = require('./routes/job');
@@ -34,5 +36,23 @@ app.use(function(req, res) {
 });
 
 logger.info('ZooPhy Started Up');
+
+request(API_URI+'/', function (error, response, body) {
+  if (error) {
+    logger.error('ZooPhy API test failed: '+error);
+  }
+  else if (response && response.statusCode === 200) {
+    logger.info('ZooPhy API test suceeded with response: '+body);
+  }
+  else {
+    let err = 'unknown';
+    let status = 'unknown';
+    if (response) {
+      err = body;
+      status = response.statusCode;
+    }
+    logger.error('ZooPhy API test failed with status: '+status+'\nand message: '+err);
+  }
+});
 
 module.exports = app;
