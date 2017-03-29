@@ -16,7 +16,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   });
 
   $scope.runJob = function() {
-    console.log('starting job...');
     $scope.runError = null;
     $scope.running = true;
     if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail)) {
@@ -52,11 +51,9 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
           }
           else {
             $scope.runError = 'Job Validation Failed';
-            console.log(response.status);
           }
         }, function failure(response) {
           $scope.runError = 'Job Validation Failed';
-          console.log(response.statusText);
         });
       }
     }

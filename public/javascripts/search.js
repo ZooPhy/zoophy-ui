@@ -121,7 +121,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       $scope.updateCountries();
     }
     else {
-      console.log('Could not load necessary values: ', response.data.error);
+      $scope.searchError = 'Search Setup Failed on Server. Please refresh and try again.';
     }
   });
 
@@ -201,7 +201,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
       query += ' AND Date:[00000000 TO '+toYear+'1231]';
     }
-    console.log(query);
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
@@ -211,7 +210,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
             searchResults.push(response.data.records[i]);
           }
         }
-        console.log('search call finished with '+searchResults.length+' results.')
         if (searchResults.length > 0) {
           RecordData.setRecords(searchResults);
           $scope.$parent.switchTabs('results');
@@ -222,7 +220,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         }
       }
       else {
-        console.log('Could not load necessary values: ', response.data.error);
         $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
       }
     });
