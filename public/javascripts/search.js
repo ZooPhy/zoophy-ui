@@ -126,6 +126,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   });
 
   $scope.search = function() {
+    $scope.searchError = null;
     let virus = Number($scope.virus);
     let host = Number($scope.host);
     if (host === 8782) {
@@ -147,9 +148,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     let continent = Number($scope.continent);
     let countries = $scope.selectedCountries;
     let regions = $scope.selectedRegions;
-    console.log(continent);
-    console.log(countries);
-    console.log(regions);
     if (!(continent === 1 && countries.length === 0)) {
       let geoString = ' AND GeonameID:(';
       if (countries.length === 0) {
@@ -183,6 +181,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       while (fromYear.length < 4) {
         fromYear = '0'+fromYear;
       }
+      fromYear += '0000';
       if ($scope.to > $scope.from) {
         toYear = $scope.to + '';
         while (toYear.length < 4) {
@@ -200,20 +199,26 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       while (toYear.length < 4) {
         toYear = '0'+toYear;
       }
-      query += ' AND Date:[0000 TO '+toYear+'1231]';
+      query += ' AND Date:[00000000 TO '+toYear+'1231]';
     }
     console.log(query);
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
-        let searchResults = response.data.records;
+        let searchResults = [];
+        for (let i = 0; i < response.data.records.length; i++) {
+          if (response.data.records[i].segmentLength > $scope.minimumSequenceLength) {
+            searchResults.push(response.data.records[i]);
+          }
+        }
         console.log('search call finished with '+searchResults.length+' results.')
         if (searchResults.length > 0) {
           RecordData.setRecords(searchResults);
           $scope.$parent.switchTabs('results');
         }
         else {
-          $scope.searchError = 'Search returned 0 results';
+          $scope.searchError = 'Search returned 0 results.';
+          RecordData.setRecords(searchResults);
         }
       }
       else {

@@ -1,4 +1,19 @@
 <div ng-controller="runController" id="run-tab" class="container" ng-show="tab === 'run'">
+  <div class="row">
+    <div id="run-error-alert" class="alert alert-danger col-md-10 col-md-offset-1 text-center" ng-show="runError">
+      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{runError}}
+    </div>
+  </div>
+  <div class="row">
+    <div id="run-validating-alert" class="alert alert-info col-md-10 col-md-offset-1 text-center" ng-show="running">
+      <i class="fa fa-hourglass-start" aria-hidden="true"></i> ZooPhy Job is Validating, may take up to 2 minutes...
+    </div>
+  </div>
+  <div class="row">
+    <div id="run-success-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center" ng-show="success">
+      <i class="fa fa-check-circle" aria-hidden="true"></i> ZooPhy Job Successfully Started!
+    </div>
+  </div>
   <h2 class="row text-center">Run ZooPhy Job Settings</h2>
   <div class="row text-center">
     <h5 class="text-center">Selected Records: {{numSelected}}</h5>

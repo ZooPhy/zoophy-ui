@@ -10,7 +10,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.$watch(function () {return RecordData.getRecords();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
       $scope.results = newValue;
-      $scope.loadDetails(newValue[0].accession);
+      if ($scope.results.length > 0) {
+        $scope.loadDetails(newValue[0].accession);
+      }
     }
   }, true);
 
