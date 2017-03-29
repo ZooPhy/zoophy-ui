@@ -2,19 +2,14 @@
   <div class="row">
     <div class="col-sm-3 col-xs-6">
       <label for="virus">Virus</label>
-      <select id="virus" class="selectpicker" data-dropup-auto="false" required>
-        <% for (let i = 0; i < allowed_values.viruses.length; i++) { %>
-          <option value="<%= allowed_values.viruses[i].tax_id %>"><%= allowed_values.viruses[i].name %></option>
-        <% } %>
+      <select id="virus" class="selectpicker" data-dropup-auto="false" ng-model="virus" ng-options="virus.tax_id as virus.name for virus in allowed_values.viruses" ng-change="updateGenes();" required>
+        <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3">
       <label for="host">Host</label>
-      <select id="host" class="selectpicker">
-        <option value="1">All</option>
-        <% for (let i = 0; i < allowed_values.hosts.length; i++) { %>
-          <option value="<%= allowed_values.hosts[i].tax_id %>"><%= allowed_values.hosts[i].name %></option>
-        <% } %>
+      <select id="host" class="selectpicker" ng-model="host" ng-options="host.tax_id as host.name for host in allowed_values.hosts" data-dropup-auto="false" required>
+        <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3 col-xs-6">
@@ -46,13 +41,10 @@
       </select>
     </div>
     <div class="col-sm-3 col-xs-6">
-      <div id="avian-host-container" class="hidden" ng-show="hostIsAvian">
+      <div id="avian-host-container" class="hidden" ng-show="host === 8782">
         <label for="avian-host">Avian Host</label>
-        <select id="avian-host" class="selectpicker" data-dropup-auto="false">
-          <option value="1">All</option>
-          <% for (let i = 0; i < allowed_values.avian_hosts.length; i++) { %>
-            <option value="<%= allowed_values.avian_hosts[i].tax_id %>"><%= allowed_values.avian_hosts[i].name %></option>
-          <% } %>
+        <select id="avian-host" class="selectpicker" data-dropup-auto="false" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts">
+          <!-- handled by Angular -->
         </select>
       </div>
     </div>
@@ -89,7 +81,7 @@
   </div>
   <div class="row">
     <div class="col-xs-12 pushed-down">
-      <button class="btn btn-warning pull-left"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>
+      <button class="btn btn-warning pull-left" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>
       <button class="btn btn-info pull-right search-button" ng-click="search();"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
     </div>
   </div>

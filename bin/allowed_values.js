@@ -2069,6 +2069,10 @@ const CONTINENTS = [
 
 const HOSTS = [
   {
+    name: 'All',
+    tax_id: 1
+  },
+  {
     name: 'Avian',
     tax_id: 8782
   },
@@ -2163,6 +2167,10 @@ const HOSTS = [
 ];
 
 const AVIAN_HOSTS = [
+  {
+    name: 'All Avian',
+    tax_id: 8782
+  },
   {
     name: 'African Stonechat',
     tax_id: 290047

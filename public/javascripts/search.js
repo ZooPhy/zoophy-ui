@@ -4,6 +4,28 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
 
   $scope.allowed_values = null;
 
+  $scope.virus = 197911;
+  $scope.host = 1;
+  $scope.avianHost = 8782;
+
+  $scope.reset = function() {
+    $scope.virus = $scope.allowed_values.viruses[0].tax_id;
+    $scope.host = $scope.allowed_values.hosts[0].tax_id;
+    $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
+    $scope.genes = $scope.allowed_values.viruses[0].genes;
+
+    $scope.from = 0;
+    $scope.to = Number(new Date().getFullYear());
+    $scope.minimumSequenceLength = 0;
+
+    setTimeout(resetSelects, 10);
+  };
+
+  function resetSelects() {
+    console.log('resetting')
+    $('.selectpicker').selectpicker('render');
+  }
+
   $scope.genes = [];
   const allGenes = "All";
   const completeGenes = "Complete";
@@ -18,13 +40,16 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.to = Number(new Date().getFullYear());
   $scope.minimumSequenceLength = 0;
 
-  $scope.hostIsAvian = false;
   $scope.countryHasRegions = false;
 
   $scope.showDetails = false;
   $scope.selectedRecord = null;
   $scope.searchError = null;
 
+  $scope.updateGenes = function() {
+    let virusIndex = $('#virus')[0].selectedIndex;
+    $scope.genes = $scope.allowed_values.viruses[virusIndex].genes;
+  };
 
   function setCountries(countryList) {
     countryList.sort(function(a, b) {
@@ -93,23 +118,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
   });
 
-  $("#host").change(function() {
-    if (Number($("#host").val()) === 8782) {
-      $scope.hostIsAvian = true;
-      console.log('host has avian')
-      //TODO: fix the ng-show issue -> note: it updates when the country box is clicked
-    }
-    else {
-      $scope.hostIsAvian = false;
-    }
-  });
-
   $http.get(SERVER_URI+'/allowed').then(function(response) {
     if (response.status === 200) {
       $scope.allowed_values = response.data;
       $("#host").removeClass('hidden');
       $('#avian-host-container').removeClass('hidden');
       $('#regions-container').removeClass('hidden');
+      $scope.virus = $scope.allowed_values.viruses[0].tax_id;
       $scope.genes = $scope.allowed_values.viruses[0].genes;
       let tempCountries = [];
       for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
@@ -123,10 +138,28 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   });
 
   $scope.search = function() {
-    let host = Number($("#host").val());
-    let virus = Number($("#virus").val());
-    let continent = Number($("#continent").val());
+    let virus = Number($scope.virus);
+    let host = Number($scope.host);
+    if (host === 8782) {
+      host = Number($scope.avianHost);
+    }
     let query = 'TaxonID:'+virus+' AND HostID:'+host;
+    let genes = $scope.selectedGenes;
+    console.log(genes);
+    if (genes.length > 0) {
+      let geneString = ' AND Gene:('+genes[0];
+      for (let i = 1; i < genes.length; i++) {
+        geneString += ' OR '+genes[i];
+      }
+      if (genes.indexOf(completeGenes) === -1) {
+        geneString += ' NOT Complete';
+      }
+      geneString += ')';
+      query += geneString;
+    }
+
+    let continent = Number($("#continent").val());
+
     if ($scope.minimumSequenceLength > 0) {
       let minLength = $scope.minimumSequenceLength+'';
       while (minLength.length < 5) {
