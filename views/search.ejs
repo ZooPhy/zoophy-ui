@@ -14,11 +14,8 @@
     </div>
     <div class="col-sm-3 col-xs-6">
       <label for="continent">Continent</label>
-      <select id="continent" class="selectpicker" data-dropup-auto="false">
-        <option value="6295630" selected>All</option>
-        <% for (let i = 0; i < allowed_values.continents.length; i++) { %>
-          <option value="<%= allowed_values.continents[i].geoname_id %>"><%= allowed_values.continents[i].name %></option>
-        <% } %>
+      <select id="continent" class="selectpicker" data-dropup-auto="false" ng-model="continent" ng-options="continent.geoname_id as continent.name for continent in allowed_values.continents" ng-change="updateCountries();" required>
+        <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3 col-xs-6 text-center">
@@ -50,7 +47,7 @@
     </div>
     <div class="col-sm-3 col-xs-6">
       <label for="countries">Countries</label>
-      <select id="countries" ng-model="selectedCountries" ng-options="country as country.name for country in countries" class="form-control" multiple>
+      <select id="countries" ng-model="selectedCountries" ng-options="country as country.name for country in countries" class="form-control" ng-change="updateRegions();" multiple>
         <!-- handled by Angular -->
       </select>
     </div>
@@ -73,9 +70,10 @@
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
       <div class="col-sm-3 col-xs-6 text-center">
-        <!-- TODO: make pretty -->
-        <label><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</label>
-        <input id="data-upload" type="file">
+        <!-- TODO -->
+        <!-- <label><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</label>
+        <input id="data-upload" type="file"> -->
+        <h6><i class="fa fa-hourglass-half" aria-hidden="true"></i> Coming Soon!</h6>
       </div>
     </div>
   </div>

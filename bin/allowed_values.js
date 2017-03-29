@@ -157,6 +157,11 @@ const HANTAVIRUS_SUB_TYPES = [
 
 const CONTINENTS = [
   {
+      name: 'All',
+      geoname_id: 1,
+      countries: []
+  },
+  {
     name: 'Asia',
     geoname_id: 6255147,
     countries: [

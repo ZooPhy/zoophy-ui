@@ -5,66 +5,72 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.allowed_values = null;
 
   $scope.virus = 197911;
+  $scope.genes = [];
+  const completeGenes = "Complete";
+  $scope.selectedGenes = [];
   $scope.host = 1;
   $scope.avianHost = 8782;
-
-  $scope.reset = function() {
-    $scope.virus = $scope.allowed_values.viruses[0].tax_id;
-    $scope.host = $scope.allowed_values.hosts[0].tax_id;
-    $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
-    $scope.genes = $scope.allowed_values.viruses[0].genes;
-
-    $scope.from = 0;
-    $scope.to = Number(new Date().getFullYear());
-    $scope.minimumSequenceLength = 0;
-
-    setTimeout(resetSelects, 10);
-  };
-
-  function resetSelects() {
-    console.log('resetting')
-    $('.selectpicker').selectpicker('render');
-  }
-
-  $scope.genes = [];
-  const allGenes = "All";
-  const completeGenes = "Complete";
+  $scope.continent = 1;
   $scope.countries = [];
-  $scope.regions = [];
-
-  $scope.selectedGenes = [];
   $scope.selectedCountries = [];
+  $scope.countryHasRegions = false;
+  $scope.regions = [];
   $scope.selectedRegions = [];
 
   $scope.from = 0;
   $scope.to = Number(new Date().getFullYear());
   $scope.minimumSequenceLength = 0;
 
-  $scope.countryHasRegions = false;
-
   $scope.showDetails = false;
   $scope.selectedRecord = null;
   $scope.searchError = null;
+
+  $scope.reset = function() {
+    $scope.virus = $scope.allowed_values.viruses[0].tax_id;
+    $scope.host = $scope.allowed_values.hosts[0].tax_id;
+    $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
+    $scope.genes = $scope.allowed_values.viruses[0].genes;
+    $scope.selectedGenes = [];
+    $scope.continent = 1;
+    $scope.selectedCountries = [];
+    $scope.countryHasRegions = false;
+    $scope.selectedRegions = [];
+    $scope.from = 0;
+    $scope.to = Number(new Date().getFullYear());
+    $scope.minimumSequenceLength = 0;
+    setTimeout(resetSelects, 10);
+  };
+
+  function resetSelects() {
+    $('.selectpicker').selectpicker('render');
+  }
 
   $scope.updateGenes = function() {
     let virusIndex = $('#virus')[0].selectedIndex;
     $scope.genes = $scope.allowed_values.viruses[virusIndex].genes;
   };
 
-  function setCountries(countryList) {
-    countryList.sort(function(a, b) {
-      return a.name.localeCompare(b.name);
-    });
-    let allCountry = {
-      name: 'All',
-      geoname_id: Number($('#continent').val())
-    };
-    countryList.splice(0, 0, allCountry);
-    $scope.countries = countryList.slice();
-    $scope.selectedCountries = [$scope.countries[0]];
+  $scope.updateCountries = function() {
+    let tempCountries = [];
+    if ($scope.continent === 1) {
+      for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
+        tempCountries = tempCountries.concat($scope.allowed_values.continents[i].countries);
+      }
+    }
+    else {
+      for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
+        if ($scope.allowed_values.continents[i].geoname_id === $scope.continent) {
+          tempCountries = tempCountries.concat($scope.allowed_values.continents[i].countries);
+        }
+      }
+    }
+    $scope.countries = tempCountries;
+    $scope.selectedCountries = [];
+    $scope.updateRegions();
   };
 
-  function setRegions(countryList) {
+  $scope.updateRegions = function() {
+    let countryList = $scope.selectedCountries;
     $scope.regions = [];
     let tempRegions = [];
     for (let i = 0; i < countryList.length; i++) {
@@ -82,41 +88,27 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         $scope.regions = $scope.regions.concat(tempRegions);
       }
     }
+    $scope.selectedRegions = [];
     if ($scope.regions.length > 0) {
-      $scope.selectedRegions = [$scope.regions[0]];
       $scope.countryHasRegions = true;
     }
     else {
-      $scope.selectedRegions = [];
       $scope.countryHasRegions = false;
     }
-  }
+  };
 
-  $scope.$watch('selectedCountries', function (newVal, oldVal) {
-    let wasChanged = false;
-    if (newVal.length === oldVal.length) {
-      let tempNew = newVal.slice();
-      tempNew.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-      });
-      let tempOld = oldVal.slice();
-      tempOld.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-      });
-      for (let i = 0; i < newVal.length; i++) {
-        if (Number(newVal[i].geoname_id) != Number(oldVal[i].geoname_id)) {
-          wasChanged = true;
-          i = newVal.length;
-        }
-      }
-    }
-    else {
-      wasChanged = true;
-    }
-    if (wasChanged) {
-      setRegions(newVal);
-    }
-  });
+  function setCountries(countryList) {
+    countryList.sort(function(a, b) {
+      return a.name.localeCompare(b.name);
+    });
+    let allCountry = {
+      name: 'All',
+      geoname_id: Number($('#continent').val())
+    };
+    countryList.splice(0, 0, allCountry);
+    $scope.countries = countryList.slice();
+    $scope.selectedCountries = [$scope.countries[0]];
+  };
 
   $http.get(SERVER_URI+'/allowed').then(function(response) {
     if (response.status === 200) {
@@ -126,11 +118,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       $('#regions-container').removeClass('hidden');
       $scope.virus = $scope.allowed_values.viruses[0].tax_id;
       $scope.genes = $scope.allowed_values.viruses[0].genes;
-      let tempCountries = [];
-      for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
-        tempCountries = tempCountries.concat($scope.allowed_values.continents[i].countries);
-      }
-      setCountries(tempCountries.slice());
+      $scope.updateCountries();
     }
     else {
       console.log('Could not load necessary values: ', response.data.error);
@@ -145,7 +133,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
     let query = 'TaxonID:'+virus+' AND HostID:'+host;
     let genes = $scope.selectedGenes;
-    console.log(genes);
     if (genes.length > 0) {
       let geneString = ' AND Gene:('+genes[0];
       for (let i = 1; i < genes.length; i++) {
@@ -157,15 +144,17 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       geneString += ')';
       query += geneString;
     }
-
-    let continent = Number($("#continent").val());
-
+    let continent = Number($scope.continent);
+    if (continent !== 1) {
+      console.log(continent)
+      //TODO
+    }
     if ($scope.minimumSequenceLength > 0) {
       let minLength = $scope.minimumSequenceLength+'';
-      while (minLength.length < 5) {
+      while (minLength.length < 4) {
         minLength = '0'+minLength;
       }
-      query += ' AND SegmentLength:['+minLength+' TO 99999]';
+      query += ' AND SegmentLength:['+minLength+' TO 9999]';
     }
     if ($scope.from > 0) {
       let fromYear = $scope.from+'';

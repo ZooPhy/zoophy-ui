@@ -56,6 +56,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     RecordData.setNumSelected($scope.numSelected);
   };
 
+  $scope.goToRun = function() {
+    $scope.$parent.switchTabs('run');
+  }
+
 });
 
 /*
