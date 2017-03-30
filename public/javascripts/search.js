@@ -58,9 +58,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
         tempCountries = tempCountries.concat($scope.allowed_values.continents[i].countries);
       }
-      tempCountries.sort(function(a, b) {
-        return a.name.localeCompare(b.name);
-      });
     }
     else {
       for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
@@ -69,6 +66,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         }
       }
     }
+    tempCountries.sort(function(a, b) {
+      return a.name.localeCompare(b.name);
+    });
     $scope.countries = tempCountries;
     $scope.selectedCountries = [];
     $scope.updateRegions();

@@ -81,6 +81,11 @@ router.post('/run', function(req, res) {
       }, function(error, response, body) {
         if (error) {
           logger.error(error);
+          result = {
+            status: 500,
+            error: String(error)
+          };
+          res.status(result.status).send(result);
         }
         else {
           logger.info('Job validation results: ', response.statusCode, body);
@@ -96,13 +101,18 @@ router.post('/run', function(req, res) {
             }, function(error, response, body) {
               if (error) {
                 logger.error(error);
+                result = {
+                  status: 500,
+                  error: 'Unknown ZooPhy API Error during Start'
+                };
+                res.status(result.status).send(result);
               }
               else {
                 logger.info('Job Started: ', response.statusCode, body);
                 if (response.statusCode === 202) {
                   result = {
                     status: 202,
-                    message: 'ZooPhy Job Successfully Started: '+body
+                    message: String(body)
                   };
                 }
                 else {
@@ -118,7 +128,7 @@ router.post('/run', function(req, res) {
           else if (body) {
             logger.warn(body);
             result = {
-              status: 400,
+              status: 200,
               error: String(body)
             };
             res.status(result.status).send(result);
@@ -126,7 +136,7 @@ router.post('/run', function(req, res) {
           else {
             logger.warn('Unknown ZooPhy API Error');
             result = {
-              status: 400,
+              status: 200,
               error: 'Unknown ZooPhy API Error during Validation'
             };
             res.status(result.status).send(result);

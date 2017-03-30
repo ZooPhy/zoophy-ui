@@ -7,7 +7,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.jobName = null;
   $scope.runError = null;
   $scope.running = false;
-  $scope.success = false;
+  $scope.success = null;
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
@@ -18,6 +18,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.runJob = function() {
     $scope.runError = null;
     $scope.running = true;
+    $scope.success = null;
     if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail)) {
       let jobAccessions = [];
       let records = RecordData.getRecords();
@@ -43,17 +44,17 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
           useGLM: false,
           predictors: null
         };
-        console.log(jobData);
         $http.post(runUri, jobData).then(function success(response) {
           $scope.running = false;
           if (response.status === 202) {
-            $scope.success = true; //TODO give job ID
+            $scope.success = response.data.message;
           }
           else {
-            $scope.runError = 'Job Validation Failed';
+            $scope.runError = 'Job Validation Failed: '+response.data.error;
           }
         }, function failure(response) {
-          $scope.runError = 'Job Validation Failed';
+          $scope.running = false;
+          $scope.runError = 'Job Validation Failed due to Unknown Error';
         });
       }
     }
