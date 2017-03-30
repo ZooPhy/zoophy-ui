@@ -1,3 +1,5 @@
+'use strict';
+
 angular.module('ZooPhy').controller('resultsController', function ($scope, $http, RecordData) {
 
   $scope.recordsPerPage = 25;
@@ -46,7 +48,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   };
 
   $scope.toggleAll = function() {
-    for (let i = 0; i < $scope.results.length; i++) {
+    for (var i = 0; i < $scope.results.length; i++) {
       $scope.results[i].includeInJob = $scope.groupIsSelected;
     }
     if ($scope.groupIsSelected) {

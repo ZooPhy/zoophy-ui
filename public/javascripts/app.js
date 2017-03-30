@@ -1,37 +1,37 @@
 'use strict';
 
 //TODO: update on server if using reverse proxy
-//const SERVER_URI = 'https://zodo.asu.edu/zoophy';
-const SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
+//var SERVER_URI = 'https://zodo.asu.edu/zoophy';
+var SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
 
 // Main Angular App
-let ZooPhyApp = angular.module('ZooPhy', ['smart-table']);
+var ZooPhyApp = angular.module('ZooPhy', ['smart-table']);
 
 // Factory for sharing data between controllers
 ZooPhyApp.factory('RecordData', function() {
-  let data = {
+  var recordData = {
     records: [],
     numSelected: 0,
     searchCount: 0
   };
   return {
     getRecords: function() {
-      return data.records;
+      return recordData.records;
     },
     setRecords: function (newRecords) {
-      data.records = newRecords;
+      recordData.records = newRecords;
     },
     getNumSelected: function() {
-      return data.numSelected;
+      return recordData.numSelected;
     },
     setNumSelected: function(newNum) {
-      data.numSelected = Number(newNum);
+      recordData.numSelected = Number(newNum);
     },
     getSearchCount: function() {
-      return data.searchCount;
+      return recordData.searchCount;
     },
     incrementSearchCount: function() {
-      data.searchCount++;
+      recordData.searchCount++;
     }
   };
 });

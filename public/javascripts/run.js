@@ -1,6 +1,8 @@
+'use strict';
+
 angular.module('ZooPhy').controller('runController', function ($scope, $http, RecordData) {
 
-  const EMAIL_RE = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  var EMAIL_RE = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
   $scope.numSelected = RecordData.getNumSelected();
   $scope.jobEmail = null;
@@ -20,9 +22,9 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.running = true;
     $scope.success = null;
     if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail)) {
-      let jobAccessions = [];
-      let records = RecordData.getRecords();
-      for (let i = 0; i < records.length; i++) {
+      var jobAccessions = [];
+      var records = RecordData.getRecords();
+      for (var i = 0; i < records.length; i++) {
         if (records[i].includeInJob) {
           jobAccessions.push(records[i].accession);
         }
@@ -36,8 +38,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
         $scope.running = false;
       }
       else {
-        let runUri = SERVER_URI+'/job/run';
-        let jobData = {
+        var runUri = SERVER_URI+'/job/run';
+        var jobData = {
           replyEmail: $scope.jobEmail,
           jobName: $scope.jobName,
           accessions: jobAccessions,
