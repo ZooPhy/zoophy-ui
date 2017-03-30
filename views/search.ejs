@@ -24,7 +24,7 @@
       </select>
     </div>
     <div class="col-sm-3 col-xs-6 text-center">
-      <% const CURRENT_YEAR = Number(new Date().getFullYear()); %>
+      <% var CURRENT_YEAR = Number(new Date().getFullYear()); %>
       <div class="col-xs-6">
         <label for="from">From</label>
         <input id="from" type="number" ng-model="from" class="form-control" placeholder="YYYY"/>
@@ -37,13 +37,36 @@
   </div>
   <div class="row pushed-down">
     <div class="col-sm-3 col-xs-6">
-      <label for="genes">Genes</label>
-      <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" class="form-control" multiple>
-        <!-- handled by Angular -->
-      </select>
+      <div id="flu-a-sub-container" ng-show="virus === 197911">
+        <label>Flu A Sub Type</label>
+        <div class="col-sm-6">
+          <label>H</label>
+          <select id="flu-a-h" class="form-control" data-dropup-auto="false" ng-model="fluAH" ng-options="h as h for h in fluAHs">
+            <!-- handled by Angular -->
+          </select>
+        </div>
+        <div class="col-sm-6">
+          <label>N</label>
+          <select id="flu-a-n" class="form-control" data-dropup-auto="false" ng-model="fluAN" ng-options="n as n for n in fluANs">
+            <!-- handled by Angular -->
+          </select>
+        </div>
+      </div>
+      <div id="hanta-sub-container" ng-show="virus === 11598">
+        <label for="hanta-sub">Hantavirus Sub Type</label>
+        <select id="hanta-sub" class="selectpicker" data-dropup-auto="false" ng-model="hantaSub" ng-options="sub.tax_id as sub.name for sub in allowed_values.hantavirus_sub_types">
+          <!-- handled by Angular -->
+        </select>
+      </div>
+      <div>
+        <label for="genes">Genes</label>
+        <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" class="form-control" multiple>
+          <!-- handled by Angular -->
+        </select>
+      </div>
     </div>
     <div class="col-sm-3 col-xs-6">
-      <div id="avian-host-container" class="hidden" ng-show="host === 8782">
+      <div id="avian-host-container" ng-show="host === 8782">
         <label for="avian-host">Avian Host</label>
         <select id="avian-host" class="selectpicker" data-dropup-auto="false" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts">
           <!-- handled by Angular -->
@@ -55,20 +78,18 @@
       <select id="countries" ng-model="selectedCountries" ng-options="country as country.name for country in countries" class="form-control" ng-change="updateRegions();" multiple>
         <!-- handled by Angular -->
       </select>
+      <div id="regions-container" ng-show="countryHasRegions">
+        <label for="regions">Regions</label>
+        <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" class="form-control" multiple>
+          <!-- handled by Angular -->
+        </select>
+      </div>
     </div>
     <div class="col-sm-3 col-xs-6 text-center">
       <label for="minimumSequenceLength">Minimum Sequence Length</label>
       <div class="col-xs-6 col-sm-offset-3">
         <input id="minimumSequenceLength" type="number" ng-model="minimumSequenceLength" min="0" max="99999" placeholder="0" class="form-control"></input>
       </div>
-    </div>
-  </div>
-  <div class="row pushed-down">
-    <div id="regions-container" class="col-sm-3 col-xs-6 col-sm-offset-6 hidden" ng-show="countryHasRegions">
-      <label for="regions">Regions</label>
-      <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" class="form-control" multiple>
-        <!-- handled by Angular -->
-      </select>
     </div>
   </div>
   <div class="row col-xs-12 pushed-down">

@@ -5,6 +5,11 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.allowed_values = null;
 
   $scope.virus = 197911;
+  $scope.hantaSub = 11599;
+  $scope.fluAHs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  $scope.fluAH = 1;
+  $scope.fluANs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+  $scope.fluAN = 1;
   $scope.genes = [];
   var completeGenes = "Complete";
   $scope.selectedGenes = [];
@@ -121,6 +126,15 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.search = function() {
     $scope.searchError = null;
     var virus = Number($scope.virus);
+    if (virus === 11598) {
+      virus = Number($scope.hantaSub);
+    }
+    else if (virus === 197911) {
+      var subH = Number($scope.fluAH);
+      var subN = Number($scope.fluAN);
+      virus = Number($scope.allowed_values.influenza_a_sub_type_ids[subH-1][subN-1]);
+      //TODO check for pdmo9 flag
+    }
     var host = Number($scope.host);
     if (host === 8782) {
       host = Number($scope.avianHost);
