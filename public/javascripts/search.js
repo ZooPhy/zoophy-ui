@@ -29,7 +29,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.virus = $scope.allowed_values.viruses[0].tax_id;
     $scope.host = $scope.allowed_values.hosts[0].tax_id;
     $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
-    $scope.genes = $scope.allowed_values.viruses[0].genes;
+    $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
+    $scope.genes.push(completeGenes);
     $scope.selectedGenes = [];
     $scope.continent = 1;
     $scope.selectedCountries = [];
@@ -47,7 +48,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
 
   $scope.updateGenes = function() {
     let virusIndex = $('#virus')[0].selectedIndex;
-    $scope.genes = $scope.allowed_values.viruses[virusIndex].genes;
+    $scope.genes = $scope.allowed_values.viruses[virusIndex].genes.slice();
+    $scope.genes.push(completeGenes);
   };
 
   $scope.updateCountries = function() {
@@ -56,6 +58,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
         tempCountries = tempCountries.concat($scope.allowed_values.continents[i].countries);
       }
+      tempCountries.sort(function(a, b) {
+        return a.name.localeCompare(b.name);
+      });
     }
     else {
       for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
@@ -97,19 +102,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
   };
 
-  function setCountries(countryList) {
-    countryList.sort(function(a, b) {
-      return a.name.localeCompare(b.name);
-    });
-    let allCountry = {
-      name: 'All',
-      geoname_id: Number($('#continent').val())
-    };
-    countryList.splice(0, 0, allCountry);
-    $scope.countries = countryList.slice();
-    $scope.selectedCountries = [$scope.countries[0]];
-  };
-
   $http.get(SERVER_URI+'/allowed').then(function(response) {
     if (response.status === 200) {
       $scope.allowed_values = response.data;
@@ -117,7 +109,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       $('#avian-host-container').removeClass('hidden');
       $('#regions-container').removeClass('hidden');
       $scope.virus = $scope.allowed_values.viruses[0].tax_id;
-      $scope.genes = $scope.allowed_values.viruses[0].genes;
+      $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
+      $scope.genes.push(completeGenes);
       $scope.updateCountries();
     }
     else {
