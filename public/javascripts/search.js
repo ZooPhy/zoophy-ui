@@ -172,10 +172,10 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
     if ($scope.minimumSequenceLength > 0) {
       var minLength = $scope.minimumSequenceLength+'';
-      while (minLength.length < 4) {
+      while (minLength.length < 5) {
         minLength = '0'+minLength;
       }
-      query += ' AND SegmentLength:['+minLength+' TO 9999]';
+      query += ' AND SegmentLength:['+minLength+' TO 99999]';
     }
     if ($scope.from > 0) {
       var fromYear = $scope.from+'';

@@ -10,6 +10,12 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.runError = null;
   $scope.running = false;
   $scope.success = null;
+  $scope.useDefaultGLM = false;
+  $scope.customPredictors = null;
+  $scope.chainLength = 10000000;
+  $scope.subSampleRate = 1000;
+  $scope.availableModels = ['HKY'];
+  $scope.substitutionModel = 'HKY';
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
@@ -39,17 +45,34 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       }
       else {
         var runUri = SERVER_URI+'/job/run';
+        var email = String($scope.jobEmail);
+        var currentJobName = String($scope.jobName);
+        var glm = Boolean($scope.useDefaultGLM | $scope.customPredictors);
+        var predictors = $scope.customPredictors;
+        var chain = Number($scope.chainLength);
+        var rate = Number($scope.subSampleRate);
+        var model = String($scope.substitutionModel);
         var jobData = {
-          replyEmail: $scope.jobEmail,
-          jobName: $scope.jobName,
+          replyEmail: email,
+          jobName: currentJobName,
           accessions: jobAccessions,
-          useGLM: false,
-          predictors: null
+          useGLM: glm,
+          predictors: predictors,
+          xmlOptions: {
+            chainLength: chain,
+            subSampleRate: rate,
+            substitutionModel: model
+          }
         };
         $http.post(runUri, jobData).then(function success(response) {
           $scope.running = false;
           if (response.status === 202) {
-            $scope.success = response.data.message;
+            if (currentJobName) {
+              $scope.success = currentJobName;
+            }
+            else {
+              $scope.success = response.data.message;
+            }
           }
           else {
             $scope.runError = 'Job Validation Failed: '+response.data.error;

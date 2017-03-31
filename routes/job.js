@@ -57,18 +57,24 @@ router.post('/run', function(req, res) {
         jobErrors += 'Invalid Job Name: '+req.body.jobName+', ';
       }
     }
-    let usingGLM = Boolean(req.body.usingGLM === true);
+    let useGLM = Boolean(req.body.useGLM === true);
     let predictors = null;
-    if (usingGLM && req.body.predictors) {
+    if (useGLM && req.body.predictors) {
       //TODO check predictors
     }
+    let xmlOptions = {
+      chainLength: Number(req.body.xmlOptions.chainLength),
+      subSampleRate: Number(req.body.xmlOptions.subSampleRate),
+      substitutionModel: String(req.body.xmlOptions.substitutionModel)
+    };
     if (jobErrors === BASE_ERROR) {
       const zoophyJob = JSON.stringify({
         accessions: accessions,
         replyEmail: email,
         jobName: jobName,
-        usingGLM: usingGLM,
-        predictors: predictors
+        useGLM: useGLM,
+        predictors: predictors,
+        xmlOptions: xmlOptions
       });
       logger.info('Parameters valid, testing ZooPhy Job with '+accessions.length+' accessions:\n'+zoophyJob);
       request({
