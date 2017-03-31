@@ -48,6 +48,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.isPDMO9 = false;
   };
 
+  $scope.isH1N1 = Boolean($scope.fluAH === 1 && $scope.fluAN === 1);
+
   $scope.updateGenes = function() {
     var virusIndex = $('#virus')[0].selectedIndex;
     $scope.genes = $scope.allowed_values.viruses[virusIndex].genes.slice();
@@ -131,7 +133,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       var subH = Number($scope.fluAH);
       var subN = Number($scope.fluAN);
       virus = Number($scope.allowed_values.influenza_a_sub_type_ids[subH-1][subN-1]);
-      if (subH === 1 === subN) {
+      if (subH === 1 && subN === 1) {
         pdmo9 = Boolean($scope.isPDMO9 === true);
       }
     }
