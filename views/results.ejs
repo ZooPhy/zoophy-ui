@@ -27,21 +27,25 @@
     	</tbody>
       <tfoot>
 			<tr>
-				<td colspan="8" class="text-center">
+        <td colspan="2">
+          <div class="text-center">
+            <label for="recordsPerPage">Records Per Page</label>
+            <select id="recordsPerPage" class="form-control" ng-options="num as num for num in pageNums" ng-model="recordsPerPage">
+              <!-- handled by Angular -->
+            </select>
+          </div>
+        </td>
+				<td colspan="4" class="text-center">
 					<div st-pagination="" st-items-by-page="recordsPerPage" st-displayed-pages="10"></div>
 				</td>
+        <td colspan="2">
+          <div class="pushed-down">
+            <button class="btn btn-info pull-right" ng-click="goToRun();">Configure ZooPhy Job</button>
+          </div>
+        </td>
 			</tr>
 		</tfoot>
     </table>
-    <div class="col-xs-6 col-xs-offset-3 text-center">
-      <label for="recordsPerPage">Records Per Page</label>
-      <select id="recordsPerPage" class="selectpicker col-xs-4" ng-options="num as num for num in pageNums" data-dropup-auto="true" ng-model="recordsPerPage">
-        <!-- handled by Angular -->
-      </select>
-    </div>
-    <div class="col-xs-3">
-      <button class="btn btn-info pull-right" ng-click="goToRun();">Configure ZooPhy Job</button>
-    </div>
   </div>
   <div id="detail-panel" class="col-sm-3 hidden-xs">
     <div class="panel panel-info">

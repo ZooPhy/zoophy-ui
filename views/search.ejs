@@ -7,19 +7,19 @@
   <div class="row">
     <div class="col-sm-3 col-xs-6">
       <label for="virus">Virus</label>
-      <select id="virus" class="selectpicker" data-dropup-auto="false" ng-model="virus" ng-options="virus.tax_id as virus.name for virus in allowed_values.viruses" ng-change="updateGenes();" required>
+      <select id="virus" class="form-control" ng-model="virus" ng-options="virus.tax_id as virus.name for virus in allowed_values.viruses" ng-change="updateGenes();" required>
         <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3">
       <label for="host">Host</label>
-      <select id="host" class="selectpicker" ng-model="host" ng-options="host.tax_id as host.name for host in allowed_values.hosts" data-dropup-auto="false" required>
+      <select id="host" class="form-control" ng-model="host" ng-options="host.tax_id as host.name for host in allowed_values.hosts" required>
         <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3 col-xs-6">
       <label for="continent">Continent</label>
-      <select id="continent" class="selectpicker" data-dropup-auto="false" ng-model="continent" ng-options="continent.geoname_id as continent.name for continent in allowed_values.continents" ng-change="updateCountries();" required>
+      <select id="continent" class="form-control" ng-model="continent" ng-options="continent.geoname_id as continent.name for continent in allowed_values.continents" ng-change="updateCountries();" required>
         <!-- handled by Angular -->
       </select>
     </div>
@@ -40,21 +40,21 @@
       <div id="flu-a-sub-container" ng-show="virus === 197911">
         <label>Flu A Sub Type</label>
         <div class="col-sm-6">
-          <label>H</label>
-          <select id="flu-a-h" class="form-control" data-dropup-auto="false" ng-model="fluAH" ng-options="h as h for h in fluAHs">
+          <label class="text-center">H</label>
+          <select id="flu-a-h" class="form-control" ng-model="fluAH" ng-options="h as h for h in fluAHs">
             <!-- handled by Angular -->
           </select>
         </div>
         <div class="col-sm-6">
-          <label>N</label>
-          <select id="flu-a-n" class="form-control" data-dropup-auto="false" ng-model="fluAN" ng-options="n as n for n in fluANs">
+          <label class="text-center">N</label>
+          <select id="flu-a-n" class="form-control" ng-model="fluAN" ng-options="n as n for n in fluANs">
             <!-- handled by Angular -->
           </select>
         </div>
       </div>
       <div id="hanta-sub-container" ng-show="virus === 11598">
         <label for="hanta-sub">Hantavirus Sub Type</label>
-        <select id="hanta-sub" class="selectpicker" data-dropup-auto="false" ng-model="hantaSub" ng-options="sub.tax_id as sub.name for sub in allowed_values.hantavirus_sub_types">
+        <select id="hanta-sub" class="form-control" ng-model="hantaSub" ng-options="sub.tax_id as sub.name for sub in allowed_values.hantavirus_sub_types">
           <!-- handled by Angular -->
         </select>
       </div>
@@ -68,7 +68,7 @@
     <div class="col-sm-3 col-xs-6">
       <div id="avian-host-container" ng-show="host === 8782">
         <label for="avian-host">Avian Host</label>
-        <select id="avian-host" class="selectpicker" data-dropup-auto="false" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts">
+        <select id="avian-host" class="form-control" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts">
           <!-- handled by Angular -->
         </select>
       </div>

@@ -44,12 +44,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.from = 0;
     $scope.to = Number(new Date().getFullYear());
     $scope.minimumSequenceLength = 0;
-    setTimeout(resetSelects, 10);
   };
-
-  function resetSelects() {
-    $('.selectpicker').selectpicker('render');
-  }
 
   $scope.updateGenes = function() {
     var virusIndex = $('#virus')[0].selectedIndex;
@@ -211,19 +206,12 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
-        var searchResults = [];
-        for (var i = 0; i < response.data.records.length; i++) {
-          if (response.data.records[i].segmentLength > $scope.minimumSequenceLength) {
-            searchResults.push(response.data.records[i]);
-          }
-        }
-        if (searchResults.length > 0) {
-          RecordData.setRecords(searchResults);
+        RecordData.setRecords(response.data.records);
+        if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
         }
         else {
           $scope.searchError = 'Search returned 0 results.';
-          RecordData.setRecords(searchResults);
         }
       }
       else {
