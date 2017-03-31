@@ -62,3 +62,7 @@ input::-webkit-inner-spin-button {
 .st-selected {
   background-color: #d9edf7 !important;
 }
+
+.pdmo9-label {
+  display: inline;
+}

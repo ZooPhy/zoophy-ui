@@ -51,6 +51,9 @@
             <!-- handled by Angular -->
           </select>
         </div>
+        <div class="col-xs-10 col-xs-offset-2 pushed-down" ng-show="fluAH === 1 && fluAN === 1">
+          <label class="pdmo9-label">pdm09 Only?</label> <input ng-model="isPDMO9" type="checkbox"></input>
+        </div>
       </div>
       <div id="hanta-sub-container" ng-show="virus === 11598">
         <label for="hanta-sub">Hantavirus Sub Type</label>
@@ -58,7 +61,7 @@
           <!-- handled by Angular -->
         </select>
       </div>
-      <div>
+      <div class="pushed-down">
         <label for="genes">Genes</label>
         <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" class="form-control" multiple>
           <!-- handled by Angular -->

@@ -25,6 +25,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.from = 0;
   $scope.to = Number(new Date().getFullYear());
   $scope.minimumSequenceLength = 0;
+  $scope.isPDMO9 = false;
 
   $scope.showDetails = false;
   $scope.selectedRecord = null;
@@ -121,6 +122,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.search = function() {
     $scope.searchError = null;
     var virus = Number($scope.virus);
+    var pdmo9 = false;
     if (virus === 11598) {
       virus = Number($scope.hantaSub);
     }
@@ -128,13 +130,16 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       var subH = Number($scope.fluAH);
       var subN = Number($scope.fluAN);
       virus = Number($scope.allowed_values.influenza_a_sub_type_ids[subH-1][subN-1]);
-      //TODO check for pdmo9 flag
+      pdmo9 = Boolean($scope.isPDMO9 === true);
     }
     var host = Number($scope.host);
     if (host === 8782) {
       host = Number($scope.avianHost);
     }
     var query = 'TaxonID:'+virus+' AND HostID:'+host;
+    if (pdmo9) {
+      query += ' AND PH1N1:true';
+    }
     var genes = $scope.selectedGenes;
     if (genes.length > 0) {
       var geneString = ' AND Gene:('+genes[0];
