@@ -45,6 +45,13 @@
           </div>
         </td>
 			</tr>
+      <tr>
+        <td colspan="8">
+          <p ng-hide="generating">Download Search Results as <button class="btn btn-xs btn-default" ng-click="setupDownload('csv');">CSV</button> or <button ng-click="setupDownload('fasta');" class="btn btn-xs btn-default">FASTA</button>
+            <a class="results-link" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyData.{{downloadFormat}}" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a><span class="text-danger results-link" ng-show="downloadError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{downloadError}}</span></p>
+          <p ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </p>
+        </td>
+      </tr>
 		</tfoot>
     </table>
   </div>

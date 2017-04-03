@@ -23,6 +23,7 @@ app.use(express.static('./public'));
 app.use(express.static('./public/stylesheets'));
 app.use(express.static('./public/images'));
 app.use(express.static('./public/javascripts'));
+app.use(express.static('./public/downloads'));
 app.use(session_tool);
 
 app.use('/', index);

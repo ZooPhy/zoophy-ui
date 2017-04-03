@@ -8,13 +8,15 @@ let request = require('request');
 let GenBankRecord = require('../bin/genbank_record');
 let fs = require('fs');
 let uuid = require('uuid/v4');
+let path = require('path');
 
 const ALLOWED_VALUES = require('../bin/allowed_values');
 const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
+const DOWNLOAD_FOLDER = path.join(__dirname, '../public/downloads/');
 
 const QUERY_RE = /^(\w| |:|\[|\]|\(|\)){5,5000}?$/;
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
-const DOWNLOAD_RE = /^(json)|(fasta)$/;
+const DOWNLOAD_FORMAT_RE = /^(csv)|(fasta)$/;
 
 let router = express.Router();
 
@@ -153,11 +155,11 @@ router.get('/record', function(req, res) {
 router.post('/download/:format', function(req, res) {
   let result;
   try {
-    if (checkInput(req.param.format, 'string', DOWNLOAD_RE)) {
-      let format = String(req.param.format);
+    if (checkInput(req.params.format, 'string', DOWNLOAD_FORMAT_RE)) {
+      let format = String(req.params.format);
       if (req.body.accessions) {
         let accessions = [];
-        for (let i = 0; i < req.body.accessions; i++) {
+        for (let i = 0; i < req.body.accessions.length; i++) {
           if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
             accessions.push(String(req.body.accessions[i]));
           }
@@ -170,14 +172,14 @@ router.post('/download/:format', function(req, res) {
             res.status(result.status).send(result);
           }
         }
-        logger.info('Retrieving '+format+' Download...');
+        logger.info('Retrieving '+format+' Download for '+accessions.length+' records...');
         request({
           url: API_URI+'/download?format='+format,
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: accessions
+          body: JSON.stringify(accessions)
         }, function(error, response, body) {
           if (error) {
             logger.error(error);
@@ -188,11 +190,13 @@ router.post('/download/:format', function(req, res) {
             res.status(result.status).send(result);
           }
           else if (response.statusCode === 200) {
-            let filePath = '/downloads/'+String(uuid())+format;
+            let fileName = String(uuid())+'.'+format;
+            let filePath = DOWNLOAD_FOLDER+fileName;
             logger.info('Download received. Writing file: '+filePath);
-            fs.writeFile(filePath, '', function(err) {
+            let fileContents = String(body);
+            fs.writeFile(filePath, fileContents, function(err) {
               if (err) {
-                logger.error('Error writing download: '+error);
+                logger.error('Error writing download: '+err);
                 result = {
                   status: 500,
                   error: 'Error writing download'
@@ -201,7 +205,7 @@ router.post('/download/:format', function(req, res) {
               else {
                 result = {
                   status: 200,
-                  downloadPath: filePath
+                  downloadPath: '/downloads/'+fileName
                 };
               }
               res.status(result.status).send(result);
@@ -226,7 +230,7 @@ router.post('/download/:format', function(req, res) {
       }
     }
     else {
-      logger.warn('Bad Download format: '+String(req.param.format));
+      logger.warn('Bad Download format: '+String(req.params.format));
       result = {
         status: 400,
         error: 'Invalid Format'

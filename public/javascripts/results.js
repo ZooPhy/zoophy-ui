@@ -8,6 +8,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.numSelected = RecordData.getNumSelected();
   $scope.results = RecordData.getRecords();
   $scope.displayedResults = RecordData.getRecords();
+  $scope.downloadLink = null;
+  $scope.generating = false;
+  $scope.downloadFormat = null;
+  $scope.downloadError = null;
 
   $scope.$watch(function () {return RecordData.getRecords();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
@@ -63,6 +67,44 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.goToRun = function() {
     $scope.$parent.switchTabs('run');
   }
+
+  $scope.setupDownload = function(format) {
+    if (!$scope.generating) {
+      $scope.generating = true;
+      $scope.downloadLink = null;
+      $scope.downloadFormat = null;
+      $scope.downloadError = null;
+      if ($scope.results.length < 1) {
+        $scope.generating = false;
+        $scope.downloadError = 'No Results to Download';
+      }
+      else if (format === 'csv' || format === 'fasta') {
+        $scope.downloadFormat = format;
+        var downloadAccessions = [];
+        for (var i = 0; i < $scope.results.length; i++) {
+          downloadAccessions.push($scope.results[i].accession);
+        }
+        var downloadURI = SERVER_URI+'/download/'+format;
+        var downloadList = {accessions: downloadAccessions};
+        $http.post(downloadURI, downloadList).then(function success(response) {
+          $scope.generating = false;
+          if (response.status === 200) {
+            $scope.downloadLink = SERVER_URI+response.data.downloadPath;
+          }
+          else {
+            $scope.downloadError = 'Error generating download';
+          }
+        }, function failure(response) {
+          $scope.generating = false;
+          $scope.downloadError = 'Error generating download';
+        });
+      }
+      else {
+        $scope.generating = false;
+        $scope.downloadError = 'Invalid Download Format';
+      }
+    }
+  };
 
 });
 

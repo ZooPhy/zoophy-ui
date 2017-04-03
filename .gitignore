@@ -40,3 +40,7 @@ bin/secret_settings.js
 
 #testing
 coverage/*
+
+#uploads/downloads
+public/downloads/*
+uploads/*
