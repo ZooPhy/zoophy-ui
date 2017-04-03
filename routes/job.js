@@ -74,7 +74,7 @@ router.post('/run', function(req, res) {
         jobName: jobName,
         useGLM: useGLM,
         predictors: predictors,
-        xmlOptions: xmlOptions
+        xmlOptions: null //xmlOptions//TODO fix services
       });
       logger.info('Parameters valid, testing ZooPhy Job with '+accessions.length+' accessions:\n'+zoophyJob);
       request({

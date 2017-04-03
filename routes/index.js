@@ -6,12 +6,15 @@ let checkInput = require('../bin/validator_tool').checkInput;
 let logger = require('../bin/logger_tool');
 let request = require('request');
 let GenBankRecord = require('../bin/genbank_record');
+let fs = require('fs');
+let uuid = require('uuid/v4');
 
 const ALLOWED_VALUES = require('../bin/allowed_values');
 const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
 
 const QUERY_RE = /^(\w| |:|\[|\]|\(|\)){5,5000}?$/;
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
+const DOWNLOAD_RE = /^(json)|(fasta)$/;
 
 let router = express.Router();
 
@@ -27,7 +30,7 @@ router.get('/search', function(req, res) {
   let result;
   try {
     if (checkInput(req.query.query, 'string', QUERY_RE)) {
-      let query = req.query.query.trim();
+      let query = String(req.query.query.trim());
       logger.info('sending query: '+query);
       query = encodeURIComponent(query.trim());
       let uri = API_URI+'/search?query='+query;
@@ -66,7 +69,7 @@ router.get('/search', function(req, res) {
       });
     }
     else {
-      logger.warn('Bad Search query'+req.query.query);
+      logger.warn('Bad Search query'+String(req.query.query));
       result = {
         status: 400,
         error: 'Invalid Lucene Query'
@@ -88,7 +91,7 @@ router.get('/record', function(req, res) {
   let result;
   try {
     if (checkInput(req.query.accession, 'string', ACCESSION_RE)) {
-      let accession = req.query.accession.trim();
+      let accession = String(req.query.accession.trim());
       logger.info('Retrieving Accession: '+accession);
       let uri = API_URI+'/record?accession='+accession;
       request(uri, function (error, response, body) {
@@ -129,7 +132,7 @@ router.get('/record', function(req, res) {
       });
     }
     else {
-      logger.warn('Bad Accession: '+req.query.accession);
+      logger.warn('Bad Accession: '+String(req.query.accession));
       result = {
         status: 400,
         error: 'Invalid Accession'
@@ -142,6 +145,100 @@ router.get('/record', function(req, res) {
     result = {
       status: 500,
       error: 'Failed to retrieve records from ZooPhy API'
+    };
+    res.status(result.status).send(result);
+  }
+});
+
+router.post('/download/:format', function(req, res) {
+  let result;
+  try {
+    if (checkInput(req.param.format, 'string', DOWNLOAD_RE)) {
+      let format = String(req.param.format);
+      if (req.body.accessions) {
+        let accessions = [];
+        for (let i = 0; i < req.body.accessions; i++) {
+          if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
+            accessions.push(String(req.body.accessions[i]));
+          }
+          else {
+            logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
+            result = {
+              status: 400,
+              error: 'Invalid Accession: '+String(req.body.accessions[i])
+            };
+            res.status(result.status).send(result);
+          }
+        }
+        logger.info('Retrieving '+format+' Download...');
+        request({
+          url: API_URI+'/download?format='+format,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: accessions
+        }, function(error, response, body) {
+          if (error) {
+            logger.error(error);
+            result = {
+              status: 500,
+              error: String(error)
+            };
+            res.status(result.status).send(result);
+          }
+          else if (response.statusCode === 200) {
+            let filePath = '/downloads/'+String(uuid())+format;
+            logger.info('Download received. Writing file: '+filePath);
+            fs.writeFile(filePath, '', function(err) {
+              if (err) {
+                logger.error('Error writing download: '+error);
+                result = {
+                  status: 500,
+                  error: 'Error writing download'
+                };
+              }
+              else {
+                result = {
+                  status: 200,
+                  downloadPath: filePath
+                };
+              }
+              res.status(result.status).send(result);
+            });
+          }
+          else {
+            logger.error('Download request failed: '+response.statusCode);
+            result = {
+              status: 500,
+              error: 'ZooPhy API Download Request Failed'
+            };
+            res.status(result.status).send(result);
+          }
+        });
+      }
+      else {
+        result = {
+          status: 400,
+          error: 'Missing Accessions'
+        };
+        res.status(result.status).send(result);
+      }
+    }
+    else {
+      logger.warn('Bad Download format: '+String(req.param.format));
+      result = {
+        status: 400,
+        error: 'Invalid Format'
+      };
+      res.status(result.status).send(result);
+    }
+  }
+  catch (err) {
+    logger.error('Failed to retrieve Download from ZooPhy API'+err);
+    result = {
+      status: 500,
+      error: 'Failed to retrieve Download from ZooPhy API'
     };
     res.status(result.status).send(result);
   }
