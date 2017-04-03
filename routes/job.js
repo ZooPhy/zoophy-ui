@@ -73,8 +73,8 @@ router.post('/run', function(req, res) {
         replyEmail: email,
         jobName: jobName,
         useGLM: useGLM,
-        predictors: predictors,
-        xmlOptions: null //xmlOptions//TODO fix services
+        predictors: predictors
+        //xmlOptions: null //xmlOptions TODO: fix issues in Spring services
       });
       logger.info('Parameters valid, testing ZooPhy Job with '+accessions.length+' accessions:\n'+zoophyJob);
       request({
