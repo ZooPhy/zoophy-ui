@@ -24,68 +24,70 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   });
 
   $scope.runJob = function() {
-    $scope.runError = null;
-    $scope.running = true;
-    $scope.success = null;
-    if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail)) {
-      var jobAccessions = [];
-      var records = RecordData.getRecords();
-      for (var i = 0; i < records.length; i++) {
-        if (records[i].includeInJob) {
-          jobAccessions.push(records[i].accession);
-        }
-      }
-      if (jobAccessions.length < 5) {
-        $scope.runError = 'Too Few Records, Minimun is 5';
-        $scope.running = false;
-      }
-      else if (jobAccessions.length > 1000) {
-        $scope.runError = 'Too Many Records, Maximum is 1000';
-        $scope.running = false;
-      }
-      else {
-        var runUri = SERVER_URI+'/job/run';
-        var email = String($scope.jobEmail);
-        var currentJobName = String($scope.jobName);
-        var glm = Boolean($scope.useDefaultGLM | $scope.customPredictors);
-        var predictors = $scope.customPredictors;
-        var chain = Number($scope.chainLength);
-        var rate = Number($scope.subSampleRate);
-        var model = String($scope.substitutionModel);
-        var jobData = {
-          replyEmail: email,
-          jobName: currentJobName,
-          accessions: jobAccessions,
-          useGLM: glm,
-          predictors: predictors,
-          xmlOptions: {
-            chainLength: chain,
-            subSampleRate: rate,
-            substitutionModel: model
+    if ($scope.running === false) {
+      $scope.runError = null;
+      $scope.running = true;
+      $scope.success = null;
+      if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail)) {
+        var jobAccessions = [];
+        var records = RecordData.getRecords();
+        for (var i = 0; i < records.length; i++) {
+          if (records[i].includeInJob) {
+            jobAccessions.push(records[i].accession);
           }
-        };
-        $http.post(runUri, jobData).then(function success(response) {
+        }
+        if (jobAccessions.length < 5) {
+          $scope.runError = 'Too Few Records, Minimun is 5';
           $scope.running = false;
-          if (response.status === 202) {
-            if (currentJobName) {
-              $scope.success = currentJobName;
+        }
+        else if (jobAccessions.length > 1000) {
+          $scope.runError = 'Too Many Records, Maximum is 1000';
+          $scope.running = false;
+        }
+        else {
+          var runUri = SERVER_URI+'/job/run';
+          var email = String($scope.jobEmail);
+          var currentJobName = String($scope.jobName);
+          var glm = Boolean($scope.useDefaultGLM | $scope.customPredictors);
+          var predictors = $scope.customPredictors;
+          var chain = Number($scope.chainLength);
+          var rate = Number($scope.subSampleRate);
+          var model = String($scope.substitutionModel);
+          var jobData = {
+            replyEmail: email,
+            jobName: currentJobName,
+            accessions: jobAccessions,
+            useGLM: glm,
+            predictors: predictors,
+            xmlOptions: {
+              chainLength: chain,
+              subSampleRate: rate,
+              substitutionModel: model
+            }
+          };
+          $http.post(runUri, jobData).then(function success(response) {
+            $scope.running = false;
+            if (response.status === 202) {
+              if (currentJobName) {
+                $scope.success = currentJobName;
+              }
+              else {
+                $scope.success = response.data.message;
+              }
             }
             else {
-              $scope.success = response.data.message;
+              $scope.runError = 'Job Validation Failed: '+response.data.error;
             }
-          }
-          else {
-            $scope.runError = 'Job Validation Failed: '+response.data.error;
-          }
-        }, function failure(response) {
-          $scope.running = false;
-          $scope.runError = 'Job Validation Failed due to Unknown Error';
-        });
+          }, function failure(response) {
+            $scope.running = false;
+            $scope.runError = 'Job Validation Failed due to Unknown Error';
+          });
+        }
       }
-    }
-    else {
-      $scope.runError = 'Invalid Email';
-      $scope.running = false;
+      else {
+        $scope.runError = 'Invalid Email';
+        $scope.running = false;
+      }
     }
   };
 
