@@ -10,6 +10,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.fluAH = 1;
   $scope.fluANs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
   $scope.fluAN = 1;
+  $scope.isH1N1 = true;
   $scope.genes = [];
   var completeGenes = "Complete";
   $scope.selectedGenes = [];
@@ -33,6 +34,10 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
 
   $scope.reset = function() {
     $scope.virus = $scope.allowed_values.viruses[0].tax_id;
+    $scope.hantaSub = 11599;
+    $scope.fluAH = 1;
+    $scope.fluAN = 1;
+    $scope.isH1N1 = true;
     $scope.host = $scope.allowed_values.hosts[0].tax_id;
     $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
     $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
@@ -48,7 +53,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.isPDMO9 = false;
   };
 
-  $scope.isH1N1 = Boolean($scope.fluAH === 1 && $scope.fluAN === 1);
+  $scope.checkH1N1 = function() {
+    $scope.isH1N1 = Boolean($scope.fluAH === 1 && $scope.fluAN === 1);
+  }
 
   $scope.updateGenes = function() {
     var virusIndex = $('#virus')[0].selectedIndex;

@@ -9,7 +9,7 @@ let request = require('request');
 const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
 
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
-const EMAIL_RE = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
 const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
 const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
 
@@ -73,8 +73,8 @@ router.post('/run', function(req, res) {
         replyEmail: email,
         jobName: jobName,
         useGLM: useGLM,
-        predictors: predictors
-        //xmlOptions: null //xmlOptions TODO: fix issues in Spring services
+        predictors: predictors,
+        xmlOptions: xmlOptions
       });
       logger.info('Parameters valid, testing ZooPhy Job with '+accessions.length+' accessions:\n'+zoophyJob);
       request({

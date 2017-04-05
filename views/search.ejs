@@ -41,13 +41,13 @@
         <label>Flu A Sub Type</label>
         <div class="col-sm-6">
           <label class="text-center">H</label>
-          <select id="flu-a-h" class="form-control" ng-model="fluAH" ng-options="h as h for h in fluAHs">
+          <select id="flu-a-h" class="form-control" ng-model="fluAH" ng-options="h as h for h in fluAHs" ng-change="checkH1N1();">
             <!-- handled by Angular -->
           </select>
         </div>
         <div class="col-sm-6">
           <label class="text-center">N</label>
-          <select id="flu-a-n" class="form-control" ng-model="fluAN" ng-options="n as n for n in fluANs">
+          <select id="flu-a-n" class="form-control" ng-model="fluAN" ng-options="n as n for n in fluANs" ng-change="checkH1N1();">
             <!-- handled by Angular -->
           </select>
         </div>

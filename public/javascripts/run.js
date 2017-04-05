@@ -2,7 +2,7 @@
 
 angular.module('ZooPhy').controller('runController', function ($scope, $http, RecordData) {
 
-  var EMAIL_RE = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  var EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
 
   $scope.numSelected = RecordData.getNumSelected();
   $scope.jobEmail = null;
@@ -16,6 +16,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.subSampleRate = 1000;
   $scope.availableModels = ['HKY'];
   $scope.substitutionModel = 'HKY';
+  $scope.availablePriors = ['Coming Soon']
+  $scope.treePrior = 'Coming Soon';
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
@@ -28,7 +30,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.runError = null;
       $scope.running = true;
       $scope.success = null;
-      if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail)) {
+      if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail.trim())) {
         var jobAccessions = [];
         var records = RecordData.getRecords();
         for (var i = 0; i < records.length; i++) {
@@ -46,13 +48,14 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
         }
         else {
           var runUri = SERVER_URI+'/job/run';
-          var email = String($scope.jobEmail);
-          var currentJobName = String($scope.jobName);
+          var email = String($scope.jobEmail).trim();
+          var currentJobName = String($scope.jobName).trim();
           var glm = Boolean($scope.useDefaultGLM | $scope.customPredictors);
           var predictors = $scope.customPredictors;
           var chain = Number($scope.chainLength);
           var rate = Number($scope.subSampleRate);
           var model = String($scope.substitutionModel);
+          var prior = String($scope.treePrior).trim();//TODO enable in job services 
           var jobData = {
             replyEmail: email,
             jobName: currentJobName,

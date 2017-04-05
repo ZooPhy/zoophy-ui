@@ -1,17 +1,27 @@
 <div ng-controller="resultsController" id="results" class="container" ng-show="tab === 'results'">
   <div id="results-table" class="col-sm-9">
     <h6 class="text-center">Search Returned {{results.length}} results</h6>
+    <div class="row">
+      <div class="col-sm-8">
+        <h6 ng-hide="generating">Download All Search Results as <button class="btn btn-xs btn-default" ng-click="setupDownload('csv');">CSV</button> or <button ng-click="setupDownload('fasta');" class="btn btn-xs btn-default">FASTA</button>
+          <a class="results-link" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyData.{{downloadFormat}}" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a><span class="text-danger results-link" ng-show="downloadError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{downloadError}}</span></h6>
+        <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
+      </div>
+      <div class="col-sm-4">
+        <h6 class="text-right"><button class="btn btn-sm btn-default">Perform Random Downsampling</button></h6>
+      </div>
+    </div>
     <table st-table="displayedResults" st-safe-src="results" class="table table-striped">
     	<thead>
       	<tr>
           <th class="col-sm-1 text-center">Select All<input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
-        	<th class="col-sm-1" st-sort="accession">Accession</th>
-        	<th class="col-sm-1" st-sort="genes">Genes</th>
-        	<th class="col-sm-2 hidden-xs" st-sort="virus">Virus</th>
-        	<th class="col-sm-2" st-sort="date">Date</th>
-        	<th class="col-sm-2 hidden-xs" st-sort="host">Host</th>
-          <th class="col-sm-2" st-sort="country">Country</th>
-          <th class="col-sm-1 hidden-xs" st-sort="segmentLength">Segment Length</th>
+        	<th class="col-sm-1" st-sort="accession"><i class="fa fa-sort" aria-hidden="true"></i> Accession</th>
+        	<th class="col-sm-1" st-sort="genes"><i class="fa fa-sort" aria-hidden="true"></i> Genes</th>
+        	<th class="col-sm-2 hidden-xs" st-sort="virus"><i class="fa fa-sort" aria-hidden="true"></i> Virus</th>
+        	<th class="col-sm-2" st-sort="luceneDate"><i class="fa fa-sort" aria-hidden="true"></i> Date</th>
+        	<th class="col-sm-2 hidden-xs" st-sort="host"><i class="fa fa-sort" aria-hidden="true"></i> Host</th>
+          <th class="col-sm-2" st-sort="country"><i class="fa fa-sort" aria-hidden="true"></i> Country</th>
+          <th class="col-sm-1 hidden-xs" st-sort="segmentLength"><i class="fa fa-sort" aria-hidden="true"></i> Length</th>
       	</tr>
     	</thead>
     	<tbody>
@@ -45,13 +55,6 @@
           </div>
         </td>
 			</tr>
-      <tr>
-        <td colspan="8">
-          <p ng-hide="generating">Download Search Results as <button class="btn btn-xs btn-default" ng-click="setupDownload('csv');">CSV</button> or <button ng-click="setupDownload('fasta');" class="btn btn-xs btn-default">FASTA</button>
-            <a class="results-link" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyData.{{downloadFormat}}" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a><span class="text-danger results-link" ng-show="downloadError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{downloadError}}</span></p>
-          <p ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </p>
-        </td>
-      </tr>
 		</tfoot>
     </table>
   </div>

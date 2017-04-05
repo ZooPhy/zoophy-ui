@@ -49,7 +49,7 @@
   <div class="row">
     <h3 class="pushed-down text-center">Advanced Parameters</h3>
     <div id="xml-options">
-      <div class="col-sm-2 col-sm-offset-3">
+      <div class="col-sm-2 col-sm-offset-2">
         <label>Substition Model</label>
         <select class="form-control" ng-model="substitutionModel" ng-options="model as model for model in availableModels">
           <!-- handled by Angular -->
@@ -63,10 +63,16 @@
         <label>Sample Rate</label>
         <input type="number" class="form-control" ng-model="subSampleRate"></input>
       </div>
+      <div class="col-sm-2">
+        <label>Tree Prior</label>
+        <select class="form-control" ng-model="treePrior" ng-options="prior as prior for prior in availablePriors">
+          <!-- handled by Angular -->
+        </select>
+      </div>
     </div>
   </div>
-  <div class="col-xs-10 col-xs-offset-1">
-    <button class="btn btn-primary pull-right" ng-click="runJob();">Start ZooPhy</button>
+  <div class="col-xs-10 col-xs-offset-1 pushed-down">
+    <button class="btn btn-primary pull-right" ng-click="runJob();" ng-disabled="running">Start ZooPhy</button>
   </div>
 
 </div>
