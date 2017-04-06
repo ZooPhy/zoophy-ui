@@ -10,6 +10,11 @@
     </div>
   </div>
   <div class="row">
+    <div id="run-warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center" ng-show="warning">
+      <i class="fa fa-info-circle" aria-hidden="true"></i> {{warning}}
+    </div>
+  </div>
+  <div class="row">
     <div id="run-success-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center" ng-show="success">
       <i class="fa fa-check-circle" aria-hidden="true"></i> Successfully Started ZooPhy Job {{success}}
     </div>

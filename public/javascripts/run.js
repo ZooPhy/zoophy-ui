@@ -16,12 +16,20 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.subSampleRate = 1000;
   $scope.availableModels = ['HKY'];
   $scope.substitutionModel = 'HKY';
-  $scope.availablePriors = ['Coming Soon']
-  $scope.treePrior = 'Coming Soon';
+  $scope.availablePriors = ['Constant']
+  $scope.treePrior = 'Constant';
+  $scope.warning = 'Too Few Records, Minimum is 5';
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
+      $scope.warning = null;
       $scope.numSelected = newValue;
+      if ($scope.numSelected < 5) {
+        $scope.warning = 'Too Few Records, Minimum is 5';
+      }
+      else if ($scope.numSelected > 1000) {
+        $scope.warning = 'Too Many Records, Maximum is 1000';
+      }
     }
   });
 
@@ -30,6 +38,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.runError = null;
       $scope.running = true;
       $scope.success = null;
+      $scope.warning = null;
       if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail.trim())) {
         var jobAccessions = [];
         var records = RecordData.getRecords();
@@ -49,13 +58,16 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
         else {
           var runUri = SERVER_URI+'/job/run';
           var email = String($scope.jobEmail).trim();
-          var currentJobName = String($scope.jobName).trim();
+          var currentJobName = null;
+          if ($scope.jobName) {
+            currentJobName = String($scope.jobName).trim();
+          }
           var glm = Boolean($scope.useDefaultGLM | $scope.customPredictors);
           var predictors = $scope.customPredictors;
           var chain = Number($scope.chainLength);
           var rate = Number($scope.subSampleRate);
           var model = String($scope.substitutionModel);
-          var prior = String($scope.treePrior).trim();//TODO enable in job services 
+          var prior = String($scope.treePrior).trim();//TODO enable in job services
           var jobData = {
             replyEmail: email,
             jobName: currentJobName,
@@ -76,6 +88,13 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
               }
               else {
                 $scope.success = response.data.message;
+              }
+              if (response.data.recordsRemoved.length > 0) {
+                var warning = response.data.recordsRemoved.length+' Incomplete Records Excluded from Job: '+response.data.recordsRemoved[0];
+                for (var i = 1; i < response.data.recordsRemoved.length; i++) {
+                  warning += ', '+response.data.recordsRemoved[i];
+                }
+                $scope.warning = warning;
               }
             }
             else {

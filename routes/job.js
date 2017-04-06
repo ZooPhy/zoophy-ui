@@ -95,8 +95,9 @@ router.post('/run', function(req, res) {
         }
         else {
           logger.info('Job validation results: ', response.statusCode, body);
-          if (response.statusCode === 200 && body === '') {
-            logger.info('Starting ZooPhy Job for: '+email);
+          let validationResults = JSON.parse(body);
+          if (response.statusCode === 200 && validationResults.error === null) {
+            logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
             request({
               url: API_URI+'/run',
               method: 'POST',
@@ -118,8 +119,11 @@ router.post('/run', function(req, res) {
                 if (response.statusCode === 202) {
                   result = {
                     status: 202,
-                    message: String(body)
+                    message: String(body),
+                    jobSize: validationResults.accessionsUsed.length,
+                    recordsRemoved: validationResults.accessionsRemoved
                   };
+                  logger.info(result)
                 }
                 else {
                   result = {
@@ -131,11 +135,11 @@ router.post('/run', function(req, res) {
               }
             });
           }
-          else if (body) {
-            logger.warn(body);
+          else if (validationResults.error) {
+            logger.warn(validationResults.error);
             result = {
               status: 200,
-              error: String(body)
+              error: String(validationResults.error)
             };
             res.status(result.status).send(result);
           }
