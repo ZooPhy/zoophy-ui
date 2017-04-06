@@ -1,7 +1,7 @@
 <div ng-controller="resultsController" id="results" class="container" ng-show="tab === 'results'">
   <div id="results-table" class="col-sm-9">
     <h5 class="text-center">Search Returned {{results.length}} results</h5>
-    <h6 class="text-center"><i class="fa fa-info" aria-hidden="true"></i> ZooPhy Jobs must contain 5 to 1000 Records</h6>
+    <h6 class="text-center"><i class="fa fa-info-circle" aria-hidden="true"></i> ZooPhy Jobs must contain 5 to 1000 Records</h6>
     <div class="row">
       <div class="col-sm-8">
         <h6 ng-hide="generating">Download All Search Results as <button class="btn btn-xs btn-default" ng-click="setupDownload('csv');">CSV</button> or <button ng-click="setupDownload('fasta');" class="btn btn-xs btn-default">FASTA</button>
@@ -9,7 +9,7 @@
         <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
       </div>
       <div class="col-sm-4">
-        <h6 class="text-right"><button class="btn btn-sm btn-default">Perform Random Downsampling</button></h6>
+        <h6 class="text-right"><button disabled class="btn btn-sm btn-default">Perform Random Downsampling</button></h6>
       </div>
     </div>
     <table st-table="displayedResults" st-safe-src="results" class="table table-striped">
