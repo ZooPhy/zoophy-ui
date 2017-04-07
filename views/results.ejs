@@ -9,7 +9,7 @@
         <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
       </div>
       <div class="col-sm-4">
-        <h6 class="text-right"><button disabled class="btn btn-sm btn-default">Perform Random Downsampling</button></h6>
+        <h6 class="text-right"><button class="btn btn-sm btn-default" ng-click="downSamplePercent(20);">Perform 20% Random Downsampling</button></h6>
       </div>
     </div>
     <table st-table="displayedResults" st-safe-src="results" class="table table-striped">

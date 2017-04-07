@@ -66,7 +66,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
   $scope.goToRun = function() {
     $scope.$parent.switchTabs('run');
-  }
+  };
 
   $scope.setupDownload = function(format) {
     if (!$scope.generating) {
@@ -104,6 +104,36 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.downloadError = 'Invalid Download Format';
       }
     }
+  };
+
+  $scope.downSamplePercent = function(percentage) {
+    var numToSelect =  Math.floor($scope.results.length*(percentage/100.0));
+    $scope.downSampleAmount(numToSelect);
+  };
+
+  $scope.downSampleAmount = function(amount) {
+    console.log('random sampling '+amount+' records...');
+    var recs = $scope.results.slice();
+    var samples = [];
+    var index = -1;
+    while (amount > 0 && recs.length > 0) {
+      index = Math.floor(Math.random()*(recs.length));
+      samples.push(recs[index].accession);
+      recs.splice(index, 1);
+      amount--;
+    }
+    $scope.numSelected = 0;
+    for (var i = 0; i < $scope.results.length; i++) {
+      if (samples.indexOf($scope.results[i].accession) > -1) {
+        $scope.results[i].includeInJob = true;
+        $scope.numSelected++;
+      }
+      else {
+        $scope.results[i].includeInJob = false;
+      }
+    }
+    RecordData.setNumSelected($scope.numSelected);
+    console.log('sampled '+$scope.numSelected+' records');//TODO testing
   };
 
 });
