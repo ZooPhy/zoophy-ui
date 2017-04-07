@@ -15,7 +15,7 @@
     <table st-table="displayedResults" st-safe-src="results" class="table table-striped">
     	<thead>
       	<tr>
-          <th class="col-sm-1 text-center">ALL <input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
+          <th class="col-sm-1 text-center" st-sort="includeInJob">ALL <input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
         	<th class="col-sm-1" st-sort="accession"><i class="fa fa-sort" aria-hidden="true"></i> GB ID</th>
         	<th class="col-sm-1" st-sort="genes"><i class="fa fa-sort" aria-hidden="true"></i> Genes</th>
         	<th class="col-sm-2 hidden-xs" st-sort="virus"><i class="fa fa-sort" aria-hidden="true"></i> Virus</th>

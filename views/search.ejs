@@ -98,11 +98,10 @@
   <div class="row col-xs-12 pushed-down">
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
-      <div class="col-sm-3 col-xs-6 text-center">
-        <!-- TODO -->
-        <!-- <label><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</label>
-        <input id="data-upload" type="file"> -->
-        <h6><i class="fa fa-hourglass-half" aria-hidden="true"></i> Coming Soon!</h6>
+      <div class="col-sm-6 col-xs-12 text-center">
+        <button class="btn btn-info btn-sm" ng-click="sendAccessions();"><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</button>
+        <label class="btn btn-default btn-file">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadAccessions(this.files);"></input></label>
+        {{filename}}
       </div>
     </div>
   </div>

@@ -27,6 +27,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.to = Number(new Date().getFullYear());
   $scope.minimumSequenceLength = 0;
   $scope.isPDMO9 = false;
+  $scope.filename = 'none';
+  $scope.fileToSend = null;
 
   $scope.showDetails = false;
   $scope.selectedRecord = null;
@@ -51,11 +53,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.to = Number(new Date().getFullYear());
     $scope.minimumSequenceLength = 0;
     $scope.isPDMO9 = false;
+    $scope.filename = 'none';
+    $scope.fileToSend = null;
   };
 
   $scope.checkH1N1 = function() {
     $scope.isH1N1 = Boolean($scope.fluAH === 1 && $scope.fluAN === 1);
-  }
+  };
 
   $scope.updateGenes = function() {
     var virusIndex = $('#virus')[0].selectedIndex;
@@ -240,6 +244,32 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     });
     RecordData.setNumSelected(0);
     RecordData.incrementSearchCount();
+  };
+
+  $scope.uploadAccessions = function(rawFile) {
+    console.log('uploading accession list...');
+    console.log(rawFile)
+    var newFile = rawFile[0];
+    if (newFile && newFile.size < 50000) { //5kb
+      $scope.fileToSend = newFile;
+      var filename = newFile.name;
+      if (!$scope.filename) {
+        $scope.filename = 'none';
+      }
+      else {
+        $scope.filename = String(filename).trim();
+      }
+      $scope.$apply();
+    }
+    else {
+      console.log("bad file")
+      console.log(newFile.size)
+    }
+    console.log('upload complete.');
+  };
+
+  $scope.sendAccessions = function() {
+    console.log('...');
   };
 
 });

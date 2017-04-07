@@ -70,3 +70,7 @@ input::-webkit-inner-spin-button {
 .results-link {
   margin-left: 3rem;
 }
+
+#data-upload {
+  display: none;
+}
