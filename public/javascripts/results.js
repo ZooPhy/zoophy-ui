@@ -25,6 +25,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
       $scope.groupIsSelected = false;
+      $scope.numSelected = 0;
     }
   });
 
@@ -43,9 +44,13 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.toggleRecord = function(record) {
     if (record.includeInJob) {
       $scope.numSelected--;
+      $scope.groupIsSelected = false;
     }
     else {
       $scope.numSelected++;
+      if ($scope.numSelected === $scope.results.length) {
+        $scope.groupIsSelected = true;
+      }
     }
     record.includeInJob = !record.includeInJob;
     RecordData.setNumSelected($scope.numSelected);
@@ -114,6 +119,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.downSampleAmount = function(amount) {
     console.log('random sampling '+amount+' records...');
     var recs = $scope.results.slice();
+    if (amount < recs.length) {
+      $scope.groupIsSelected = false;
+    }
     var samples = [];
     var index = -1;
     while (amount > 0 && recs.length > 0) {

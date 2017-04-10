@@ -20,6 +20,20 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.treePrior = 'Constant';
   $scope.warning = 'Too Few Records, Minimum is 5';
 
+  $scope.reset = function() {
+    $scope.useDefaultGLM = false;
+    $scope.customPredictors = null;
+    $scope.chainLength = 10000000;
+    $scope.subSampleRate = 1000;
+    $scope.substitutionModel = 'HKY';
+    $scope.treePrior = 'Constant';
+    $scope.jobName = null;
+    $scope.runError = null;
+    $scope.running = false;
+    $scope.success = null;
+    $scope.warning = 'Too Few Records, Minimum is 5';
+  };
+
   $scope.$watch(function () {return RecordData.getNumSelected();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
       $scope.warning = null;
@@ -30,6 +44,12 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       else if ($scope.numSelected > 1000) {
         $scope.warning = 'Too Many Records, Maximum is 1000';
       }
+    }
+  });
+
+  $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
+    if (newValue !== oldValue) {
+      $scope.reset();
     }
   });
 
