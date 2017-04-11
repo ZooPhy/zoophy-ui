@@ -9,6 +9,13 @@ let GenBankRecord = require('../bin/genbank_record');
 let fs = require('fs');
 let uuid = require('uuid/v4');
 let path = require('path');
+let multer  = require('multer');
+let upload = multer({
+  dest: 'uploads/',
+  limits: {
+    fileSize: 50000 //5KB
+  }
+});
 
 const ALLOWED_VALUES = require('../bin/allowed_values');
 const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
@@ -17,6 +24,7 @@ const DOWNLOAD_FOLDER = path.join(__dirname, '../public/downloads/');
 const QUERY_RE = /^(\w| |:|\[|\]|\(|\)){5,5000}?$/;
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
 const DOWNLOAD_FORMAT_RE = /^(csv)|(fasta)$/;
+const ACCESSION_UPLOAD_RE = /^(\w|-|\.){1,250}?\.txt$/;
 
 let router = express.Router();
 
@@ -243,6 +251,21 @@ router.post('/download/:format', function(req, res) {
     result = {
       status: 500,
       error: 'Failed to retrieve Download from ZooPhy API'
+    };
+    res.status(result.status).send(result);
+  }
+});
+
+router.post('/upload', upload.single('accessionFile'), function (req, res) {
+  let result;
+  try {
+    rest.sendStatus(200);//TODO handle file
+  }
+  catch (err) {
+    logger.error('Failed to proccess Accession upload '+err);
+    result = {
+      status: 500,
+      error: 'Failed to proccess Accession upload'
     };
     res.status(result.status).send(result);
   }

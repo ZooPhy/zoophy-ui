@@ -34,6 +34,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.selectedRecord = null;
   $scope.searchError = null;
 
+  var fileRegex = /^(\w|-|\.){1,250}?\.txt$/;
+
   $scope.reset = function() {
     $scope.virus = $scope.allowed_values.viruses[0].tax_id;
     $scope.hantaSub = 11599;
@@ -247,25 +249,23 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   };
 
   $scope.uploadAccessions = function(rawFile) {
-    console.log('uploading accession list...');
+    $scope.searchError = null;
     console.log(rawFile)
     var newFile = rawFile[0];
     if (newFile && newFile.size < 50000) { //5kb
-      $scope.fileToSend = newFile;
-      var filename = newFile.name;
-      if (!$scope.filename) {
-        $scope.filename = 'none';
+      var filename = newFile.name.trim();
+      if (fileRegex.test(filename)) {
+        $scope.fileToSend = newFile;
+        $scope.filename = String(filename).trim();
+        $scope.$apply();
       }
       else {
-        $scope.filename = String(filename).trim();
+        $scope.searchError = 'Invalid File Name. Must be .txt file.';
       }
-      $scope.$apply();
     }
     else {
-      console.log("bad file")
-      console.log(newFile.size)
+      $scope.searchError = 'Invalid File Size. Limit is 5kb.';
     }
-    console.log('upload complete.');
   };
 
   $scope.sendAccessions = function() {
