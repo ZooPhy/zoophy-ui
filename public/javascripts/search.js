@@ -269,7 +269,18 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   };
 
   $scope.sendAccessions = function() {
-    console.log('...');
+    console.log('sending file...');
+    var form = new FormData();
+    var uri = SERVER_URI+'/upload';
+    form.append('accessionFile', $scope.fileToSend);
+    $http.post(uri, form, {
+        headers: {'Content-Type': undefined}
+    }).then(function (response) {
+      console.log(response.body);
+      if (response.status === 200) {
+        console.log('all good')
+      }
+    });
   };
 
 });

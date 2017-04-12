@@ -25,6 +25,7 @@ const QUERY_RE = /^(\w| |:|\[|\]|\(|\)){5,5000}?$/;
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
 const DOWNLOAD_FORMAT_RE = /^(csv)|(fasta)$/;
 const ACCESSION_UPLOAD_RE = /^(\w|-|\.){1,250}?\.txt$/;
+const ACCESSION_VERSION_RE = /^([A-Z]|\d|_|\.){5,10}?\.\d{1,2}?$/;
 
 let router = express.Router();
 
@@ -259,7 +260,62 @@ router.post('/download/:format', function(req, res) {
 router.post('/upload', upload.single('accessionFile'), function (req, res) {
   let result;
   try {
-    rest.sendStatus(200);//TODO handle file
+    if (req.file) {
+      logger.info('Processing file upload...');
+      let accessionFile = req.file;
+      if (accessionFile.mimetype === 'text/plain' && checkInput(accessionFile.originalname, 'string', ACCESSION_UPLOAD_RE)) {
+        fs.readFile(accessionFile.path, function (err, data) {
+          if (err) {
+            res.sendStatus(500);
+          }
+          else {
+            let rawAccessions = data.toString().trim().split('\n');
+            fs.unlink(accessionFile.path, function (err) {
+              if (err) {
+                logger.warn('Failed to delete valid file: '+accessionFile.path);
+              }
+              else {
+                logger.info('Successfully deleted valid file.');
+              }
+            });
+            let cleanAccessions = [];
+            let fileErrors = [];
+            for (let i = 0; i < rawAccessions.length; i++) {
+              if (checkInput(rawAccessions[i], 'string', ACCESSION_RE)) {
+                cleanAccessions.push(String(rawAccessions[i]));
+              }
+              else if (checkInput(rawAccessions[i], 'string', ACCESSION_VERSION_RE)) {
+                cleanAccessions.push(String(rawAccessions[i].substr(0,rawAccessions[i].indexOf('.'))));
+              }
+              else {
+                fileErrors.push(String('BAD ACCESSION IN FILE: "'+rawAccessions[i]+'" on line #'+i));
+              }
+            }
+            if (fileErrors.length > 0) {
+              res.status(400).send(fileErrors);
+            }
+            else {
+              res.sendStatus(200);
+            }
+          }
+        });
+      }
+      else {
+        logger.warn('Invalid file received. Deleting...');
+        fs.unlink(accessionFile.path, function (err) {
+          if (err) {
+            logger.error('Failed to delete invalid file: '+accessionFile.path);
+          }
+          else {
+            logger.info('Successfully deleted invalid file.');
+          }
+        });
+        res.sendStatus(400);
+      }
+    }
+    else {
+      res.sendStatus(404);
+    }
   }
   catch (err) {
     logger.error('Failed to proccess Accession upload '+err);
