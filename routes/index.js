@@ -9,7 +9,7 @@ let GenBankRecord = require('../bin/genbank_record');
 let fs = require('fs');
 let uuid = require('uuid/v4');
 let path = require('path');
-let multer  = require('multer');
+let multer = require('multer');
 let upload = multer({
   dest: 'uploads/',
   limits: {
@@ -22,10 +22,11 @@ const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
 const DOWNLOAD_FOLDER = path.join(__dirname, '../public/downloads/');
 
 const QUERY_RE = /^(\w| |:|\[|\]|\(|\)){5,5000}?$/;
-const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
+const ACCESSION_RE = /^([A-Z]|\d){5,10}?$/;
 const DOWNLOAD_FORMAT_RE = /^(csv)|(fasta)$/;
 const ACCESSION_UPLOAD_RE = /^(\w|-|\.){1,250}?\.txt$/;
 const ACCESSION_VERSION_RE = /^([A-Z]|\d|_|\.){5,10}?\.\d{1,2}?$/;
+const UPLOAD_QUERY_LIMIT = 2500;
 
 let router = express.Router();
 
@@ -266,7 +267,12 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
       if (accessionFile.mimetype === 'text/plain' && checkInput(accessionFile.originalname, 'string', ACCESSION_UPLOAD_RE)) {
         fs.readFile(accessionFile.path, function (err, data) {
           if (err) {
-            res.sendStatus(500);
+            logger.error(error);
+            result = {
+              status: 500,
+              error: String(error)
+            };
+            res.status(result.status).send(result);
           }
           else {
             let rawAccessions = data.toString().trim().split('\n');
@@ -280,7 +286,7 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
             });
             let cleanAccessions = [];
             let fileErrors = [];
-            for (let i = 0; i < rawAccessions.length; i++) {
+            for (let i = 0; i < rawAccessions.length && i < UPLOAD_QUERY_LIMIT; i++) {
               if (checkInput(rawAccessions[i], 'string', ACCESSION_RE)) {
                 cleanAccessions.push(String(rawAccessions[i]));
               }
@@ -288,14 +294,52 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
                 cleanAccessions.push(String(rawAccessions[i].substr(0,rawAccessions[i].indexOf('.'))));
               }
               else {
-                fileErrors.push(String('BAD ACCESSION IN FILE: "'+rawAccessions[i]+'" on line #'+i));
+                fileErrors.push(String('"'+rawAccessions[i]+'" on line #'+i));
               }
             }
             if (fileErrors.length > 0) {
-              res.status(400).send(fileErrors);
+              let humanizedErrors = 'Invalid Accesion(s): '+fileErrors[0];
+              for (let i = 1; i < fileErrors.length; i++) {
+                humanizedErrors += ', '+fileErrors[i];
+              }
+              logger.warn(humanizedErrors.trim());
+              result = {
+                status: 400,
+                error: humanizedErrors.trim()
+              };
+              res.status(result.status).send(result);
             }
             else {
-              res.sendStatus(200);
+              request({
+                url: API_URI+'/search/accessions',
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cleanAccessions)
+              }, function(error, response, body) {
+                if (error) {
+                  logger.error(error);
+                  result = {
+                    status: 500,
+                    error: String(error)
+                  };
+                  res.status(result.status).send(result);
+                }
+                else {
+                  let rawRecords = JSON.parse(body);
+                  let records = [];
+                  for (let i = 0; i < rawRecords.length; i++) {
+                    let record = new GenBankRecord.LuceneRecord(rawRecords[i]);
+                    records.push(record);
+                  }
+                  result = {
+                    status: 200,
+                    records: records
+                  };
+                  res.status(result.status).send(result);
+                }
+              });   
             }
           }
         });
@@ -310,11 +354,20 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
             logger.info('Successfully deleted invalid file.');
           }
         });
-        res.sendStatus(400);
+        result = {
+          status: 400,
+          error: 'Invalid File'
+        };
+        res.status(result.status).send(result);
       }
     }
     else {
-      res.sendStatus(404);
+      logger.error('Missing Accession File');
+      result = {
+        status: 500,
+        error: 'Missing Accession File'
+      };
+      res.status(result.status).send(result);
     }
   }
   catch (err) {

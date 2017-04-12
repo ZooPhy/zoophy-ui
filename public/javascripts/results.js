@@ -117,7 +117,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   };
 
   $scope.downSampleAmount = function(amount) {
-    console.log('random sampling '+amount+' records...');
     var recs = $scope.results.slice();
     if (amount < recs.length) {
       $scope.groupIsSelected = false;
@@ -141,7 +140,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       }
     }
     RecordData.setNumSelected($scope.numSelected);
-    console.log('sampled '+$scope.numSelected+' records');//TODO testing
   };
 
 });

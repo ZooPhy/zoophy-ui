@@ -250,7 +250,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
 
   $scope.uploadAccessions = function(rawFile) {
     $scope.searchError = null;
-    console.log(rawFile)
     var newFile = rawFile[0];
     if (newFile && newFile.size < 50000) { //5kb
       var filename = newFile.name.trim();
@@ -269,18 +268,33 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   };
 
   $scope.sendAccessions = function() {
-    console.log('sending file...');
-    var form = new FormData();
-    var uri = SERVER_URI+'/upload';
-    form.append('accessionFile', $scope.fileToSend);
-    $http.post(uri, form, {
-        headers: {'Content-Type': undefined}
-    }).then(function (response) {
-      console.log(response.body);
-      if (response.status === 200) {
-        console.log('all good')
-      }
-    });
+    $scope.searchError = null;
+    if ($scope.fileToSend) {
+      var form = new FormData();
+      var uri = SERVER_URI+'/upload';
+      form.append('accessionFile', $scope.fileToSend);
+      $http.post(uri, form, {
+          headers: {'Content-Type': undefined}
+      }).then(function (response) {
+        RecordData.setRecords(response.data.records);
+        if (response.data.records.length > 0) {
+          $scope.$parent.switchTabs('results');
+        }
+        else {
+          $scope.searchError = 'Search returned 0 results.';
+        }
+      }, function(error) {
+        if (error.status !== 500) {
+          $scope.searchError = error.data.error;
+        }
+        else {
+          $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
+        }
+      });
+    }
+    else {
+      $scope.searchError = 'No Accession File Selected';
+    }
   };
 
 });
