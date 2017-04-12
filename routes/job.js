@@ -23,6 +23,8 @@ const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
 const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
 const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
 const PREDICTOR_FILE_RE = /^(\w|-|\.){1,250}?\.tsv$/;
+const STATE_RE = /^(\w){1,255}?$/;//TODO
+const PREDICTOR_RE = /^(\w){1,255}?$/;//TODO
 
 let router = express.Router();
 
@@ -70,8 +72,22 @@ router.post('/run', function(req, res) {
     }
     let useGLM = Boolean(req.body.useGLM === true);
     let predictors = null;
-    if (useGLM && req.body.predictors) {
-      //TODO check predictors
+    if (useGLM && req.body.predictors !== undefined && req.body.predictors !== null) {
+      logger.info('Job is using Custom Predictors');
+      let predictorsAreValid = true;
+      for (let state in req.body.predictors) {
+        if (req.body.predictors.hasOwnProperty(state)) {
+          if (!validatePredictor(state, req.body.predictors[state])) {
+            predictorsAreValid = false;
+          }
+        }
+      }
+      if (predictorsAreValid) {
+        predictors = req.body.predictors;
+      }
+      else {
+        jobErrors += 'Invalid Custom Job Predictors, ';
+      }
     }
     let xmlOptions = {
       chainLength: Number(req.body.xmlOptions.chainLength),
@@ -187,7 +203,7 @@ router.post('/run', function(req, res) {
   }
 });
 
-router.post('/upload', upload.single('predictorsBatchFile'), function (req, res) {
+router.post('/predictors', upload.single('predictorsBatchFile'), function (req, res) {
   let result;
   try {
     logger.info('Setting Predictors...');
@@ -216,12 +232,13 @@ router.post('/upload', upload.single('predictorsBatchFile'), function (req, res)
               }
             });
             let predictors = {};
-            let predictorNames = [];
+            const predictorNames = rawPredictorLines[0].trim().split("\t");
             for (let i = 1; i < rawPredictorLines.length; i++) {
-              const state = String(rawPredictorLines[i][0].trim());
+              let stateLine = rawPredictorLines[i].trim().split("\t");
+              const state = String(stateLine[0].trim());
               let statePredictors = [];
-              for (let j = 1; j < rawPredictorLines[i].length; j++) {
-                let predictor = new GLMPredictor(state, predictorNames[j], rawPredictorLines[i][j]);
+              for (let j = 1; j < stateLine.length; j++) {
+                let predictor = new GLMPredictor(state, predictorNames[j], stateLine[j]);
                 statePredictors.push(predictor);
               }
               predictors[state] = statePredictors;
@@ -269,5 +286,16 @@ router.post('/upload', upload.single('predictorsBatchFile'), function (req, res)
     res.status(result.status).send(result);
   }
 });
+
+function validatePredictor(state, predictor) {
+  try {
+    console.log("Validaing:\t", state, "\n", predictor);//TESTING
+    //TODO actual validation
+    return true;
+  }
+  catch (err) {
+    return false;
+  }
+}
 
 module.exports = router;

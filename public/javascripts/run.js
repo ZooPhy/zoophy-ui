@@ -3,6 +3,7 @@
 angular.module('ZooPhy').controller('runController', function ($scope, $http, RecordData) {
 
   var EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
+  var PREDICTOR_FILE_RE = /^(\w|-|\.){1,250}?\.tsv$/;
 
   $scope.numSelected = RecordData.getNumSelected();
   $scope.jobEmail = null;
@@ -19,6 +20,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.availablePriors = ['Constant']
   $scope.treePrior = 'Constant';
   $scope.warning = 'Too Few Records, Minimum is 5';
+  $scope.fileToSend = null;
+  $scope.filename = 'none';
 
   $scope.reset = function() {
     $scope.useDefaultGLM = false;
@@ -32,12 +35,15 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.running = false;
     $scope.success = null;
     $scope.warning = 'Too Few Records, Minimum is 5';
+    $scope.fileToSend = null;
+    $scope.filename = 'none';
   };
 
-  $scope.$watch(function () {return RecordData.getNumSelected();}, function (newValue, oldValue) {
+  $scope.$watch(function () {return RecordData.getNumSelected();}, function(newValue, oldValue) {
     if (newValue !== oldValue) {
       $scope.warning = null;
       $scope.runError = null;
+      $scope.success = null;
       $scope.numSelected = newValue;
       if ($scope.numSelected < 5) {
         $scope.warning = 'Too Few Records, Minimum is 5';
@@ -45,6 +51,13 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       else if ($scope.numSelected > 1000) {
         $scope.warning = 'Too Many Records, Maximum is 1000';
       }
+    }
+  });
+
+  $scope.$watch($scope.runError, function(newValue, oldValue) {
+    if (newValue) {
+      $scope.warning = null;
+      $scope.success = null;
     }
   });
 
@@ -83,7 +96,9 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
           if ($scope.jobName) {
             currentJobName = String($scope.jobName).trim();
           }
-          var glm = Boolean($scope.useDefaultGLM | $scope.customPredictors);
+          console.log($scope.customPredictors);
+          var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
+          var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
           var predictors = $scope.customPredictors;
           var chain = Number($scope.chainLength);
           var rate = Number($scope.subSampleRate);
@@ -101,6 +116,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
               substitutionModel: model
             }
           };
+          console.log(jobData);
           $http.post(runUri, jobData).then(function success(response) {
             $scope.running = false;
             if (response.status === 202) {
@@ -131,6 +147,54 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
         $scope.runError = 'Invalid Email';
         $scope.running = false;
       }
+    }
+  };
+
+  $scope.uploadPredictors = function(rawFile) {
+    $scope.runError = null;
+    $scope.warning = null;
+    $scope.success = null;
+    var newFile = rawFile[0];
+    if (newFile && newFile.size < 500000) { //50kb
+      var filename = newFile.name.trim();
+      if (PREDICTOR_FILE_RE.test(filename)) {
+        $scope.fileToSend = newFile;
+        $scope.filename = String(filename).trim();
+      }
+      else {
+        $scope.runError = 'Invalid File Name. Must be .tsv file.';
+      }
+    }
+    else {
+      $scope.runError = 'Invalid File Size. Limit is 50kb.';
+    }
+    $scope.$apply();
+  };
+
+  $scope.setPredictors = function() {
+    $scope.runError = null;
+    $scope.warning = null;
+    $scope.success = null;
+    if ($scope.fileToSend) {
+      var form = new FormData();
+      var uri = SERVER_URI+'/job/predictors';
+      form.append('predictorsBatchFile', $scope.fileToSend);
+      $http.post(uri, form, {
+          headers: {'Content-Type': undefined}
+      }).then(function (response) {
+        $scope.customPredictors = response.data.predictors;
+        console.log($scope.customPredictors);
+      }, function(error) {
+        if (error.status !== 500) {
+          $scope.runError = error.data.error;
+        }
+        else {
+          $scope.runError = 'Upload Failed on Server.';
+        }
+      });
+    }
+    else {
+      $scope.runError = 'No Predictor File Selected';
     }
   };
 
