@@ -10,12 +10,13 @@ let fs = require('fs');
 let uuid = require('uuid/v4');
 let path = require('path');
 let multer = require('multer');
-let upload = multer({
+const multerOptions = {
   dest: 'uploads/',
   limits: {
     fileSize: 50000 //5KB
   }
-});
+};
+let upload = multer(multerOptions);
 
 const ALLOWED_VALUES = require('../bin/allowed_values');
 const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
@@ -262,7 +263,7 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
   let result;
   try {
     if (req.file) {
-      logger.info('Processing file upload...');
+      logger.info('Processing Accession file upload...');
       let accessionFile = req.file;
       if (accessionFile.mimetype === 'text/plain' && checkInput(accessionFile.originalname, 'string', ACCESSION_UPLOAD_RE)) {
         fs.readFile(accessionFile.path, function (err, data) {
@@ -364,7 +365,7 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
     else {
       logger.error('Missing Accession File');
       result = {
-        status: 500,
+        status: 400,
         error: 'Missing Accession File'
       };
       res.status(result.status).send(result);

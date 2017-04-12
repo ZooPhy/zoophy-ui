@@ -5,6 +5,16 @@ let express = require('express');
 let checkInput = require('../bin/validator_tool').checkInput;
 let logger = require('../bin/logger_tool');
 let request = require('request');
+let fs = require('fs');
+let multer = require('multer');
+const multerOptions = {
+  dest: 'uploads/',
+  limits: {
+    fileSize: 50000 //50KB
+  }
+};
+let upload = multer(multerOptions);
+let GLMPredictor = require('../bin/glm_predictor');
 
 const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
 
@@ -12,6 +22,7 @@ const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
 const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
 const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
 const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
+const PREDICTOR_FILE_RE = /^(\w|-|\.){1,250}?\.tsv$/;
 
 let router = express.Router();
 
@@ -171,6 +182,89 @@ router.post('/run', function(req, res) {
     result = {
       status: 500,
       error: 'Failed to start ZooPhy Job'
+    };
+    res.status(result.status).send(result);
+  }
+});
+
+router.post('/upload', upload.single('predictorsBatchFile'), function (req, res) {
+  let result;
+  try {
+    logger.info('Setting Predictors...');
+    if (req.file) {
+      logger.info('Processing Predictor file upload...');
+      let predictorFile = req.file;
+      if (predictorFile.mimetype === 'text/tab-separated-values' && (checkInput(predictorFile.originalname, 'string', PREDICTOR_FILE_RE))) {
+        fs.readFile(predictorFile.path, function (err, data) {
+          if (err) {
+            logger.error(error);
+            result = {
+              status: 500,
+              error: String(error)
+            };
+            res.status(result.status).send(result);
+          }
+          else {
+            let rawPredictorLines = data.toString().trim().split('\n');
+            logger.info('Deleting valid file...');
+            fs.unlink(predictorFile.path, function (err) {
+              if (err) {
+                logger.warn('Failed to delete valid file: '+predictorFile.path);
+              }
+              else {
+                logger.info('Successfully deleted valid file.');
+              }
+            });
+            let predictors = {};
+            let predictorNames = [];
+            for (let i = 1; i < rawPredictorLines.length; i++) {
+              const state = String(rawPredictorLines[i][0].trim());
+              let statePredictors = [];
+              for (let j = 1; j < rawPredictorLines[i].length; j++) {
+                let predictor = new GLMPredictor(state, predictorNames[j], rawPredictorLines[i][j]);
+                statePredictors.push(predictor);
+              }
+              predictors[state] = statePredictors;
+            }
+            result = {
+              status: 200,
+              predictors: predictors
+            };
+            res.status(result.status).send(result);
+          }
+        });
+      }
+      else {
+        logger.warn('Deleting Invalid Predictor file...');
+        fs.unlink(predictorFile.path, function (err) {
+          if (err) {
+            logger.error('Failed to delete invalid file: '+predictorFile.path);
+          }
+          else {
+            logger.info('Successfully deleted invalid file.');
+          }
+        });
+        result = {
+          status: 400,
+          error: 'Invalid Predictor File'
+        };
+        res.status(result.status).send(result);
+      }
+    }
+    else {
+      logger.warn('Missing Predictor File');
+      result = {
+        status: 400,
+        error: 'Missing Predictor File'
+      };
+      res.status(result.status).send(result);
+    }
+  }
+  catch (err) {
+    logger.error('Failed to set Predictors: '+err);
+    result = {
+      status: 500,
+      error: 'Failed to set Predictors'
     };
     res.status(result.status).send(result);
   }

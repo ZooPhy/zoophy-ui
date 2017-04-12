@@ -37,6 +37,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.$watch(function () {return RecordData.getNumSelected();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
       $scope.warning = null;
+      $scope.runError = null;
       $scope.numSelected = newValue;
       if ($scope.numSelected < 5) {
         $scope.warning = 'Too Few Records, Minimum is 5';
