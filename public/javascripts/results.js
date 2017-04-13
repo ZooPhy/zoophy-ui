@@ -26,6 +26,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if (newValue !== oldValue) {
       $scope.groupIsSelected = false;
       $scope.numSelected = 0;
+      $scope.downloadLink = null;
+      $scope.generating = false;
+      $scope.downloadFormat = null;
+      $scope.downloadError = null;
     }
   });
 

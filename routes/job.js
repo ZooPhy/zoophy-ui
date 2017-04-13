@@ -123,7 +123,7 @@ router.post('/run', function(req, res) {
         else {
           let validationResults = JSON.parse(body);
           if (response.statusCode === 200 && validationResults.error === null) {
-            logger.warn('Accessions removed in job validatin: '+validationResults.accessionsRemoved);
+            logger.warn('Accessions removed in job validation: '+validationResults.accessionsRemoved);
             logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
             request({
               url: API_URI+'/run',
