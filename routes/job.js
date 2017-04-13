@@ -121,9 +121,9 @@ router.post('/run', function(req, res) {
           res.status(result.status).send(result);
         }
         else {
-          logger.info('Job validation results: ', response.statusCode, body);
           let validationResults = JSON.parse(body);
           if (response.statusCode === 200 && validationResults.error === null) {
+            logger.warn('Accessions removed in job validatin: '+validationResults.accessionsRemoved);
             logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
             request({
               url: API_URI+'/run',
@@ -287,15 +287,24 @@ router.post('/predictors', upload.single('predictorsBatchFile'), function (req, 
   }
 });
 
-function validatePredictor(state, predictor) {
+function validatePredictor(state, predictors) {
   try {
-    console.log("Validaing:\t", state, "\n", predictor);//TESTING
-    //TODO actual validation
-    return true;
+    if ((predictors instanceof Array) && checkInput(state, 'string', STATE_RE)) {
+      for (let i = 0; i < predictors.length; i++) {
+        let predictor = predictors[i];
+        if (!(typeof predictor === 'object' && Object.keys(predictor).length === 4 && predictor.state === state && checkInput(predictor.name, 'string', PREDICTOR_RE) && checkInput(predictor.value, 'number', null) && predictor.year === null)) {
+          return false;
+        }
+      }
+      return true;
+    }
+    else {
+      return false;
+    }
   }
   catch (err) {
     return false;
   }
-}
+};
 
 module.exports = router;
