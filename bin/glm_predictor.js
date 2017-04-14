@@ -3,8 +3,8 @@
 class GLMPredictor {
     
     constructor(state, name, value) {
-        this.state = String(state);
-        this.name = String(name);
+        this.state = String(state).trim();
+        this.name = String(name).trim();
         this.value = Number(value);
         this.year = null;
     };

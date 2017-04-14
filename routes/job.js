@@ -104,9 +104,8 @@ router.post('/run', function(req, res) {
         xmlOptions: xmlOptions
       });
       logger.info('Parameters valid, testing ZooPhy Job with '+accessions.length+' accessions:\n'+zoophyJob);
-      request({
+      request.post({
         url: API_URI+'/validate',
-        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -125,9 +124,8 @@ router.post('/run', function(req, res) {
           if (response.statusCode === 200 && validationResults.error === null) {
             logger.warn('Accessions removed in job validation: '+validationResults.accessionsRemoved);
             logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
-            request({
+            request.post({
               url: API_URI+'/run',
-              method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
               },

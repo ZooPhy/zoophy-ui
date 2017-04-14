@@ -7,6 +7,7 @@ let assert = require('chai').assert;
 let helperData = require('./helper_data');
 
 let GenBankRecord = require('../bin/genbank_record');
+let GLMPredictor = require('../bin/glm_predictor');
 let checkInput = require('../bin/validator_tool').checkInput;
 let redisTool = require('../bin/redis_tool');
 
@@ -42,6 +43,19 @@ describe('GebBankRecord Tests', function() {
     assert.isString(dbRecord.genes, 'Should contain String of Genes');
     assert.strictEqual('NS', dbRecord.genes , 'Should contain correct Gene names');
     assert.strictEqual('Influenza A virus (A/Maryland/02/2017(H1N1)) nuclear export protein (NEP) and nonstructural protein 1 (NS1) genes, complete cds.', dbRecord.definition , 'Should contain correct Definition');
+    done();
+  });
+});
+
+describe ('GLM Predictor Tests', function() {
+  it('Should create valid GLM Predictor', function(done) {
+    let rawPredictor = helperData.predictor;
+    let glmPredictor = new GLMPredictor(rawPredictor.state, rawPredictor.name, rawPredictor.value);
+    assert.isNotNull(glmPredictor, 'Created Predictor');
+    assert.strictEqual('az', glmPredictor.state, 'Should contain correct State');
+    assert.strictEqual('SampleSize', glmPredictor.name, 'Should contain correct Name');
+    assert.strictEqual(44, glmPredictor.value, 'Should contain correct Value');
+    assert.isNull(glmPredictor.year, 'Should contain Null Year');
     done();
   });
 });

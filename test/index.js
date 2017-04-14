@@ -5,6 +5,7 @@ let app = require('../app');
 let request = require('supertest');
 let assert = require('chai').assert;
 const allowedValues = require('../bin/allowed_values');
+let sinon = require('sinon');
 
 describe('Get Record', function() {
   it('Should require Accession', function(done) {
@@ -125,5 +126,23 @@ describe('Search', function() {
         assert.strictEqual(false, indexRecord.includeInJob, 'Should not be included in Job');
         done();
       });
+  });
+});
+
+describe('File Upload and Download tests', function(done) {
+  it('Should download CSV file', function(done) {
+    assert.fail('Empyt Test', 'Real Test', 'Need to write CSV test');
+    //TODO
+    done();
+  });
+  it('Should download FASTA file', function(done) {
+    assert.fail('Empyt Test', 'Real Test', 'Need to write FASTA test');
+    //TODO
+    done();
+  });
+  it('Should search Accessions list text file', function(done) {
+    assert.fail('Empyt Test', 'Real Test', 'Need to write Accessions list test');
+    //TODO
+    done();
   });
 });

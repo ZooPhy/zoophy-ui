@@ -72,9 +72,17 @@ const LUCENE_RECORD = {
     "publication": null
 };
 
+const PREDICTOR = {
+    state: 'az ',
+    name: ' SampleSize',
+    value: ' 44 ',
+    year: '2007'
+};
+
 const TEST_DATA = {
   luceneRecord: LUCENE_RECORD,
-  sqlRecord: SQL_RECORD
+  sqlRecord: SQL_RECORD,
+  predictor: PREDICTOR
 };
 
 module.exports = TEST_DATA;

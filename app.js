@@ -38,7 +38,7 @@ app.use(function(req, res) {
 
 logger.info('ZooPhy Started Up');
 
-request(API_URI+'/', function (error, response, body) {
+request.get(API_URI+'/', function (error, response, body) {
   if (error) {
     logger.error('ZooPhy API test failed: '+error);
   }

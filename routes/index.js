@@ -47,7 +47,7 @@ router.get('/search', function(req, res) {
       logger.info('sending query: '+query);
       query = encodeURIComponent(query.trim());
       let uri = API_URI+'/search?query='+query;
-      request(uri, function (error, response, body) {
+      request.get(uri, function (error, response, body) {
         if (error) {
           logger.error('Search failed to call ZooPhy API'+error);
           result = {
@@ -107,7 +107,7 @@ router.get('/record', function(req, res) {
       let accession = String(req.query.accession.trim());
       logger.info('Retrieving Accession: '+accession);
       let uri = API_URI+'/record?accession='+accession;
-      request(uri, function (error, response, body) {
+      request.get(uri, function (error, response, body) {
         if (error) {
           logger.error('Failed to get record from ZooPhy API'+error);
           result = {
@@ -184,9 +184,8 @@ router.post('/download/:format', function(req, res) {
           }
         }
         logger.info('Retrieving '+format+' Download for '+accessions.length+' records...');
-        request({
+        request.post({
           url: API_URI+'/download?format='+format,
-          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -311,9 +310,8 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
               res.status(result.status).send(result);
             }
             else {
-              request({
+              request.post({
                 url: API_URI+'/search/accessions',
-                method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
                 },

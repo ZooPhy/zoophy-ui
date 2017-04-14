@@ -45,7 +45,7 @@
         <input type="button" class="btn btn-sm" ng-class="glmButtonClass" ng-click="toggleDefaultGLM();" value="Default Predictors"/>
       </div>
       <div class="col-xs-3">
-        <label>Upload Custom Predictors <a href="https://github.com/djmagee5/BEAST_GLM#predictor-data-file-requirements" target="_new" class="help" data-toggle="tooltip" data-placement="top" title="tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></a></label>
+        <label>Upload Custom Predictors <a href="https://github.com/djmagee5/BEAST_GLM#predictor-data-file-requirements" target="_new" class="help" data-toggle="tooltip" data-placement="top" title="Tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></a></label>
         <div ng-hide="customPredictors">
           <input type="button" class="btn btn-info btn-sm" ng-click="setPredictors();" value="Set Predictors" ng-disabled="useDefaultGLM || !filename"/>
           <label class="btn btn-default btn-file">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadPredictors(this.files);" ng-disabled="useDefaultGLM"/></label>
