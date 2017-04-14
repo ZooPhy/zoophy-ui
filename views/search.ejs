@@ -98,7 +98,8 @@
   <div class="row col-xs-12 pushed-down">
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
-      <div class="col-sm-6 col-xs-12 text-center">
+      <div class="col-sm-6 col-xs-12 col-xs-offset-1">
+        <label>Accession List Search <span class="help-info" data-toggle="tooltip" data-placement="top" title="Line delimited text (.txt) file of up to 2500 GenBank Accessions"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
         <button class="btn btn-info btn-sm" ng-click="sendAccessions();"><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</button>
         <label class="btn btn-default btn-file">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadAccessions(this.files);"></input></label>
         {{filename}}

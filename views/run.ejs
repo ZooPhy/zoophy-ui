@@ -10,12 +10,12 @@
     </div>
   </div>
   <div class="row">
-    <div id="run-warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center" ng-show="warning">
+    <div id="run-warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center" ng-show="!(!warning || runError)">
       <i class="fa fa-info-circle" aria-hidden="true"></i> {{warning}}
     </div>
   </div>
   <div class="row">
-    <div id="run-success-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center" ng-show="success">
+    <div id="run-success-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center" ng-show="!(runError || warning || running || !success)">
       <i class="fa fa-check-circle" aria-hidden="true"></i> Successfully Started ZooPhy Job {{success}}
     </div>
   </div>
@@ -25,7 +25,7 @@
     <div class="pushed-down">
       <div class="col-sm-3 col-sm-offset-3 col-xs-6">
         <label for="jobEmail">Email:</label>
-        <div class="">
+        <div>
           <input id="jobEmail" type="email" ng-model="jobEmail" placeholder="email@domain.com" class="form-control"></input>
         </div>
       </div>
@@ -42,13 +42,18 @@
     <div id="glm-options" class="row text-center">
       <div class="col-xs-3 col-xs-offset-3">
         <label>Use Default GLM (US States ONLY)</label>
-        <input ng-model="useDefaultGLM" type="checkbox"/>
+        <input type="button" class="btn btn-sm" ng-class="glmButtonClass" ng-click="toggleDefaultGLM();" value="Default Predictors"/>
       </div>
       <div class="col-xs-3">
-        <label>Upload Custom Predictors</label>
-        <button class="btn btn-info btn-sm" ng-click="setPredictors();"><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</button>
-        <label class="btn btn-default btn-file">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadPredictors(this.files);"></input></label>
-        <br/>{{filename}}
+        <label>Upload Custom Predictors <a href="https://github.com/djmagee5/BEAST_GLM#predictor-data-file-requirements" target="_new" class="help" data-toggle="tooltip" data-placement="top" title="tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></a></label>
+        <div ng-hide="customPredictors">
+          <input type="button" class="btn btn-info btn-sm" ng-click="setPredictors();" value="Set Predictors" ng-disabled="useDefaultGLM || !filename"/>
+          <label class="btn btn-default btn-file">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadPredictors(this.files);" ng-disabled="useDefaultGLM"/></label>
+          <br/>{{filename}}
+        </div>
+        <div ng-show="customPredictors">
+          <h6 class="text-center"><i class="fa fa-check-square-o" aria-hidden="true"></i> Predictors set from {{filename}}</h6>
+        </div>
       </div>
     </div>
   </div>
@@ -78,7 +83,6 @@
     </div>
   </div>
   <div class="col-xs-10 col-xs-offset-1 pushed-down">
-    <button class="btn btn-primary pull-right" ng-click="runJob();" ng-disabled="running">Start ZooPhy</button>
+    <input type="button" class="btn btn-primary pull-right" ng-click="runJob();" ng-disabled="!jobEmail || warning || running" value="Start ZooPhy"/>
   </div>
-
 </div>

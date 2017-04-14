@@ -74,3 +74,13 @@ input::-webkit-inner-spin-button {
 #data-upload {
   display: none;
 }
+
+.help {
+  cursor: pointer; 
+  cursor: hand;
+  color: rgb(38, 50, 56) !important;
+}
+
+.help-info {
+   cursor: help;
+}

@@ -22,6 +22,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.warning = 'Too Few Records, Minimum is 5';
   $scope.fileToSend = null;
   $scope.filename = 'none';
+  $scope.glmButtonClass = null;
 
   $scope.reset = function() {
     $scope.useDefaultGLM = false;
@@ -37,6 +38,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.warning = 'Too Few Records, Minimum is 5';
     $scope.fileToSend = null;
     $scope.filename = 'none';
+    $scope.glmButtonClass = null;
   };
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function(newValue, oldValue) {
@@ -51,13 +53,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       else if ($scope.numSelected > 1000) {
         $scope.warning = 'Too Many Records, Maximum is 1000';
       }
-    }
-  });
-
-  $scope.$watch($scope.runError, function(newValue, oldValue) {
-    if (newValue) {
-      $scope.warning = null;
-      $scope.success = null;
     }
   });
 
@@ -151,8 +146,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   };
 
   $scope.uploadPredictors = function(rawFile) {
+    console.log('file selected')
     $scope.runError = null;
-    $scope.warning = null;
     $scope.success = null;
     var newFile = rawFile[0];
     if (newFile && newFile.size < 500000) { //50kb
@@ -160,6 +155,11 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       if (PREDICTOR_FILE_RE.test(filename)) {
         $scope.fileToSend = newFile;
         $scope.filename = String(filename).trim();
+        var fileUploader = $('#data-upload');
+        console.log(fileUploader)
+        // TODO reset fileUploader
+        fileUploader[0].files = null; // not working /:
+        fileUploader[0].value = null;
       }
       else {
         $scope.runError = 'Invalid File Name. Must be .tsv file.';
@@ -173,7 +173,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
 
   $scope.setPredictors = function() {
     $scope.runError = null;
-    $scope.warning = null;
     $scope.success = null;
     if ($scope.fileToSend) {
       var form = new FormData();
@@ -183,7 +182,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
           headers: {'Content-Type': undefined}
       }).then(function (response) {
         $scope.customPredictors = response.data.predictors;
-        console.log($scope.customPredictors);
       }, function(error) {
         if (error.status !== 500) {
           $scope.runError = error.data.error;
@@ -195,6 +193,20 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     }
     else {
       $scope.runError = 'No Predictor File Selected';
+    }
+  };
+
+  $scope.toggleDefaultGLM = function() {
+    $scope.useDefaultGLM = !$scope.useDefaultGLM;
+    if ($scope.useDefaultGLM) {
+      $scope.glmButtonClass = 'btn-success';
+      $scope.fileToSend = null;
+      $scope.filename = 'none';
+      $scope.customPredictors = null;
+      $scope.runError = null;
+    }
+    else {
+      $scope.glmButtonClass = null;
     }
   };
 
