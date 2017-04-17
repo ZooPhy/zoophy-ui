@@ -174,11 +174,45 @@ const ACCESSION_LIST = [
     'CY060728'
 ];
 
+const CANADA_PREDICTORS = {
+    "manitoba" : [
+        {"state": "manitoba", "name": "lat", "value": 55.000191, "year": null},
+        {"state": "manitoba", "name": "long", "value": -97.000488, "year": null},
+        {"state": "manitoba", "name": "sampleSize", "value": 8, "year": null}
+    ],
+    "saskatchewan": [
+        {"state": "saskatchewan", "name": "lat", "value": 54.000099, "year": null},
+        {"state": "saskatchewan", "name": "long", "value": -106.00099, "year": null},
+        {"state": "saskatchewan", "name": "sampleSize", "value": 7, "year": null}
+    ],
+    "ontario" : [
+        {"state": "ontario", "name": "lat", "value": 49.250141, "year": null},
+        {"state": "ontario", "name": "long", "value": -84.499832, "year": null},
+        {"state": "ontario", "name": "sampleSize", "value": 63, "year": null}
+    ],
+    "nova-scotia": [
+        {"state": "nova-scotia", "name": "lat", "value": 45.000149, "year": null},
+        {"state": "nova-scotia", "name": "long", "value": -62.99865, "year": null},
+        {"state": "nova-scotia", "name": "sampleSize", "value": 6, "year": null}
+    ],
+    "quebec": [
+        {"state": "quebec", "name": "lat", "value": 52.000172, "year": null},
+        {"state": "quebec", "name": "long", "value": -71.999069, "year": null},
+        {"state": "quebec", "name": "sampleSize", "value": 5, "year": null}
+    ],
+    "alberta": [
+        {"state": "alberta", "name": "lat", "value": 52.283329, "year": null},
+        {"state": "alberta", "name": "long", "value": -117.469, "year": null},
+        {"state": "alberta", "name": "sampleSize", "value": 3, "year": null}
+    ]
+};
+
 const TEST_DATA = {
   luceneRecord: LUCENE_RECORD,
   sqlRecord: SQL_RECORD,
   predictor: PREDICTOR,
-  accessions: ACCESSION_LIST
+  accessions: ACCESSION_LIST,
+  canadianPredictors: CANADA_PREDICTORS
 };
 
 module.exports = TEST_DATA;

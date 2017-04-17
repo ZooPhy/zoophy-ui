@@ -23,8 +23,8 @@ const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
 const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
 const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
 const PREDICTOR_FILE_RE = /^(\w|-|\.){1,250}?\.tsv$/;
-const STATE_RE = /^(\w){1,255}?$/;//TODO
-const PREDICTOR_RE = /^(\w){1,255}?$/;//TODO
+const STATE_RE = /^(\w|-|\.|,| |'){1,255}?$/;
+const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
 
 let router = express.Router();
 
@@ -231,21 +231,56 @@ router.post('/predictors', upload.single('predictorsBatchFile'), function (req, 
             });
             let predictors = {};
             const predictorNames = rawPredictorLines[0].trim().split("\t");
-            for (let i = 1; i < rawPredictorLines.length; i++) {
-              let stateLine = rawPredictorLines[i].trim().split("\t");
-              const state = String(stateLine[0].trim());
-              let statePredictors = [];
-              for (let j = 1; j < stateLine.length; j++) {
-                let predictor = new GLMPredictor(state, predictorNames[j], stateLine[j]);
-                statePredictors.push(predictor);
+            let invalidName = -1;
+            for (let i = 0; i < predictorNames.length; i++) {
+              if (!(checkInput(predictorNames[i], 'string', PREDICTOR_RE))) {
+                invalidName = i;
+                break;
               }
-              predictors[state] = statePredictors;
             }
-            result = {
-              status: 200,
-              predictors: predictors
-            };
-            res.status(result.status).send(result);
+            if (invalidName !== -1) {
+              result = {
+                status: 400,
+                error: 'Invalid Predictor name: "'+predictorNames[invalidName]+'"'
+              };
+              res.status(result.status).send(result);
+            }
+            else {
+              let stateError = null;
+              for (let i = 1; i < rawPredictorLines.length && stateError == null; i++) {
+                let stateLine = rawPredictorLines[i].trim().split("\t");
+                const state = String(stateLine[0].trim());
+                if (!(checkInput(state, 'string', STATE_RE))) {
+                  stateError = state;
+                  break;
+                }
+                let statePredictors = [];
+                for (let j = 1; j < stateLine.length && stateError == null; j++) {
+                  if (checkInput(stateLine[j],'number', null)) {
+                    let predictor = new GLMPredictor(state, predictorNames[j], stateLine[j]);
+                    statePredictors.push(predictor);
+                  }
+                  else {
+                    stateError = stateLine[j];
+                    break;
+                  }
+                }
+                predictors[state] = statePredictors;
+              }
+              if (stateError === null) {
+                result = {
+                  status: 200,
+                  predictors: predictors
+                };
+              }
+              else {
+                result = {
+                  status: 400,
+                  error: 'Invalid Predictor value: "'+stateError+'"'
+                };
+              }
+              res.status(result.status).send(result);
+            }
           }
         });
       }
