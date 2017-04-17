@@ -46,8 +46,8 @@ router.post('/run', function(req, res) {
           accessions.push(String(req.body.accessions[i]));
         }
         else {
-          jobErrors += 'Invalid Accession: '+accessions[i]+', ';
-          i = accessions.length;
+          jobErrors += 'Invalid Accession: '+req.body.accessions[i]+', ';
+          i = req.body.accessions.length;
         }
       }
     }

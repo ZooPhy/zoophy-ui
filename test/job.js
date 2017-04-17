@@ -6,12 +6,83 @@ let request = require('supertest');
 let assert = require('chai').assert;
 let helperData = require('./helper_data');
 
+function clone(a) {
+  // thanks http://stackoverflow.com/a/12826757/5702582 
+  return JSON.parse(JSON.stringify(a));
+};
+
 describe('Run Job', function() {
-  it('Empty Job test ran', function(done) {
-    assert.fail('Empyt Test', 'Real Test', 'Need to write Job tests');
-    //TODO
-    done();
+  let job = {
+    replyEmail: 'zoophytesting@asu.edu', //need to change eventually
+    jobName: 'Mocha Test',
+    accessions: helperData.accessions.slice(),
+    useGLM: true,
+    predictors: null,
+    xmlOptions: clone(helperData.xmlOptions)
+  };
+  it('Should require email', function(done) {
+    job.replyEmail = null;
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Missing Reply Email');
+      assert.strictEqual(res.status, 400, "Should not run Job");
+      done();
+    });
   });
+  it('Should require valid email', function(done) {
+    job.replyEmail = 'fakeAddressss';
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Email: fakeAddressss');
+      assert.strictEqual(res.status, 400, "Should not run Job");
+      done();
+    });
+  });
+  it('Should require accessions', function(done) {
+    job.replyEmail = 'zoophytesting@asu.edu';
+    job.accessions = null;
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Missing Accessions');
+      assert.strictEqual(res.status, 400, "Should not run Job");
+      done();
+    });
+  });
+  it('Should require valid accessions', function(done) {
+    job.accessions = helperData.accessions.slice();
+    job.accessions.push('w00t');
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Accession: w00t');
+      assert.strictEqual(res.status, 400, "Should not run Job");
+      done();
+    });
+  });
+  it('Should fail non-US locatins with Default GLM', function(done) {
+    job.accessions = helperData.accessions.slice();
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'Too few distinct locations (need at least 2): 0');
+      assert.strictEqual(res.status, 200, "Should not run Job");
+      done();
+    });
+  });
+  //TODO finish job tests
 });
 
 describe('Process Predictors', function() {

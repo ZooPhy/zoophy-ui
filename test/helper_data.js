@@ -207,12 +207,19 @@ const CANADA_PREDICTORS = {
     ]
 };
 
+const XML_OPTIONS = {
+    chainLength: 10000000,
+    subSampleRate: 10000,
+    substitutionModel: 'HKY'
+};
+
 const TEST_DATA = {
   luceneRecord: LUCENE_RECORD,
   sqlRecord: SQL_RECORD,
   predictor: PREDICTOR,
   accessions: ACCESSION_LIST,
-  canadianPredictors: CANADA_PREDICTORS
+  canadianPredictors: CANADA_PREDICTORS,
+  xmlOptions: XML_OPTIONS
 };
 
 module.exports = TEST_DATA;
