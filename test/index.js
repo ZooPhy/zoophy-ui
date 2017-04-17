@@ -3,9 +3,13 @@
 let express = require('express');
 let app = require('../app');
 let request = require('supertest');
-let assert = require('chai').assert;
+let chai = require('chai');
+chai.use(require('chai-fs'));
+let assert = chai.assert;
 const allowedValues = require('../bin/allowed_values');
 let sinon = require('sinon');
+const helperData = require('./helper_data.js');
+let path = require("path");
 
 describe('Get Record', function() {
   it('Should require Accession', function(done) {
@@ -130,19 +134,116 @@ describe('Search', function() {
 });
 
 describe('File Upload and Download tests', function(done) {
+  it('Should require valid format', function(done) {
+    request(app)
+      .post('/download/xml')
+      .send({accessions: helperData.accessions})
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'Invalid Format','Should return error');
+      assert.strictEqual(res.status, 400, "Should not generate CSV file");
+      done();
+    });
+  });
+  it('Should require valid accessions', function(done) {
+    let badList = helperData.accessions.slice();
+    badList.push('GQ/*rm**/0');
+    request(app)
+      .post('/download/csv')
+      .send({accessions: badList})
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'Invalid Accession: GQ/*rm**/0','Should return error');
+      assert.strictEqual(res.status, 400, "Should not generate CSV file");
+      done();
+    });
+  });
+  it('Should require accession list', function(done) {
+    request(app)
+      .post('/download/csv')
+      .send({accessions: undefined})
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'Missing Accessions','Should return error');
+      assert.strictEqual(res.status, 400, "Should not generate CSV file");
+      done();
+    });
+  });
   it('Should download CSV file', function(done) {
-    assert.fail('Empyt Test', 'Real Test', 'Need to write CSV test');
-    //TODO
-    done();
+    request(app)
+      .post('/download/csv')
+      .send({accessions: helperData.accessions})
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.isUndefined(res.body.error, 'Should not return error');
+      assert.strictEqual(res.status, 200, "Should generate CSV file");
+      assert.isDefined(res.body.downloadPath, 'Should return file path');
+      let relativePath = path.join(__dirname, '../public', res.body.downloadPath);
+      assert.pathExists(relativePath, 'Valid CSV file path returned');
+      done();
+    });
   });
   it('Should download FASTA file', function(done) {
-    assert.fail('Empyt Test', 'Real Test', 'Need to write FASTA test');
-    //TODO
-    done();
+    request(app)
+      .post('/download/fasta')
+      .send({accessions: helperData.accessions})
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.isUndefined(res.body.error, 'Should not return error');
+      assert.strictEqual(res.status, 200, "Should generate CSV file");
+      assert.isDefined(res.body.downloadPath, 'Should return file path');
+      let relativePath = path.join(__dirname, '../public', res.body.downloadPath);
+      assert.pathExists(relativePath, 'Valid CSV file path returned');
+      done();
+    });
   });
-  it('Should search Accessions list text file', function(done) {
-    assert.fail('Empyt Test', 'Real Test', 'Need to write Accessions list test');
-    //TODO
-    done();
+  it('Should require file', function(done) {
+    request(app)
+      .post('/upload')
+      .send({file: undefined})
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'Missing Accession File','Should return error');
+      assert.strictEqual(res.status, 400, "Should not perform upload search");
+      done();
+    });
+  });
+  it('Should require .txt Accessions file', function(done) {
+    let path = __dirname+'/bad-upload.xml';
+    request(app)
+      .post('/upload')
+      .attach('accessionFile', path)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'Invalid File','Should return error');
+      assert.strictEqual(res.status, 400, "Should not perform upload search");
+      done();
+    });
+  });
+  it('Should require valid Accessions', function(done) {
+    let path = __dirname+'/bad-upload.txt';
+    request(app)
+      .post('/upload')
+      .attach('accessionFile', path)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'Invalid Accesion(s): "CY" on line #85, "--DROP TABLES--" on line #92', 'Should return error');
+      assert.strictEqual(res.status, 400, "Should not perform upload search");
+      done();
+    });
+  });
+  it('Should search valid Accessions text file', function(done) {
+    let path = __dirname+'/good-upload.txt';
+    request(app)
+      .post('/upload')
+      .attach('accessionFile', path)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.isUndefined(res.body.error, 'Should not return error');
+      assert.strictEqual(res.status, 200, "Should perform upload search");
+      assert.isArray(res.body.records, 'Should return Array of records');
+      assert.strictEqual(res.body.records.length, 92, 'Should return correct number of results');
+      done();
+    });
   });
 });

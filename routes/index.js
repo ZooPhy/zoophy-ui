@@ -170,66 +170,73 @@ router.post('/download/:format', function(req, res) {
       let format = String(req.params.format);
       if (req.body.accessions) {
         let accessions = [];
+        let invalidAcc = -1;
         for (let i = 0; i < req.body.accessions.length; i++) {
           if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
             accessions.push(String(req.body.accessions[i]));
           }
           else {
             logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
-            result = {
-              status: 400,
-              error: 'Invalid Accession: '+String(req.body.accessions[i])
-            };
-            res.status(result.status).send(result);
+            invalidAcc = i;
+            break;
           }
         }
-        logger.info('Retrieving '+format+' Download for '+accessions.length+' records...');
-        request.post({
-          url: API_URI+'/download?format='+format,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(accessions)
-        }, function(error, response, body) {
-          if (error) {
-            logger.error(error);
-            result = {
-              status: 500,
-              error: String(error)
-            };
-            res.status(result.status).send(result);
-          }
-          else if (response.statusCode === 200) {
-            let fileName = String(uuid())+'.'+format;
-            let filePath = DOWNLOAD_FOLDER+fileName;
-            logger.info('Download received. Writing file: '+filePath);
-            let fileContents = String(body);
-            fs.writeFile(filePath, fileContents, function(err) {
-              if (err) {
-                logger.error('Error writing download: '+err);
-                result = {
-                  status: 500,
-                  error: 'Error writing download'
-                };
-              }
-              else {
-                result = {
-                  status: 200,
-                  downloadPath: '/downloads/'+fileName
-                };
-              }
+        if (invalidAcc !== -1) {
+          result = {
+            status: 400,
+            error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc])
+          };
+          res.status(result.status).send(result);
+        }
+        else {
+          logger.info('Retrieving '+format+' Download for '+accessions.length+' records...');
+          request.post({
+            url: API_URI+'/download?format='+format,
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(accessions)
+          }, function(error, response, body) {
+            if (error) {
+              logger.error(error);
+              result = {
+                status: 500,
+                error: String(error)
+              };
               res.status(result.status).send(result);
-            });
-          }
-          else {
-            logger.error('Download request failed: '+response.statusCode);
-            result = {
-              status: 500,
-              error: 'ZooPhy API Download Request Failed'
-            };
-            res.status(result.status).send(result);
-          }
-        });
+            }
+            else if (response.statusCode === 200) {
+              let fileName = String(uuid())+'.'+format;
+              let filePath = DOWNLOAD_FOLDER+fileName;
+              logger.info('Download received. Writing file: '+filePath);
+              let fileContents = String(body);
+              fs.writeFile(filePath, fileContents, function(err) {
+                if (err) {
+                  logger.error('Error writing download: '+err);
+                  result = {
+                    status: 500,
+                    error: 'Error writing download'
+                  };
+                }
+                else {
+                  result = {
+                    status: 200,
+                    downloadPath: '/downloads/'+fileName
+                  };
+                }
+                res.status(result.status).send(result);
+              });
+            }
+            else {
+              logger.error('Download request failed: '+response.statusCode);
+              result = {
+                status: 500,
+                error: 'ZooPhy API Download Request Failed'
+              };
+              res.status(result.status).send(result);
+            }
+          });
+        }
       }
       else {
         result = {
@@ -294,7 +301,7 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
                 cleanAccessions.push(String(rawAccessions[i].substr(0,rawAccessions[i].indexOf('.'))));
               }
               else {
-                fileErrors.push(String('"'+rawAccessions[i]+'" on line #'+i));
+                fileErrors.push(String('"'+rawAccessions[i]+'" on line #'+String(i+1)));
               }
             }
             if (fileErrors.length > 0) {
