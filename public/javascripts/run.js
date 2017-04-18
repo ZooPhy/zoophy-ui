@@ -1,65 +1,212 @@
+'use strict';
+
 angular.module('ZooPhy').controller('runController', function ($scope, $http, RecordData) {
 
-  const EMAIL_RE = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  var EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
+  var PREDICTOR_FILE_RE = /^(\w|-|\.){1,250}?\.tsv$/;
 
   $scope.numSelected = RecordData.getNumSelected();
   $scope.jobEmail = null;
   $scope.jobName = null;
   $scope.runError = null;
   $scope.running = false;
-  $scope.success = false;
+  $scope.success = null;
+  $scope.useDefaultGLM = false;
+  $scope.customPredictors = null;
+  $scope.chainLength = 10000000;
+  $scope.subSampleRate = 1000;
+  $scope.availableModels = ['HKY'];
+  $scope.substitutionModel = 'HKY';
+  $scope.availablePriors = ['Constant']
+  $scope.treePrior = 'Constant';
+  $scope.warning = 'Too Few Records, Minimum is 5';
+  $scope.fileToSend = null;
+  $scope.filename = 'none';
+  $scope.glmButtonClass = null;
 
-  $scope.$watch(function () {return RecordData.getNumSelected();}, function (newValue, oldValue) {
+  $scope.reset = function() {
+    $scope.useDefaultGLM = false;
+    $scope.customPredictors = null;
+    $scope.chainLength = 10000000;
+    $scope.subSampleRate = 1000;
+    $scope.substitutionModel = 'HKY';
+    $scope.treePrior = 'Constant';
+    $scope.jobName = null;
+    $scope.runError = null;
+    $scope.running = false;
+    $scope.success = null;
+    $scope.warning = 'Too Few Records, Minimum is 5';
+    $scope.fileToSend = null;
+    $scope.filename = 'none';
+    $scope.glmButtonClass = null;
+  };
+
+  $scope.$watch(function () {return RecordData.getNumSelected();}, function(newValue, oldValue) {
     if (newValue !== oldValue) {
+      $scope.warning = null;
+      $scope.runError = null;
+      $scope.success = null;
       $scope.numSelected = newValue;
+      if ($scope.numSelected < 5) {
+        $scope.warning = 'Too Few Records, Minimum is 5';
+      }
+      else if ($scope.numSelected > 1000) {
+        $scope.warning = 'Too Many Records, Maximum is 1000';
+      }
+    }
+  });
+
+  $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
+    if (newValue !== oldValue) {
+      $scope.reset();
     }
   });
 
   $scope.runJob = function() {
-    $scope.runError = null;
-    $scope.running = true;
-    if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail)) {
-      let jobAccessions = [];
-      let records = RecordData.getRecords();
-      for (let i = 0; i < records.length; i++) {
-        if (records[i].includeInJob) {
-          jobAccessions.push(records[i].accession);
+    if ($scope.running === false) {
+      $scope.runError = null;
+      $scope.running = true;
+      $scope.success = null;
+      $scope.warning = null;
+      if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail.trim())) {
+        var jobAccessions = [];
+        var records = RecordData.getRecords();
+        for (var i = 0; i < records.length; i++) {
+          if (records[i].includeInJob) {
+            jobAccessions.push(records[i].accession);
+          }
+        }
+        if (jobAccessions.length < 5) {
+          $scope.runError = 'Too Few Records, Minimun is 5';
+          $scope.running = false;
+        }
+        else if (jobAccessions.length > 1000) {
+          $scope.runError = 'Too Many Records, Maximum is 1000';
+          $scope.running = false;
+        }
+        else {
+          var runUri = SERVER_URI+'/job/run';
+          var email = String($scope.jobEmail).trim();
+          var currentJobName = null;
+          if ($scope.jobName) {
+            currentJobName = String($scope.jobName).trim();
+          }
+          console.log($scope.customPredictors);
+          var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
+          var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
+          var predictors = $scope.customPredictors;
+          var chain = Number($scope.chainLength);
+          var rate = Number($scope.subSampleRate);
+          var model = String($scope.substitutionModel);
+          var prior = String($scope.treePrior).trim();//TODO enable in job services
+          var jobData = {
+            replyEmail: email,
+            jobName: currentJobName,
+            accessions: jobAccessions,
+            useGLM: glm,
+            predictors: predictors,
+            xmlOptions: {
+              chainLength: chain,
+              subSampleRate: rate,
+              substitutionModel: model
+            }
+          };
+          console.log(jobData);
+          $http.post(runUri, jobData).then(function success(response) {
+            $scope.running = false;
+            if (response.status === 202) {
+              if (currentJobName) {
+                $scope.success = currentJobName;
+              }
+              else {
+                $scope.success = response.data.message;
+              }
+              if (response.data.recordsRemoved.length > 0) {
+                var warning = response.data.recordsRemoved.length+' Incomplete Records Excluded from Job: '+response.data.recordsRemoved[0];
+                for (var i = 1; i < response.data.recordsRemoved.length; i++) {
+                  warning += ', '+response.data.recordsRemoved[i];
+                }
+                $scope.warning = warning;
+              }
+            }
+            else {
+              $scope.runError = 'Job Validation Failed: '+response.data.error;
+            }
+          }, function failure(response) {
+            $scope.running = false;
+            $scope.runError = 'Job Validation Failed due to Unknown Error';
+          });
         }
       }
-      if (jobAccessions.length < 5) {
-        $scope.runError = 'Too Few Records, Minimun is 5';
+      else {
+        $scope.runError = 'Invalid Email';
         $scope.running = false;
       }
-      else if (jobAccessions.length > 1000) {
-        $scope.runError = 'Too Many Records, Maximum is 1000';
-        $scope.running = false;
+    }
+  };
+
+  $scope.uploadPredictors = function(rawFile) {
+    console.log('file selected')
+    $scope.runError = null;
+    $scope.success = null;
+    var newFile = rawFile[0];
+    if (newFile && newFile.size < 500000) { //50kb
+      var filename = newFile.name.trim();
+      if (PREDICTOR_FILE_RE.test(filename)) {
+        $scope.fileToSend = newFile;
+        $scope.filename = String(filename).trim();
+        var fileUploader = $('#data-upload');
+        console.log(fileUploader)
+        // TODO reset fileUploader
+        fileUploader[0].files = null; // not working /:
+        fileUploader[0].value = null;
       }
       else {
-        let runUri = SERVER_URI+'/job/run';
-        let jobData = {
-          replyEmail: $scope.jobEmail,
-          jobName: $scope.jobName,
-          accessions: jobAccessions,
-          useGLM: false,
-          predictors: null
-        };
-        console.log(jobData);
-        $http.post(runUri, jobData).then(function success(response) {
-          $scope.running = false;
-          if (response.status === 202) {
-            $scope.success = true; //TODO give job ID
-          }
-          else {
-            $scope.runError = 'Job Validation Failed';
-          }
-        }, function failure(response) {
-          $scope.runError = 'Job Validation Failed';
-        });
+        $scope.runError = 'Invalid File Name. Must be .tsv file.';
       }
     }
     else {
-      $scope.runError = 'Invalid Email';
-      $scope.running = false;
+      $scope.runError = 'Invalid File Size. Limit is 50kb.';
+    }
+    $scope.$apply();
+  };
+
+  $scope.setPredictors = function() {
+    $scope.runError = null;
+    $scope.success = null;
+    if ($scope.fileToSend) {
+      var form = new FormData();
+      var uri = SERVER_URI+'/job/predictors';
+      form.append('predictorsBatchFile', $scope.fileToSend);
+      $http.post(uri, form, {
+          headers: {'Content-Type': undefined}
+      }).then(function (response) {
+        $scope.customPredictors = response.data.predictors;
+      }, function(error) {
+        if (error.status !== 500) {
+          $scope.runError = error.data.error;
+        }
+        else {
+          $scope.runError = 'Upload Failed on Server.';
+        }
+      });
+    }
+    else {
+      $scope.runError = 'No Predictor File Selected';
+    }
+  };
+
+  $scope.toggleDefaultGLM = function() {
+    $scope.useDefaultGLM = !$scope.useDefaultGLM;
+    if ($scope.useDefaultGLM) {
+      $scope.glmButtonClass = 'btn-success';
+      $scope.fileToSend = null;
+      $scope.filename = 'none';
+      $scope.customPredictors = null;
+      $scope.runError = null;
+    }
+    else {
+      $scope.glmButtonClass = null;
     }
   };
 

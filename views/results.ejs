@@ -1,16 +1,29 @@
 <div ng-controller="resultsController" id="results" class="container" ng-show="tab === 'results'">
   <div id="results-table" class="col-sm-9">
+    <h5 class="text-center">Search Returned {{results.length}} results</h5>
+    <h6 class="text-center">{{numSelected}} records are selected.
+    <h6 class="text-center"><i class="fa fa-info-circle" aria-hidden="true"></i> ZooPhy Jobs must contain 5 to 1000 Records</h6>
+    <div class="row">
+      <div class="col-sm-8">
+        <h6 ng-hide="generating">Download All Search Results as <button class="btn btn-xs btn-default" ng-click="setupDownload('csv');">CSV</button> or <button ng-click="setupDownload('fasta');" class="btn btn-xs btn-default">FASTA</button>
+          <a class="results-link" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyData.{{downloadFormat}}" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a><span class="text-danger results-link" ng-show="downloadError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{downloadError}}</span></h6>
+        <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
+      </div>
+      <div class="col-sm-4">
+        <h6 class="text-right"><button class="btn btn-sm btn-default" ng-click="downSamplePercent(20);">Perform Random 20% Downsampling</button></h6>
+      </div>
+    </div>
     <table st-table="displayedResults" st-safe-src="results" class="table table-striped">
     	<thead>
       	<tr>
-          <th class="col-sm-1 text-center">Select All<input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
-        	<th class="col-sm-1" st-sort="accession">Accession</th>
-        	<th class="col-sm-1" st-sort="genes">Genes</th>
-        	<th class="col-sm-2 hidden-xs" st-sort="virus">Virus</th>
-        	<th class="col-sm-2" st-sort="date">Date</th>
-        	<th class="col-sm-2 hidden-xs" st-sort="host">Host</th>
-          <th class="col-sm-2" st-sort="country">Country</th>
-          <th class="col-sm-1 hidden-xs" st-sort="segmentLength">Segment Length</th>
+          <th class="col-sm-1 text-center" st-sort="includeInJob">ALL <input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
+        	<th class="col-sm-1" st-sort="accession"><i class="fa fa-sort" aria-hidden="true"></i> GB ID</th>
+        	<th class="col-sm-1" st-sort="genes"><i class="fa fa-sort" aria-hidden="true"></i> Genes</th>
+        	<th class="col-sm-2 hidden-xs" st-sort="virus"><i class="fa fa-sort" aria-hidden="true"></i> Virus</th>
+        	<th class="col-sm-2" st-sort="luceneDate"><i class="fa fa-sort" aria-hidden="true"></i> Date</th>
+        	<th class="col-sm-2 hidden-xs" st-sort="host"><i class="fa fa-sort" aria-hidden="true"></i> Host</th>
+          <th class="col-sm-2" st-sort="country"><i class="fa fa-sort" aria-hidden="true"></i> Country</th>
+          <th class="col-sm-1 hidden-xs" st-sort="segmentLength"><i class="fa fa-sort" aria-hidden="true"></i> Length</th>
       	</tr>
     	</thead>
     	<tbody>
@@ -27,21 +40,25 @@
     	</tbody>
       <tfoot>
 			<tr>
-				<td colspan="8" class="text-center">
+        <td colspan="2">
+          <div class="text-center">
+            <label for="recordsPerPage">Records Per Page</label>
+            <select id="recordsPerPage" class="form-control" ng-options="num as num for num in pageNums" ng-model="recordsPerPage">
+              <!-- handled by Angular -->
+            </select>
+          </div>
+        </td>
+				<td colspan="4" class="text-center">
 					<div st-pagination="" st-items-by-page="recordsPerPage" st-displayed-pages="10"></div>
 				</td>
+        <td colspan="2">
+          <div class="pushed-down">
+            <input type="button" class="btn btn-info pull-right" ng-click="goToRun();" value="Configure ZooPhy Job" ng-disabled="numSelected < 5 || numSelected > 1000"/>
+          </div>
+        </td>
 			</tr>
 		</tfoot>
     </table>
-    <div class="col-xs-6 col-xs-offset-3 text-center">
-      <label for="recordsPerPage">Records Per Page</label>
-      <select id="recordsPerPage" class="selectpicker col-xs-4" ng-options="num as num for num in pageNums" data-dropup-auto="true" ng-model="recordsPerPage">
-        <!-- handled by Angular -->
-      </select>
-    </div>
-    <div class="col-xs-3">
-      <button class="btn btn-info pull-right" ng-click="goToRun();">Configure ZooPhy Job</button>
-    </div>
   </div>
   <div id="detail-panel" class="col-sm-3 hidden-xs">
     <div class="panel panel-info">

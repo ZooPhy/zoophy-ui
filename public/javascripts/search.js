@@ -5,8 +5,14 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.allowed_values = null;
 
   $scope.virus = 197911;
+  $scope.hantaSub = 11599;
+  $scope.fluAHs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  $scope.fluAH = 1;
+  $scope.fluANs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+  $scope.fluAN = 1;
+  $scope.isH1N1 = true;
   $scope.genes = [];
-  const completeGenes = "Complete";
+  var completeGenes = "Complete";
   $scope.selectedGenes = [];
   $scope.host = 1;
   $scope.avianHost = 8782;
@@ -20,16 +26,26 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.from = 0;
   $scope.to = Number(new Date().getFullYear());
   $scope.minimumSequenceLength = 0;
+  $scope.isPDMO9 = false;
+  $scope.filename = 'none';
+  $scope.fileToSend = null;
 
   $scope.showDetails = false;
   $scope.selectedRecord = null;
   $scope.searchError = null;
 
+  var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
+
   $scope.reset = function() {
     $scope.virus = $scope.allowed_values.viruses[0].tax_id;
+    $scope.hantaSub = 11599;
+    $scope.fluAH = 1;
+    $scope.fluAN = 1;
+    $scope.isH1N1 = true;
     $scope.host = $scope.allowed_values.hosts[0].tax_id;
     $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
-    $scope.genes = $scope.allowed_values.viruses[0].genes;
+    $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
+    $scope.genes.push(completeGenes);
     $scope.selectedGenes = [];
     $scope.continent = 1;
     $scope.selectedCountries = [];
@@ -38,50 +54,56 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.from = 0;
     $scope.to = Number(new Date().getFullYear());
     $scope.minimumSequenceLength = 0;
-    setTimeout(resetSelects, 10);
+    $scope.isPDMO9 = false;
+    $scope.filename = 'none';
+    $scope.fileToSend = null;
   };
 
-  function resetSelects() {
-    $('.selectpicker').selectpicker('render');
-  }
+  $scope.checkH1N1 = function() {
+    $scope.isH1N1 = Boolean($scope.fluAH === 1 && $scope.fluAN === 1);
+  };
 
   $scope.updateGenes = function() {
-    let virusIndex = $('#virus')[0].selectedIndex;
-    $scope.genes = $scope.allowed_values.viruses[virusIndex].genes;
+    var virusIndex = $('#virus')[0].selectedIndex;
+    $scope.genes = $scope.allowed_values.viruses[virusIndex].genes.slice();
+    $scope.genes.push(completeGenes);
   };
 
   $scope.updateCountries = function() {
-    let tempCountries = [];
+    var tempCountries = [];
     if ($scope.continent === 1) {
-      for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
+      for (var i = 0; i < $scope.allowed_values.continents.length; i++) {
         tempCountries = tempCountries.concat($scope.allowed_values.continents[i].countries);
       }
     }
     else {
-      for (let i = 0; i < $scope.allowed_values.continents.length; i++) {
+      for (var i = 0; i < $scope.allowed_values.continents.length; i++) {
         if ($scope.allowed_values.continents[i].geoname_id === $scope.continent) {
           tempCountries = tempCountries.concat($scope.allowed_values.continents[i].countries);
         }
       }
     }
+    tempCountries.sort(function(a, b) {
+      return a.name.localeCompare(b.name);
+    });
     $scope.countries = tempCountries;
     $scope.selectedCountries = [];
     $scope.updateRegions();
   };
 
   $scope.updateRegions = function() {
-    let countryList = $scope.selectedCountries;
+    var countryList = $scope.selectedCountries;
     $scope.regions = [];
     $scope.selectedRegions = [];
-    let tempRegions = [];
-    for (let i = 0; i < countryList.length; i++) {
+    var tempRegions = [];
+    for (var i = 0; i < countryList.length; i++) {
       tempRegions = [];
       if (countryList[i].regions) {
         tempRegions = countryList[i].regions.slice();
         tempRegions.sort(function(a, b) {
           return a.name.localeCompare(b.name);
         });
-        let allRegion = {
+        var allRegion = {
           name: 'All '+countryList[i].name,
           geoname_id: Number(countryList[i].geoname_id)
         };
@@ -97,19 +119,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
   };
 
-  function setCountries(countryList) {
-    countryList.sort(function(a, b) {
-      return a.name.localeCompare(b.name);
-    });
-    let allCountry = {
-      name: 'All',
-      geoname_id: Number($('#continent').val())
-    };
-    countryList.splice(0, 0, allCountry);
-    $scope.countries = countryList.slice();
-    $scope.selectedCountries = [$scope.countries[0]];
-  };
-
   $http.get(SERVER_URI+'/allowed').then(function(response) {
     if (response.status === 200) {
       $scope.allowed_values = response.data;
@@ -117,7 +126,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       $('#avian-host-container').removeClass('hidden');
       $('#regions-container').removeClass('hidden');
       $scope.virus = $scope.allowed_values.viruses[0].tax_id;
-      $scope.genes = $scope.allowed_values.viruses[0].genes;
+      $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
+      $scope.genes.push(completeGenes);
       $scope.updateCountries();
     }
     else {
@@ -127,16 +137,31 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
 
   $scope.search = function() {
     $scope.searchError = null;
-    let virus = Number($scope.virus);
-    let host = Number($scope.host);
+    var virus = Number($scope.virus);
+    var pdmo9 = false;
+    if (virus === 11598) {
+      virus = Number($scope.hantaSub);
+    }
+    else if (virus === 197911) {
+      var subH = Number($scope.fluAH);
+      var subN = Number($scope.fluAN);
+      virus = Number($scope.allowed_values.influenza_a_sub_type_ids[subH-1][subN-1]);
+      if (subH === 1 && subN === 1) {
+        pdmo9 = Boolean($scope.isPDMO9 === true);
+      }
+    }
+    var host = Number($scope.host);
     if (host === 8782) {
       host = Number($scope.avianHost);
     }
-    let query = 'TaxonID:'+virus+' AND HostID:'+host;
-    let genes = $scope.selectedGenes;
+    var query = 'TaxonID:'+virus+' AND HostID:'+host;
+    if (pdmo9) {
+      query += ' AND PH1N1:true';
+    }
+    var genes = $scope.selectedGenes;
     if (genes.length > 0) {
-      let geneString = ' AND Gene:('+genes[0];
-      for (let i = 1; i < genes.length; i++) {
+      var geneString = ' AND Gene:('+genes[0];
+      for (var i = 1; i < genes.length; i++) {
         geneString += ' OR '+genes[i];
       }
       if (genes.indexOf(completeGenes) === -1) {
@@ -145,23 +170,23 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       geneString += ')';
       query += geneString;
     }
-    let continent = Number($scope.continent);
-    let countries = $scope.selectedCountries;
-    let regions = $scope.selectedRegions;
+    var continent = Number($scope.continent);
+    var countries = $scope.selectedCountries;
+    var regions = $scope.selectedRegions;
     if (!(continent === 1 && countries.length === 0)) {
-      let geoString = ' AND GeonameID:(';
+      var geoString = ' AND GeonameID:(';
       if (countries.length === 0) {
         geoString += continent;
       }
       else if (regions.length === 0) {
         geoString += Number(countries[0].geoname_id);
-        for (let i = 1; i < countries.length; i++) {
+        for (var i = 1; i < countries.length; i++) {
           geoString += ' OR '+Number(countries[i].geoname_id);
         }
       }
       else {
         geoString += Number(regions[0].geoname_id);
-        for (let i = 1; i < regions.length; i++) {
+        for (var i = 1; i < regions.length; i++) {
           geoString += ' OR '+Number(regions[i].geoname_id);
         }
       }
@@ -169,15 +194,15 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       query += geoString;
     }
     if ($scope.minimumSequenceLength > 0) {
-      let minLength = $scope.minimumSequenceLength+'';
-      while (minLength.length < 4) {
+      var minLength = $scope.minimumSequenceLength+'';
+      while (minLength.length < 5) {
         minLength = '0'+minLength;
       }
-      query += ' AND SegmentLength:['+minLength+' TO 9999]';
+      query += ' AND SegmentLength:['+minLength+' TO 99999]';
     }
     if ($scope.from > 0) {
-      let fromYear = $scope.from+'';
-      let toYear = '';
+      var fromYear = $scope.from+'';
+      var toYear = '';
       while (fromYear.length < 4) {
         fromYear = '0'+fromYear;
       }
@@ -195,7 +220,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       query += ' AND Date:['+fromYear+' TO '+toYear+'1231]';
     }
     else if ($scope.to > 0) {
-      let toYear = $scope.to + '';
+      var toYear = $scope.to + '';
       while (toYear.length < 4) {
         toYear = '0'+toYear;
       }
@@ -204,19 +229,12 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
-        let searchResults = [];
-        for (let i = 0; i < response.data.records.length; i++) {
-          if (response.data.records[i].segmentLength > $scope.minimumSequenceLength) {
-            searchResults.push(response.data.records[i]);
-          }
-        }
-        if (searchResults.length > 0) {
-          RecordData.setRecords(searchResults);
+        RecordData.setRecords(response.data.records);
+        if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
         }
         else {
           $scope.searchError = 'Search returned 0 results.';
-          RecordData.setRecords(searchResults);
         }
       }
       else {
@@ -228,6 +246,55 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     });
     RecordData.setNumSelected(0);
     RecordData.incrementSearchCount();
+  };
+
+  $scope.uploadAccessions = function(rawFile) {
+    $scope.searchError = null;
+    var newFile = rawFile[0];
+    if (newFile && newFile.size < 50000) { //5kb
+      var filename = newFile.name.trim();
+      if (ACCESSION_FILE_RE.test(filename)) {
+        $scope.fileToSend = newFile;
+        $scope.filename = String(filename).trim();
+      }
+      else {
+        $scope.searchError = 'Invalid File Name. Must be .txt file.';
+      }
+    }
+    else {
+      $scope.searchError = 'Invalid File Size. Limit is 5kb.';
+    }
+    $scope.$apply();
+  };
+
+  $scope.sendAccessions = function() {
+    $scope.searchError = null;
+    if ($scope.fileToSend) {
+      var form = new FormData();
+      var uri = SERVER_URI+'/upload';
+      form.append('accessionFile', $scope.fileToSend);
+      $http.post(uri, form, {
+          headers: {'Content-Type': undefined}
+      }).then(function (response) {
+        RecordData.setRecords(response.data.records);
+        if (response.data.records.length > 0) {
+          $scope.$parent.switchTabs('results');
+        }
+        else {
+          $scope.searchError = 'Search returned 0 results.';
+        }
+      }, function(error) {
+        if (error.status !== 500) {
+          $scope.searchError = error.data.error;
+        }
+        else {
+          $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
+        }
+      });
+    }
+    else {
+      $scope.searchError = 'No Accession File Selected';
+    }
   };
 
 });

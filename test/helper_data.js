@@ -72,9 +72,154 @@ const LUCENE_RECORD = {
     "publication": null
 };
 
+const PREDICTOR = {
+    state: 'az ',
+    name: ' SampleSize',
+    value: ' 44 ',
+    year: '2007'
+};
+
+const ACCESSION_LIST = [
+    'GQ132157',
+    'GQ132159',
+    'FJ998215',
+    'GQ132154',
+    'FJ998213',
+    'GQ465702',
+    'GQ465698',
+    'GQ402240',
+    'GQ465707',
+    'GQ402241',
+    'GQ465706',
+    'GQ465699',
+    'GQ402237',
+    'GQ465703',
+    'GQ402244',
+    'GQ402246',
+    'GQ402242',
+    'GQ465700',
+    'GQ465697',
+    'GQ402243',
+    'GQ465696',
+    'GQ465705',
+    'GQ402227',
+    'GQ465704',
+    'GQ402235',
+    'GQ132156',
+    'GQ132158',
+    'GQ402234',
+    'GQ465701',
+    'GQ402239',
+    'GQ402238',
+    'GQ402236',
+    'GQ402245',
+    'CY045932',
+    'CY045940',
+    'JQ964683',
+    'GQ411899',
+    'CY060752',
+    'CY045948',
+    'CY060704',
+    'CY060584',
+    'JN632581',
+    'CY045964',
+    'CY060712',
+    'CY076781',
+    'CY060608',
+    'CY060576',
+    'CY076789',
+    'CY076765',
+    'CY081063',
+    'CY045956',
+    'CY060624',
+    'CY060536',
+    'GQ385302',
+    'CY045972',
+    'CY060680',
+    'CY060592',
+    'CY060744',
+    'KC456604',
+    'KC456605',
+    'CY060640',
+    'CY060616',
+    'CY060664',
+    'CY060568',
+    'CY060672',
+    'CY060528',
+    'GQ373263',
+    'CY081103',
+    'CY060512',
+    'CY045980',
+    'CY060560',
+    'CY060552',
+    'CY081087',
+    'CY081095',
+    'CY060720',
+    'CY060504',
+    'CY081079',
+    'CY060656',
+    'GQ502908',
+    'CY060632',
+    'CY060648',
+    'CY076773',
+    'CY060520',
+    'CY076797',
+    'CY060600',
+    'CY060696',
+    'CY076757',
+    'CY081071',
+    'CY060544',
+    'CY060736',
+    'CY060688',
+    'CY060728'
+];
+
+const CANADA_PREDICTORS = {
+    "manitoba" : [
+        {"state": "manitoba", "name": "lat", "value": 55.000191, "year": null},
+        {"state": "manitoba", "name": "long", "value": -97.000488, "year": null},
+        {"state": "manitoba", "name": "sampleSize", "value": 8, "year": null}
+    ],
+    "saskatchewan": [
+        {"state": "saskatchewan", "name": "lat", "value": 54.000099, "year": null},
+        {"state": "saskatchewan", "name": "long", "value": -106.00099, "year": null},
+        {"state": "saskatchewan", "name": "sampleSize", "value": 7, "year": null}
+    ],
+    "ontario" : [
+        {"state": "ontario", "name": "lat", "value": 49.250141, "year": null},
+        {"state": "ontario", "name": "long", "value": -84.499832, "year": null},
+        {"state": "ontario", "name": "sampleSize", "value": 63, "year": null}
+    ],
+    "nova-scotia": [
+        {"state": "nova-scotia", "name": "lat", "value": 45.000149, "year": null},
+        {"state": "nova-scotia", "name": "long", "value": -62.99865, "year": null},
+        {"state": "nova-scotia", "name": "sampleSize", "value": 6, "year": null}
+    ],
+    "quebec": [
+        {"state": "quebec", "name": "lat", "value": 52.000172, "year": null},
+        {"state": "quebec", "name": "long", "value": -71.999069, "year": null},
+        {"state": "quebec", "name": "sampleSize", "value": 5, "year": null}
+    ],
+    "alberta": [
+        {"state": "alberta", "name": "lat", "value": 52.283329, "year": null},
+        {"state": "alberta", "name": "long", "value": -117.469, "year": null},
+        {"state": "alberta", "name": "sampleSize", "value": 3, "year": null}
+    ]
+};
+
+const XML_OPTIONS = {
+    chainLength: 10000000,
+    subSampleRate: 10000,
+    substitutionModel: 'HKY'
+};
+
 const TEST_DATA = {
   luceneRecord: LUCENE_RECORD,
-  sqlRecord: SQL_RECORD
+  sqlRecord: SQL_RECORD,
+  predictor: PREDICTOR,
+  accessions: ACCESSION_LIST,
+  canadianPredictors: CANADA_PREDICTORS,
+  xmlOptions: XML_OPTIONS
 };
 
 module.exports = TEST_DATA;

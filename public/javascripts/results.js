@@ -1,3 +1,5 @@
+'use strict';
+
 angular.module('ZooPhy').controller('resultsController', function ($scope, $http, RecordData) {
 
   $scope.recordsPerPage = 25;
@@ -6,6 +8,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.numSelected = RecordData.getNumSelected();
   $scope.results = RecordData.getRecords();
   $scope.displayedResults = RecordData.getRecords();
+  $scope.downloadLink = null;
+  $scope.generating = false;
+  $scope.downloadFormat = null;
+  $scope.downloadError = null;
 
   $scope.$watch(function () {return RecordData.getRecords();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
@@ -19,6 +25,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
       $scope.groupIsSelected = false;
+      $scope.numSelected = 0;
+      $scope.downloadLink = null;
+      $scope.generating = false;
+      $scope.downloadFormat = null;
+      $scope.downloadError = null;
     }
   });
 
@@ -37,16 +48,20 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.toggleRecord = function(record) {
     if (record.includeInJob) {
       $scope.numSelected--;
+      $scope.groupIsSelected = false;
     }
     else {
       $scope.numSelected++;
+      if ($scope.numSelected === $scope.results.length) {
+        $scope.groupIsSelected = true;
+      }
     }
     record.includeInJob = !record.includeInJob;
     RecordData.setNumSelected($scope.numSelected);
   };
 
   $scope.toggleAll = function() {
-    for (let i = 0; i < $scope.results.length; i++) {
+    for (var i = 0; i < $scope.results.length; i++) {
       $scope.results[i].includeInJob = $scope.groupIsSelected;
     }
     if ($scope.groupIsSelected) {
@@ -60,7 +75,76 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
   $scope.goToRun = function() {
     $scope.$parent.switchTabs('run');
-  }
+  };
+
+  $scope.setupDownload = function(format) {
+    if (!$scope.generating) {
+      $scope.generating = true;
+      $scope.downloadLink = null;
+      $scope.downloadFormat = null;
+      $scope.downloadError = null;
+      if ($scope.results.length < 1) {
+        $scope.generating = false;
+        $scope.downloadError = 'No Results to Download';
+      }
+      else if (format === 'csv' || format === 'fasta') {
+        $scope.downloadFormat = format;
+        var downloadAccessions = [];
+        for (var i = 0; i < $scope.results.length; i++) {
+          downloadAccessions.push($scope.results[i].accession);
+        }
+        var downloadURI = SERVER_URI+'/download/'+format;
+        var downloadList = {accessions: downloadAccessions};
+        $http.post(downloadURI, downloadList).then(function success(response) {
+          $scope.generating = false;
+          if (response.status === 200) {
+            $scope.downloadLink = SERVER_URI+response.data.downloadPath;
+          }
+          else {
+            $scope.downloadError = 'Error generating download';
+          }
+        }, function failure(response) {
+          $scope.generating = false;
+          $scope.downloadError = 'Error generating download';
+        });
+      }
+      else {
+        $scope.generating = false;
+        $scope.downloadError = 'Invalid Download Format';
+      }
+    }
+  };
+
+  $scope.downSamplePercent = function(percentage) {
+    var numToSelect =  Math.floor($scope.results.length*(percentage/100.0));
+    $scope.downSampleAmount(numToSelect);
+  };
+
+  $scope.downSampleAmount = function(amount) {
+    var recs = $scope.results.slice();
+    if (amount < recs.length) {
+      $scope.groupIsSelected = false;
+    }
+    var samples = [];
+    var index = -1;
+    while (amount > 0 && recs.length > 0) {
+      index = Math.floor(Math.random()*(recs.length));
+      samples.push(recs[index].accession);
+      recs.splice(index, 1);
+      amount--;
+    }
+    $scope.numSelected = 0;
+    for (var i = 0; i < $scope.results.length; i++) {
+      if (samples.indexOf($scope.results[i].accession) > -1) {
+        $scope.results[i].includeInJob = true;
+        $scope.numSelected++;
+      }
+      else {
+        $scope.results[i].includeInJob = false;
+      }
+    }
+    RecordData.setNumSelected($scope.numSelected);
+  };
 
 });
 

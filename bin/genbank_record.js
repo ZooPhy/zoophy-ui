@@ -99,6 +99,7 @@ class LuceneRecord {
     this.accession = String(searchApiRecord.accession);
     this.genes = stringifyGenes(searchApiRecord.genes);
     this.virus = simplifyOrganism(searchApiRecord.sequence.organism);
+    this.luceneDate = String(searchApiRecord.sequence.collectionDate);
     this.date = humanizeLuceneDate(searchApiRecord.sequence.collectionDate);
     if (searchApiRecord.host) {
       this.host = String(searchApiRecord.host.name || UNKNOWN);

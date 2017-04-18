@@ -7,24 +7,24 @@
   <div class="row">
     <div class="col-sm-3 col-xs-6">
       <label for="virus">Virus</label>
-      <select id="virus" class="selectpicker" data-dropup-auto="false" ng-model="virus" ng-options="virus.tax_id as virus.name for virus in allowed_values.viruses" ng-change="updateGenes();" required>
+      <select id="virus" class="form-control" ng-model="virus" ng-options="virus.tax_id as virus.name for virus in allowed_values.viruses" ng-change="updateGenes();" required>
         <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3">
       <label for="host">Host</label>
-      <select id="host" class="selectpicker" ng-model="host" ng-options="host.tax_id as host.name for host in allowed_values.hosts" data-dropup-auto="false" required>
+      <select id="host" class="form-control" ng-model="host" ng-options="host.tax_id as host.name for host in allowed_values.hosts" required>
         <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3 col-xs-6">
       <label for="continent">Continent</label>
-      <select id="continent" class="selectpicker" data-dropup-auto="false" ng-model="continent" ng-options="continent.geoname_id as continent.name for continent in allowed_values.continents" ng-change="updateCountries();" required>
+      <select id="continent" class="form-control" ng-model="continent" ng-options="continent.geoname_id as continent.name for continent in allowed_values.continents" ng-change="updateCountries();" required>
         <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3 col-xs-6 text-center">
-      <% const CURRENT_YEAR = Number(new Date().getFullYear()); %>
+      <% var CURRENT_YEAR = Number(new Date().getFullYear()); %>
       <div class="col-xs-6">
         <label for="from">From</label>
         <input id="from" type="number" ng-model="from" class="form-control" placeholder="YYYY"/>
@@ -37,15 +37,41 @@
   </div>
   <div class="row pushed-down">
     <div class="col-sm-3 col-xs-6">
-      <label for="genes">Genes</label>
-      <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" class="form-control" multiple>
-        <!-- handled by Angular -->
-      </select>
+      <div id="flu-a-sub-container" ng-show="virus === 197911">
+        <label>Flu A Sub Type</label>
+        <div class="col-sm-6">
+          <label class="text-center">H</label>
+          <select id="flu-a-h" class="form-control" ng-model="fluAH" ng-options="h as h for h in fluAHs" ng-change="checkH1N1();">
+            <!-- handled by Angular -->
+          </select>
+        </div>
+        <div class="col-sm-6">
+          <label class="text-center">N</label>
+          <select id="flu-a-n" class="form-control" ng-model="fluAN" ng-options="n as n for n in fluANs" ng-change="checkH1N1();">
+            <!-- handled by Angular -->
+          </select>
+        </div>
+        <div class="col-xs-10 col-xs-offset-2 pushed-down" ng-show="isH1N1">
+          <label class="pdmo9-label">pdm09 Only?</label> <input ng-model="isPDMO9" type="checkbox"></input>
+        </div>
+      </div>
+      <div id="hanta-sub-container" ng-show="virus === 11598">
+        <label for="hanta-sub">Hantavirus Sub Type</label>
+        <select id="hanta-sub" class="form-control" ng-model="hantaSub" ng-options="sub.tax_id as sub.name for sub in allowed_values.hantavirus_sub_types">
+          <!-- handled by Angular -->
+        </select>
+      </div>
+      <div class="pushed-down">
+        <label for="genes">Genes</label>
+        <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" class="form-control" multiple>
+          <!-- handled by Angular -->
+        </select>
+      </div>
     </div>
     <div class="col-sm-3 col-xs-6">
-      <div id="avian-host-container" class="hidden" ng-show="host === 8782">
+      <div id="avian-host-container" ng-show="host === 8782">
         <label for="avian-host">Avian Host</label>
-        <select id="avian-host" class="selectpicker" data-dropup-auto="false" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts">
+        <select id="avian-host" class="form-control" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts">
           <!-- handled by Angular -->
         </select>
       </div>
@@ -55,6 +81,12 @@
       <select id="countries" ng-model="selectedCountries" ng-options="country as country.name for country in countries" class="form-control" ng-change="updateRegions();" multiple>
         <!-- handled by Angular -->
       </select>
+      <div id="regions-container" ng-show="countryHasRegions">
+        <label for="regions">Regions</label>
+        <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" class="form-control" multiple>
+          <!-- handled by Angular -->
+        </select>
+      </div>
     </div>
     <div class="col-sm-3 col-xs-6 text-center">
       <label for="minimumSequenceLength">Minimum Sequence Length</label>
@@ -63,22 +95,14 @@
       </div>
     </div>
   </div>
-  <div class="row pushed-down">
-    <div id="regions-container" class="col-sm-3 col-xs-6 col-sm-offset-6 hidden" ng-show="countryHasRegions">
-      <label for="regions">Regions</label>
-      <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" class="form-control" multiple>
-        <!-- handled by Angular -->
-      </select>
-    </div>
-  </div>
   <div class="row col-xs-12 pushed-down">
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
-      <div class="col-sm-3 col-xs-6 text-center">
-        <!-- TODO -->
-        <!-- <label><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</label>
-        <input id="data-upload" type="file"> -->
-        <h6><i class="fa fa-hourglass-half" aria-hidden="true"></i> Coming Soon!</h6>
+      <div class="col-sm-6 col-xs-12 col-xs-offset-1">
+        <label>Accession List Search <span class="help-info" data-toggle="tooltip" data-placement="top" title="Line delimited text (.txt) file of up to 2500 GenBank Accessions"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+        <button class="btn btn-info btn-sm" ng-click="sendAccessions();"><i id='toggle-icon' class="fa fa-upload" aria-hidden="true"></i> Upload File</button>
+        <label class="btn btn-default btn-file">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadAccessions(this.files);"></input></label>
+        {{filename}}
       </div>
     </div>
   </div>
