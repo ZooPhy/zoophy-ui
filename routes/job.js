@@ -25,6 +25,7 @@ const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
 const PREDICTOR_FILE_RE = /^(\w|-|\.){1,250}?\.tsv$/;
 const STATE_RE = /^(\w|-|\.|,| |'){1,255}?$/;
 const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
+const MODEL_RE = /^(HKY)$/;
 
 let router = express.Router();
 
@@ -89,11 +90,17 @@ router.post('/run', function(req, res) {
         jobErrors += 'Invalid Custom Job Predictors, ';
       }
     }
-    let xmlOptions = {
-      chainLength: Number(req.body.xmlOptions.chainLength),
-      subSampleRate: Number(req.body.xmlOptions.subSampleRate),
-      substitutionModel: String(req.body.xmlOptions.substitutionModel)
-    };
+    let xmlOptions = null;
+    if (checkInput(req.body.xmlOptions.chainLength, 'number', null) && checkInput(req.body.xmlOptions.subSampleRate, 'number', null) && checkInput(req.body.xmlOptions.substitutionModel, 'string', MODEL_RE)) {
+      xmlOptions = {
+        chainLength: Number(req.body.xmlOptions.chainLength),
+        subSampleRate: Number(req.body.xmlOptions.subSampleRate),
+        substitutionModel: String(req.body.xmlOptions.substitutionModel)
+      };
+    }
+    else {
+       jobErrors += 'Invalid XML Parameters, ';
+    }
     if (jobErrors === BASE_ERROR) {
       const zoophyJob = JSON.stringify({
         accessions: accessions,

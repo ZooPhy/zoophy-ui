@@ -45,8 +45,21 @@ describe('Run Job', function() {
       done();
     });
   });
-  it('Should require accessions', function(done) {
+  it('Should require valid Job name', function(done) {
     job.replyEmail = 'zoophytesting@asu.edu';
+    job.jobName = '$(cat /etc/ssl/private.key)';
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Job Name: $(cat /etc/ssl/private.key)');
+      assert.strictEqual(res.status, 400, "Should not run Job");
+      done();
+    });
+  });
+  it('Should require accessions', function(done) {
+    job.jobName = 'Mocha Test';
     job.accessions = null;
     request(app)
       .post('/job/run')
@@ -71,6 +84,22 @@ describe('Run Job', function() {
       done();
     });
   });
+  it('Should require minimum number of accessions', function(done) {
+    let shortList = [];
+    for (let i = 0; i < 4; i++) {
+      shortList.push(helperData.accessions[i]);
+    }
+    job.accessions = shortList;
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid number of Accessions: 4');
+      assert.strictEqual(res.status, 400, "Should not run Job");
+      done();
+    });
+  });
   it('Should fail non-US locatins with Default GLM', function(done) {
     job.accessions = helperData.accessions.slice();
     request(app)
@@ -83,8 +112,35 @@ describe('Run Job', function() {
       done();
     });
   });
-  it('Should run Job with correct GLM', function(done) {
+  it('Should fail non-US locatins with invalid Predictor', function(done) {
+    job.accessions = helperData.accessions.slice();
+    job.predictors = clone(helperData.canadianPredictors);
+    job.predictors['ontario'][0].value = 'eh';
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Custom Job Predictors');
+      assert.strictEqual(res.status, 400, "Should not run Job");
+      done();
+    });
+  });
+  it('Should fail Job with invalid XML Parameters', function(done) {
     job.predictors = helperData.canadianPredictors;
+    job.xmlOptions.subSampleRate = 'often';
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid XML Parameters');
+      assert.strictEqual(res.status, 400, "Should not run Job");
+      done();
+    });
+  });
+  it('Should run Job with correct GLM', function(done) {
+    job.xmlOptions = helperData.xmlOptions;
     request(app)
       .post('/job/run')
       .send(job)
