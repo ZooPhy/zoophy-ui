@@ -5,6 +5,7 @@ let app = require('../app');
 let request = require('supertest');
 let assert = require('chai').assert;
 let helperData = require('./helper_data');
+const JOB_ID_RE = /^\w{8}?-\w{4}?-\w{4}?-\w{4}?-\w{12}?$/;
 
 function clone(a) {
   // thanks http://stackoverflow.com/a/12826757/5702582 
@@ -82,7 +83,22 @@ describe('Run Job', function() {
       done();
     });
   });
-  //TODO finish job tests
+  it('Should run Job with correct GLM', function(done) {
+    job.predictors = helperData.canadianPredictors;
+    request(app)
+      .post('/job/run')
+      .send(job)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.isUndefined(res.body.error, 'Should successfully validate Job');
+      assert.strictEqual(res.status, 202, 'Should run Job');
+      assert.match(res.body.message, JOB_ID_RE, 'Should return valid Job ID');
+      assert.strictEqual(res.body.jobSize, 92, 'Should run Job with correct Records');
+      assert.isArray(res.body.recordsRemoved, 'Should return excluded Reords');
+      assert.strictEqual(res.body.recordsRemoved.length, 0, 'Should not exclude any Records');
+      done();
+    });
+  });
 });
 
 describe('Process Predictors', function() {
