@@ -43,14 +43,14 @@
         <td colspan="2">
           <div class="text-center">
             <label for="recordsPerPage">Records Per Page</label>
-            <select id="recordsPerPage" class="form-control" ng-options="num as num for num in pageNums" ng-model="recordsPerPage">
+            <select id="recordsPerPage" class="form-control" ng-options="num as num for num in pageNums" ng-model="maxSize">
               <!-- handled by Angular -->
             </select>
           </div>
         </td>
 				<td colspan="4" class="text-center">
-					<h3>Pagination Goes Here</h3>
-				</td>
+          <ul uib-pagination direction-links="false" boundary-links="true" total-items="results.length" ng-model="currentPage"></ul> <!--TODO finish pagination-->
+         </td>
         <td colspan="2">
           <div class="pushed-down">
             <input type="button" class="btn btn-info pull-right" ng-click="goToRun();" value="Configure ZooPhy Job" ng-disabled="numSelected < 5 || numSelected > 1000"/>
