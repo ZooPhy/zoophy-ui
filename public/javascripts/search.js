@@ -207,7 +207,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         fromYear = '0'+fromYear;
       }
       fromYear += '0000';
-      if ($scope.to > $scope.from) {
+      if ($scope.to >= $scope.from) {
         toYear = $scope.to + '';
         while (toYear.length < 4) {
           toYear = '0'+toYear;

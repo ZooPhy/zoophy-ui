@@ -13,21 +13,21 @@
         <h6 class="text-right"><button class="btn btn-sm btn-default" ng-click="downSamplePercent(20);">Perform Random 20% Downsampling</button></h6>
       </div>
     </div>
-    <table st-table="displayedResults" st-safe-src="results" class="table table-striped">
+    <table class="table table-striped">
     	<thead>
       	<tr>
-          <th class="col-sm-1 text-center" st-sort="includeInJob">ALL <input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
-        	<th class="col-sm-1" st-sort="accession"><i class="fa fa-sort" aria-hidden="true"></i> GB ID</th>
-        	<th class="col-sm-1" st-sort="genes"><i class="fa fa-sort" aria-hidden="true"></i> Genes</th>
-        	<th class="col-sm-2 hidden-xs" st-sort="virus"><i class="fa fa-sort" aria-hidden="true"></i> Virus</th>
-        	<th class="col-sm-2" st-sort="luceneDate"><i class="fa fa-sort" aria-hidden="true"></i> Date</th>
-        	<th class="col-sm-2 hidden-xs" st-sort="host"><i class="fa fa-sort" aria-hidden="true"></i> Host</th>
-          <th class="col-sm-2" st-sort="country"><i class="fa fa-sort" aria-hidden="true"></i> Country</th>
-          <th class="col-sm-1 hidden-xs" st-sort="segmentLength"><i class="fa fa-sort" aria-hidden="true"></i> Length</th>
+          <th class="col-sm-1 text-center">ALL <input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
+        	<th class="col-sm-1" ng-click="updateSort('accession');"><i class="fa fa-sort" aria-hidden="true"></i> GB ID</th>
+        	<th class="col-sm-1" ng-click="updateSort('genes');"><i class="fa fa-sort" aria-hidden="true"></i> Genes</th>
+        	<th class="col-sm-2 hidden-xs" ng-click="updateSort('virus');"><i class="fa fa-sort" aria-hidden="true"></i> Virus</th>
+        	<th class="col-sm-2" ng-click="updateSort('luceneDate');"><i class="fa fa-sort" aria-hidden="true"></i> Date</th>
+        	<th class="col-sm-2 hidden-xs" ng-click="updateSort('host');"><i class="fa fa-sort" aria-hidden="true"></i> Host</th>
+          <th class="col-sm-2" ng-click="updateSort('country');"><i class="fa fa-sort" aria-hidden="true"></i> Country</th>
+          <th class="col-sm-1 hidden-xs" ng-click="updateSort('segmentLength');"><i class="fa fa-sort" aria-hidden="true"></i> Length</th>
       	</tr>
     	</thead>
     	<tbody>
-      	<tr st-select-row="record" st-select-mode="single" ng-repeat="record in displayedResults" ng-click="loadDetails(record.accession);">
+      	<tr ng-class="(selectedRecord.accession === record.accession) ? 'selected' : ''" dir-paginate="record in results | orderBy:sortField:sortReverse | itemsPerPage:recordsPerPage" ng-click="loadDetails(record.accession);">
           <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="toggleRecord(record); $event.stopPropagation();"></td>
           <td class="col-sm-1">{{record.accession}}</td>
       		<td class="col-sm-1">{{record.genes}}</td>
@@ -49,8 +49,8 @@
           </div>
         </td>
 				<td colspan="4" class="text-center">
-					<div st-pagination="" st-items-by-page="recordsPerPage" st-displayed-pages="10"></div>
-				</td>
+          <dir-pagination-controls max-size="5" direction-links="false" boundary-links="true" auto-hide="false"></dir-pagination-controls>
+        </td>
         <td colspan="2">
           <div class="pushed-down">
             <input type="button" class="btn btn-info pull-right" ng-click="goToRun();" value="Configure ZooPhy Job" ng-disabled="numSelected < 5 || numSelected > 1000"/>

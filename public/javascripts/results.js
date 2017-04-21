@@ -2,16 +2,27 @@
 
 angular.module('ZooPhy').controller('resultsController', function ($scope, $http, RecordData) {
 
-  $scope.recordsPerPage = 25;
   $scope.pageNums = [25, 50, 100, 250, 500];
   $scope.groupIsSelected = false;
   $scope.numSelected = RecordData.getNumSelected();
   $scope.results = RecordData.getRecords();
-  $scope.displayedResults = RecordData.getRecords();
+  $scope.selectedRecord = null;
   $scope.downloadLink = null;
   $scope.generating = false;
   $scope.downloadFormat = null;
   $scope.downloadError = null;
+  $scope.sortField = 'accession';
+  $scope.sortReverse = false;
+  $scope.recordsPerPage = 25;
+
+  $scope.updateSort = function(field) {
+    if (field === $scope.sortField) {
+      $scope.sortReverse = !$scope.sortReverse;
+    }
+    else {
+      $scope.sortField = field;
+    }
+  };
 
   $scope.$watch(function () {return RecordData.getRecords();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {

@@ -59,7 +59,7 @@ input::-webkit-inner-spin-button {
   font-size: 1.25rem;
 }
 
-.st-selected {
+.selected {
   background-color: #d9edf7 !important;
 }
 
