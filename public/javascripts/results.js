@@ -13,8 +13,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.downloadError = null;
   $scope.sortField = 'accession';
   $scope.sortReverse = false;
-  $scope.currentPage = 1;
-  $scope.maxSize = 5;
+  $scope.recordsPerPage = 25;
 
   $scope.updateSort = function(field) {
     if (field === $scope.sortField) {
@@ -23,7 +22,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     else {
       $scope.sortField = field;
     }
-  }
+  };
 
   $scope.$watch(function () {return RecordData.getRecords();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {

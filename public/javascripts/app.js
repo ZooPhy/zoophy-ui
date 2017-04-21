@@ -5,7 +5,7 @@
 var SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
 
 // Main Angular App
-var ZooPhyApp = angular.module('ZooPhy', ['ui.bootstrap']);
+var ZooPhyApp = angular.module('ZooPhy', ['angularUtils.directives.dirPagination']);
 
 // Factory for sharing data between controllers
 ZooPhyApp.factory('RecordData', function() {
