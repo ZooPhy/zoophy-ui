@@ -125,6 +125,30 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       }
     }
   };
+  $scope.validate =function (radioval,textval) {
+    var validInput=false;
+    if(radioval==='percent' ) { 
+      if(textval > 0 && textval <= 100){ 
+        validInput=true;  
+      }
+    }
+    else if(radioval==='number' ) { 
+      if(textval > 0 && textval <= $scope.results.length){ 
+        validInput=true;  
+      }
+    }
+    if(validInput===false) { 
+      $scope.warning = 'Invalid Downsample' 
+    }
+    else {
+      if(radioval=='percent') {
+        $scope.downSamplePercent(textval);
+      }
+      else{
+        $scope.downSampleAmount(textval);
+      }
+    }
+  };
 
   $scope.downSamplePercent = function(percentage) {
     var numToSelect =  Math.floor($scope.results.length*(percentage/100.0));

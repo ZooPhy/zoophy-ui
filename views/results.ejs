@@ -9,8 +9,16 @@
           <a class="results-link" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyData.{{downloadFormat}}" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a><span class="text-danger results-link" ng-show="downloadError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{downloadError}}</span></h6>
         <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
       </div>
-      <div class="col-sm-4">
-        <h6 class="text-right"><button class="btn btn-sm btn-default" ng-click="downSamplePercent(20);">Perform Random 20% Downsampling</button></h6>
+      <div class="col-sm-4 text-right">
+        <!--<h6 class="text-right"><button class="btn btn-sm btn-default" ng-click="downSamplePercent(20);">Perform Random 20% Downsampling</button></h6>-->
+        <label>Random Downsample:</label>
+        <input type="radio" name="number" id="number" ng-model="radioval" value="number" />Number
+        <input type="radio" name="percent" id="percent" ng-model="radioval" value="percent" />Percentage
+        <input type="text" name="textval" id="textbox" ng-model="textval" style="width:40px" />
+        <!--<div>{{radioval}} {{textval}}</div>-->
+        <button class="btn btn-sm btn-default" ng-click="check(radioval,textval);">Generate</button>
+        
+
       </div>
     </div>
     <table class="table table-striped">
