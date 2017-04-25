@@ -1,5 +1,10 @@
 <div ng-controller="resultsController" id="results" class="container" ng-show="tab === 'results'">
   <div id="results-table" class="col-sm-9">
+    <div class="row">
+      <div id="warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center" ng-show="warning">
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{warning}}
+      </div>
+    </div>
     <h5 class="text-center">Search Returned {{results.length}} results</h5>
     <h6 class="text-center">{{numSelected}} records are selected.
     <h6 class="text-center"><i class="fa fa-info-circle" aria-hidden="true"></i> ZooPhy Jobs must contain 5 to 1000 Records</h6>
@@ -9,8 +14,12 @@
           <a class="results-link" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyData.{{downloadFormat}}" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a><span class="text-danger results-link" ng-show="downloadError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{downloadError}}</span></h6>
         <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
       </div>
-      <div class="col-sm-4">
-        <h6 class="text-right"><button class="btn btn-sm btn-default" ng-click="downSamplePercent(20);">Perform Random 20% Downsampling</button></h6>
+      <div class="col-sm-4 text-right">
+        <label>Random Downsample:</label>
+        <input type="radio" name="sampleTypeNumber" id="number" ng-model="sampleType" value="number"/>Number
+        <input type="radio" name="sampleTypePercent" id="percent" ng-model="sampleType" value="percent" ng-checked="true"/>Percentage
+        <input class="form-control sampleBox" type="number" min="0" max="{{results.length}}" name="sampleAmount" ng-model="sampleAmount"/>
+        <button class="btn btn-sm btn-default" ng-click="validateDownSample();">Sample</button>
       </div>
     </div>
     <table class="table table-striped">
