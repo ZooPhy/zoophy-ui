@@ -84,3 +84,8 @@ input::-webkit-inner-spin-button {
 .help-info {
    cursor: help;
 }
+
+.sampleBox {
+  display: inline;
+  max-width: 5rem;
+}

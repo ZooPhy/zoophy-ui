@@ -15,6 +15,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.sortReverse = false;
   $scope.recordsPerPage = 25;
   $scope.warning = null;
+  $scope.sampleType = 'percent';
+  $scope.sampleAmount = 20;
 
   $scope.updateSort = function(field) {
     if (field === $scope.sortField) {
@@ -43,6 +45,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.downloadFormat = null;
       $scope.warning = null;
       $scope.downloadError = null;
+      $scope.sampleType = 'percent';
+      $scope.sampleAmount = 20;
     }
   });
 
@@ -130,28 +134,30 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
   };
 
-  $scope.validate = function (radio_type,text_value) {
+  $scope.validateDownSample = function() {
+    var sampleType = String($scope.sampleType);
+    var sampleAmount = Number($scope.sampleAmount);
     var check_for_validInput=false;
-    if(radio_type==='percent' ) { 
-      if(text_value > 0 && text_value <= 100){ 
+    if (sampleType === 'percent' ) { 
+      if (sampleAmount > 0 && sampleAmount <= 100) { 
         check_for_validInput=true;  
       }
     }
-    else if(radio_type==='number' ) { 
-      if(text_value > 0 && text_value <= $scope.results.length){ 
+    else if (sampleType === 'number' ) { 
+      if(sampleAmount > 0 && sampleAmount <= $scope.results.length){ 
         check_for_validInput=true;  
       }
     }
-    if(check_for_validInput===false) { 
+    if(check_for_validInput === false) { 
       $scope.warning = 'Invalid Downsample'; 
     }
     else {
       $scope.warning = null;
-      if(radio_type==='percent') {
-        $scope.downSamplePercent(text_value);
+      if (sampleType === 'percent') {
+        $scope.downSamplePercent(sampleAmount);
       }
-      else{
-        $scope.downSampleAmount(text_value);
+      else {
+        $scope.downSampleAmount(sampleAmount);
       }
     }
   };
