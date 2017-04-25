@@ -1,4 +1,9 @@
 <div ng-controller="resultsController" id="results" class="container" ng-show="tab === 'results'">
+  <div class="row">
+    <div id="search-error-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center" ng-show="warning">
+      <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{warning}}
+    </div>
+  </div>
   <div id="results-table" class="col-sm-9">
     <h5 class="text-center">Search Returned {{results.length}} results</h5>
     <h6 class="text-center">{{numSelected}} records are selected.
@@ -10,15 +15,11 @@
         <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
       </div>
       <div class="col-sm-4 text-right">
-        <!--<h6 class="text-right"><button class="btn btn-sm btn-default" ng-click="downSamplePercent(20);">Perform Random 20% Downsampling</button></h6>-->
         <label>Random Downsample:</label>
-        <input type="radio" name="number" id="number" ng-model="radioval" value="number" />Number
-        <input type="radio" name="percent" id="percent" ng-model="radioval" value="percent" />Percentage
-        <input type="text" name="textval" id="textbox" ng-model="textval" style="width:40px" />
-        <!--<div>{{radioval}} {{textval}}</div>-->
-        <button class="btn btn-sm btn-default" ng-click="check(radioval,textval);">Generate</button>
-        
-
+        <input type="radio" name="number" id="number" ng-model="radio_value" value="number" />Number
+        <input type="radio" name="percent" id="percent" ng-model="radio_value" value="percent" ng-checked="true" />Percentage
+        <input type="text" name="textval" id="textbox" ng-model="text_value" style="width:40px" />
+        <button class="btn btn-sm btn-default" ng-click="validate(radio_value,text_value);">Generate</button>
       </div>
     </div>
     <table class="table table-striped">
