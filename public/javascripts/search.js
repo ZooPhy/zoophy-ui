@@ -10,6 +10,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.fluAH = 1;
   $scope.fluANs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
   $scope.fluAN = 1;
+  $scope.fluBLineage = 'Victoria';
   $scope.isH1N1 = true;
   $scope.genes = [];
   var completeGenes = "Complete";
@@ -42,6 +43,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.fluAH = 1;
     $scope.fluAN = 1;
     $scope.isH1N1 = true;
+    $scope.fluBLineage = 'Victoria';
     $scope.host = $scope.allowed_values.hosts[0].tax_id;
     $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
     $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
@@ -139,6 +141,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.searchError = null;
     var virus = Number($scope.virus);
     var pdmo9 = false;
+    var lineage = null;
     if (virus === 11598) {
       virus = Number($scope.hantaSub);
     }
@@ -150,6 +153,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         pdmo9 = Boolean($scope.isPDMO9 === true);
       }
     }
+    else if (virus === 197912) {
+      lineage = String($scope.fluBLineage);
+    }
     var host = Number($scope.host);
     if (host === 8782) {
       host = Number($scope.avianHost);
@@ -157,6 +163,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     var query = 'TaxonID:'+virus+' AND HostID:'+host;
     if (pdmo9) {
       query += ' AND PH1N1:true';
+    }
+    if (lineage !== null) {
+      query += ' AND Lineage:'+lineage;
     }
     var genes = $scope.selectedGenes;
     if (genes.length > 0) {

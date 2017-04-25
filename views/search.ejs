@@ -55,6 +55,12 @@
           <label class="pdmo9-label">pdm09 Only?</label> <input ng-model="isPDMO9" type="checkbox"></input>
         </div>
       </div>
+      <div id="flub-lineage-container" ng-show="virus === 197912">
+        <label for="flub-lineage">Flu B Lineage</label>
+        <select id="flub-lineage" class="form-control" ng-model="fluBLineage" ng-options="lineage as lineage for lineage in allowed_values.fluBLineages">
+          <!-- handled by Angular -->
+        </select>
+      </div>
       <div id="hanta-sub-container" ng-show="virus === 11598">
         <label for="hanta-sub">Hantavirus Sub Type</label>
         <select id="hanta-sub" class="form-control" ng-model="hantaSub" ng-options="sub.tax_id as sub.name for sub in allowed_values.hantavirus_sub_types">

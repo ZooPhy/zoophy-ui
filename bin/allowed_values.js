@@ -116,6 +116,11 @@ const INFLUENZA_A_SUB_TYPE_IDS = [
 	[0, 0, 304360, 0, 0, 0, 0, 0, 1313083] //H16
 ];
 
+const INFLUENZA_B_LINEAGES = [
+  'Victoria',
+  'Yamagata'
+];
+
 const HANTAVIRUS_SUB_TYPES = [
   {
     name: 'Hantaan',
@@ -3049,6 +3054,7 @@ const AVIAN_HOSTS = [
 const ALLOWED_VALUES = {
   viruses: VIRUSES,
   influenza_a_sub_type_ids: INFLUENZA_A_SUB_TYPE_IDS,
+  fluBLineages: INFLUENZA_B_LINEAGES,
   hantavirus_sub_types: HANTAVIRUS_SUB_TYPES,
   continents: CONTINENTS,
   hosts: HOSTS,
