@@ -87,5 +87,6 @@ input::-webkit-inner-spin-button {
 
 .sampleBox {
   display: inline;
-  max-width: 5rem;
+  max-width: 7.5rem;
+  min-width: 5rem;
 }
