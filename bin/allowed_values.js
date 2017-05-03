@@ -1667,6 +1667,10 @@ const CONTINENTS = [
             geoname_id: 4142224
           },
           {
+            name: 'District of Columbia',
+            geoname_id: 4138106
+          },
+          {
             name: 'Florida',
             geoname_id: 4155751
           },
