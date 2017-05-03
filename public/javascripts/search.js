@@ -230,6 +230,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
         RecordData.setRecords(response.data.records);
+        RecordData.incrementSearchCount();
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
         }
@@ -244,8 +245,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $(window).scroll(function() {
       $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
     });
-    RecordData.setNumSelected(0);
-    RecordData.incrementSearchCount();
   };
 
   $scope.uploadAccessions = function(rawFile) {

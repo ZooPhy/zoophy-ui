@@ -92,7 +92,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
           if ($scope.jobName) {
             currentJobName = String($scope.jobName).trim();
           }
-          console.log($scope.customPredictors);
           var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
           var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
           var predictors = $scope.customPredictors;
@@ -112,7 +111,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
               substitutionModel: model
             }
           };
-          console.log(jobData);
           $http.post(runUri, jobData).then(function success(response) {
             $scope.running = false;
             if (response.status === 202) {
@@ -147,7 +145,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   };
 
   $scope.uploadPredictors = function(rawFile) {
-    console.log('file selected')
     $scope.runError = null;
     $scope.success = null;
     var newFile = rawFile[0];
@@ -157,9 +154,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
         $scope.fileToSend = newFile;
         $scope.filename = String(filename).trim();
         var fileUploader = $('#data-upload');
-        console.log(fileUploader)
-        // TODO reset fileUploader
-        fileUploader[0].files = null; // not working /:
+        fileUploader[0].files = null; // TODO not working /:
         fileUploader[0].value = null;
       }
       else {
