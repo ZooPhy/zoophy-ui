@@ -115,13 +115,13 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
             $scope.running = false;
             if (response.status === 202) {
               if (currentJobName) {
-                $scope.success = currentJobName;
+                $scope.success = 'Successfully Started the ZooPhy Job: '+currentJobName;
               }
               else {
                 $scope.success = response.data.message;
               }
               if (response.data.recordsRemoved.length > 0) {
-                var success = 'ZooPhy Job Started with '+response.data.recordsRemoved.length+' incomplete Records excluded from Job: '+response.data.recordsRemoved[0];
+                var success = 'Successfully Started the ZooPhy Job: '+currentJobName+'. The following '+response.data.recordsRemoved.length+' incomplete records were excluded from this job: '+response.data.recordsRemoved[0];
                 for (var i = 1; i < response.data.recordsRemoved.length; i++) {
                   success += ', '+response.data.recordsRemoved[i];
                 }
