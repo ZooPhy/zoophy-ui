@@ -18,7 +18,7 @@
         <label>Random Downsample:</label>
         <input type="radio" name="sampleTypeNumber" id="number" ng-model="sampleType" value="number"/>Number
         <input type="radio" name="sampleTypePercent" id="percent" ng-model="sampleType" value="percent" ng-checked="true"/>Percentage
-        <input class="form-control sampleBox" type="number" min="0" max="{{results.length}}" name="sampleAmount" ng-model="sampleAmount"/>
+        <input class="form-control sampleBox" type="number" min="0" name="sampleAmount" ng-model="sampleAmount"/>
         <button class="btn btn-sm btn-default" ng-click="validateDownSample();">Sample</button>
       </div>
     </div>
