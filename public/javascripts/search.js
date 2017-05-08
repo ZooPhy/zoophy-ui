@@ -282,6 +282,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Search returned 0 results.';
         }
+        RecordData.incrementSearchCount();
       }, function(error) {
         if (error.status !== 500) {
           $scope.searchError = error.data.error;
