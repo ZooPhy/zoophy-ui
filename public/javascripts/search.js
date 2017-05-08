@@ -296,6 +296,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
   };
 
+  $scope.showHelp = function() {
+    BootstrapDialog.show({
+      title: 'Accession Upload Help',
+      message: 'The Accession file needs to be a new line delimited .txt file containing 1 Accession per line. The current search limit is 2500 Accessions.'
+    });
+  };
+
 });
 
 /*
