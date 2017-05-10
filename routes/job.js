@@ -6,6 +6,8 @@ let checkInput = require('../bin/validator_tool').checkInput;
 let logger = require('../bin/logger_tool');
 let request = require('request');
 let fs = require('fs');
+let uuid = require('uuid/v4');
+let path = require('path');
 let multer = require('multer');
 const multerOptions = {
   dest: 'uploads/',
@@ -18,6 +20,7 @@ let GLMPredictor = require('../bin/glm_predictor');
 
 const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
 
+const DOWNLOAD_FOLDER = path.join(__dirname, '../public/downloads/');
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
 const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
 const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
@@ -203,6 +206,97 @@ router.post('/run', function(req, res) {
     result = {
       status: 500,
       error: 'Failed to start ZooPhy Job'
+    };
+    res.status(result.status).send(result);
+  }
+});
+
+router.post('/predictors/template', function(req, res) {
+  let result;
+  try {
+    if (req.body.accessions) {
+      let accessions = [];
+      let invalidAcc = -1;
+      for (let i = 0; i < req.body.accessions.length; i++) {
+        if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
+          accessions.push(String(req.body.accessions[i]));
+        }
+        else {
+          logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
+          invalidAcc = i;
+          break;
+        }
+      }
+      if (invalidAcc !== -1) {
+        result = {
+          status: 400,
+          error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc])
+        };
+        res.status(result.status).send(result);
+      }
+      else {
+        logger.info('Retrieving Predictors Download for '+accessions.length+' records...');
+        request.post({
+          url: API_URI+'/template',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(accessions)
+        }, function(error, response, body) {
+          if (error) {
+            logger.error(error);
+            result = {
+              status: 500,
+              error: String(error)
+            };
+            res.status(result.status).send(result);
+          }
+          else if (response.statusCode === 200) {
+            let fileName = String(uuid())+'.tsv';
+            let filePath = DOWNLOAD_FOLDER+fileName;
+            logger.info('Download received. Writing file: '+filePath);
+            let fileContents = String(body);
+            fs.writeFile(filePath, fileContents, function(err) {
+              if (err) {
+                logger.error('Error writing download: '+err);
+                result = {
+                  status: 500,
+                  error: 'Error writing download'
+                };
+              }
+              else {
+                result = {
+                  status: 200,
+                  downloadPath: '/downloads/'+fileName
+                };
+              }
+              res.status(result.status).send(result);
+            });
+          }
+          else {
+            logger.error('Download request failed: '+response.statusCode);
+            result = {
+              status: 500,
+              error: 'ZooPhy API Download Request Failed'
+            };
+            res.status(result.status).send(result);
+          }
+        });
+      }
+    }
+    else {
+      result = {
+        status: 400,
+        error: 'Missing Accessions'
+      };
+      res.status(result.status).send(result);
+    }
+  }
+  catch (err) {
+    logger.error('Failed to load Predictor Template: '+err);
+    result = {
+      status: 500,
+      error: 'Failed to load Predictor Template'
     };
     res.status(result.status).send(result);
   }
