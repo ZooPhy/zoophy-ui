@@ -252,7 +252,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.showHelp = function() {
     BootstrapDialog.show({
       title: 'Custom Predictors Upload Help',
-      message: 'Follow the steps below to use custom GLM predictors for your ZooPhy Job:\n 1) Generate .tsv template with Job locations\n 2) Fill template with your own Predictor data\n 3) Upload completed template and run Job'
+      message: 'Follow the steps below to use custom GLM predictors for your ZooPhy Job:\n 1) Generate .tsv template with Job locations\n 2) Fill template with your own Predictor data\n 3) Upload completed template\n\nFor more details on Predictor file formatting, visit the <a target="_new" href="https://github.com/djmagee5/BEAST_GLM#predictor-data-file-requirements">BEAST_GLM</a> page.'
     });
   };
 
