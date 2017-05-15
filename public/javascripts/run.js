@@ -156,9 +156,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       if (PREDICTOR_FILE_RE.test(filename)) {
         $scope.fileToSend = newFile;
         $scope.filename = String(filename).trim();
-        var fileUploader = $('#data-upload');
-        fileUploader[0].files = null; // TODO not working /:
-        fileUploader[0].value = null;
+        setPredictors();
       }
       else {
         $scope.runError = 'Invalid File Name. Must be .tsv file.';
@@ -170,7 +168,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.$apply();
   };
 
-  $scope.setPredictors = function() {
+  function setPredictors() {
     $scope.runError = null;
     $scope.success = null;
     if ($scope.fileToSend) {
@@ -202,6 +200,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.fileToSend = null;
       $scope.filename = 'none';
       $scope.customPredictors = null;
+      $scope.downloadLink = null;
       $scope.runError = null;
     }
     else {
@@ -232,7 +231,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
         $scope.generating = false;
       }
       else {
-        var downloadURI = SERVER_URI+'/predictors/template';
+        var downloadURI = SERVER_URI+'/job/predictors/template';
         var downloadList = {accessions: downloadAccessions};
         $http.post(downloadURI, downloadList).then(function success(response) {
           $scope.generating = false;
@@ -240,14 +239,21 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
             $scope.downloadLink = SERVER_URI+response.data.downloadPath;
           }
           else {
-            $scope.runError = 'Error generating download';
+            $scope.runError = 'Error Generating Download';
           }
         }, function failure(response) {
           $scope.generating = false;
-          $scope.runError = 'Error generating download';
+          $scope.runError = 'Error Generating Download';
         });
       }
     }
+  };
+
+  $scope.showHelp = function() {
+    BootstrapDialog.show({
+      title: 'Custom Predictors Upload Help',
+      message: 'Follow the steps below to use custom GLM predictors for your ZooPhy Job:\n 1) Generate .tsv template with Job locations\n 2) Fill template with your own Predictor data\n 3) Upload completed template and run Job'
+    });
   };
 
 });
