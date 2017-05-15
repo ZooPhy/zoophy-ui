@@ -282,6 +282,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Search returned 0 results.';
         }
+        RecordData.incrementSearchCount();
       }, function(error) {
         if (error.status !== 500) {
           $scope.searchError = error.data.error;
@@ -294,6 +295,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     else {
       $scope.searchError = 'No Accession File Selected';
     }
+  };
+
+  $scope.showHelp = function() {
+    BootstrapDialog.show({
+      title: 'Accession Upload Help',
+      message: 'The Accession file needs to be a new line delimited .txt file containing 1 Accession per line. The current search limit is 2500 Accessions.'
+    });
   };
 
 });

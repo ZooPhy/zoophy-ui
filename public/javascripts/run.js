@@ -23,6 +23,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.fileToSend = null;
   $scope.filename = 'none';
   $scope.glmButtonClass = null;
+  $scope.generating = false;
+  $scope.downloadLink = null;
 
   $scope.reset = function() {
     $scope.useDefaultGLM = false;
@@ -40,6 +42,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.filename = 'none';
     $scope.glmButtonClass = null;
     $scope.numSelected = RecordData.getNumSelected();
+    $scope.downloadLink = null;
   };
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function(newValue, oldValue) {
@@ -153,9 +156,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       if (PREDICTOR_FILE_RE.test(filename)) {
         $scope.fileToSend = newFile;
         $scope.filename = String(filename).trim();
-        var fileUploader = $('#data-upload');
-        fileUploader[0].files = null; // TODO not working /:
-        fileUploader[0].value = null;
+        setPredictors();
       }
       else {
         $scope.runError = 'Invalid File Name. Must be .tsv file.';
@@ -167,7 +168,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.$apply();
   };
 
-  $scope.setPredictors = function() {
+  function setPredictors() {
     $scope.runError = null;
     $scope.success = null;
     if ($scope.fileToSend) {
@@ -199,11 +200,60 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.fileToSend = null;
       $scope.filename = 'none';
       $scope.customPredictors = null;
+      $scope.downloadLink = null;
       $scope.runError = null;
     }
     else {
       $scope.glmButtonClass = null;
     }
+  };
+
+  $scope.setupGLMTemplate = function() {
+    if ($scope.generating === false && $scope.running === false) {
+      $scope.generating = true;
+      $scope.downloadLink = null;
+      $scope.runError = null;
+      $scope.success = null;
+      $scope.warning = null;
+      var downloadAccessions = [];
+      var records = RecordData.getRecords();
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].includeInJob) {
+          downloadAccessions.push(records[i].accession);
+        }
+      }
+      if (downloadAccessions.length < 5) {
+        $scope.runError = 'Too Few Records, Minimun is 5';
+        $scope.generating = false;
+      }
+      else if (downloadAccessions.length > 1000) {
+        $scope.runError = 'Too Many Records, Maximum is 1000';
+        $scope.generating = false;
+      }
+      else {
+        var downloadURI = SERVER_URI+'/job/predictors/template';
+        var downloadList = {accessions: downloadAccessions};
+        $http.post(downloadURI, downloadList).then(function success(response) {
+          $scope.generating = false;
+          if (response.status === 200) {
+            $scope.downloadLink = SERVER_URI+response.data.downloadPath;
+          }
+          else {
+            $scope.runError = 'Error Generating Download';
+          }
+        }, function failure(response) {
+          $scope.generating = false;
+          $scope.runError = 'Error Generating Download';
+        });
+      }
+    }
+  };
+
+  $scope.showHelp = function() {
+    BootstrapDialog.show({
+      title: 'Custom Predictors Upload Help',
+      message: 'Follow the steps below to use custom GLM predictors for your ZooPhy Job:\n 1) Generate .tsv template with Job locations\n 2) Fill template with your own Predictor data\n 3) Upload completed template and run Job'
+    });
   };
 
 });
