@@ -75,6 +75,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail.trim())) {
         var jobAccessions = [];
         var records = RecordData.getRecords();
+        var isGenbankJob = Boolean(RecordData.isTypeGenbank());
         for (var i = 0; i < records.length; i++) {
           if (records[i].includeInJob) {
             jobAccessions.push(records[i].accession);
@@ -89,55 +90,125 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
           $scope.running = false;
         }
         else {
-          var runUri = SERVER_URI+'/job/run';
-          var email = String($scope.jobEmail).trim();
-          var currentJobName = null;
-          if ($scope.jobName) {
-            currentJobName = String($scope.jobName).trim();
-          }
-          var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
-          var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
-          var predictors = $scope.customPredictors;
-          var chain = Number($scope.chainLength);
-          var rate = Number($scope.subSampleRate);
-          var model = String($scope.substitutionModel);
-          var prior = String($scope.treePrior).trim();//TODO enable in job services
-          var jobData = {
-            replyEmail: email,
-            jobName: currentJobName,
-            accessions: jobAccessions,
-            useGLM: glm,
-            predictors: predictors,
-            xmlOptions: {
-              chainLength: chain,
-              subSampleRate: rate,
-              substitutionModel: model
+          //Submit the job to appropriate URL
+          if (isGenbankJob){
+            //Genbank Job
+            var runUri = SERVER_URI+'/job/run';
+            var email = String($scope.jobEmail).trim();
+            var currentJobName = null;
+            if ($scope.jobName) {
+              currentJobName = String($scope.jobName).trim();
             }
-          };
-          $http.post(runUri, jobData).then(function success(response) {
-            $scope.running = false;
-            if (response.status === 202) {
-              if (currentJobName) {
-                $scope.success = 'Successfully Started the ZooPhy Job: '+currentJobName;
+            var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
+            var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
+            var predictors = $scope.customPredictors;
+            var chain = Number($scope.chainLength);
+            var rate = Number($scope.subSampleRate);
+            var model = String($scope.substitutionModel);
+            var prior = String($scope.treePrior).trim();//TODO enable in job services
+            var jobData = {
+              replyEmail: email,
+              jobName: currentJobName,
+              accessions: jobAccessions,
+              sequences: jobSequences,
+              useGLM: glm,
+              predictors: predictors,
+              isGenbankJob: isGenbankJob,
+              xmlOptions: {
+                chainLength: chain,
+                subSampleRate: rate,
+                substitutionModel: model
+              }
+            };
+            $http.post(runUri, jobData).then(function success(response) {
+              $scope.running = false;
+              if (response.status === 202) {
+                if (currentJobName) {
+                  $scope.success = 'Successfully Started the ZooPhy Job: '+currentJobName;
+                }
+                else {
+                  $scope.success = response.data.message;
+                }
+                if (response.data.recordsRemoved.length > 0) {
+                  var success = 'Successfully Started the ZooPhy Job: '+currentJobName+'. The following '+response.data.recordsRemoved.length+' incomplete records were excluded from this job: '+response.data.recordsRemoved[0];
+                  for (var i = 1; i < response.data.recordsRemoved.length; i++) {
+                    success += ', '+response.data.recordsRemoved[i];
+                  }
+                  $scope.success = success;
+                }
               }
               else {
-                $scope.success = response.data.message;
+                $scope.runError = 'Job Validation Failed: '+response.data.error;
               }
-              if (response.data.recordsRemoved.length > 0) {
-                var success = 'Successfully Started the ZooPhy Job: '+currentJobName+'. The following '+response.data.recordsRemoved.length+' incomplete records were excluded from this job: '+response.data.recordsRemoved[0];
-                for (var i = 1; i < response.data.recordsRemoved.length; i++) {
-                  success += ', '+response.data.recordsRemoved[i];
+            }, function failure(response) {
+              $scope.running = false;
+              $scope.runError = 'Job Validation Failed due to Unknown Error';
+            });
+          } else {
+            // FASTA Job
+            var jobSequences = [];
+            for (var i = 0; i < records.length; i++) {
+              if (records[i].includeInJob) {
+                var jobSequence = {
+                  id:records[i].accession,
+                  collectionDate:records[i].date,
+                  geonameID:records[i].geonameid,
+                  rawSequence:records[i].sequence
                 }
-                $scope.success = success;
+                jobSequences.push(jobSequence);
               }
             }
-            else {
-              $scope.runError = 'Job Validation Failed: '+response.data.error;
+            var runUri = SERVER_URI+'/job/runcustom';
+            var email = String($scope.jobEmail).trim();
+            var currentJobName = null;
+            if ($scope.jobName) {
+              currentJobName = String($scope.jobName).trim();
             }
-          }, function failure(response) {
-            $scope.running = false;
-            $scope.runError = 'Job Validation Failed due to Unknown Error';
-          });
+            var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
+            var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
+            var predictors = $scope.customPredictors;
+            var chain = Number($scope.chainLength);
+            var rate = Number($scope.subSampleRate);
+            var model = String($scope.substitutionModel);
+            var prior = String($scope.treePrior).trim();//TODO enable in job services
+            var jobData = {
+              replyEmail: email,
+              jobName: currentJobName,
+              records: jobSequences,
+              useGLM: glm,
+              predictors: predictors,
+              isGenbankJob: isGenbankJob,
+              xmlOptions: {
+                chainLength: chain,
+                subSampleRate: rate,
+                substitutionModel: model
+              }
+            };
+            $http.post(runUri, jobData).then(function success(response) {
+              $scope.running = false;
+              if (response.status === 202) {
+                if (currentJobName) {
+                  $scope.success = 'Successfully Started the ZooPhy Job: '+currentJobName;
+                }
+                else {
+                  $scope.success = response.data.message;
+                }
+                if (response.data.recordsRemoved.length > 0) {
+                  var success = 'Successfully Started the ZooPhy Job: '+currentJobName+'. The following '+response.data.recordsRemoved.length+' incomplete records were excluded from this job: '+response.data.recordsRemoved[0];
+                  for (var i = 1; i < response.data.recordsRemoved.length; i++) {
+                    success += ', '+response.data.recordsRemoved[i];
+                  }
+                  $scope.success = success;
+                }
+              }
+              else {
+                $scope.runError = 'Job Validation Failed: '+response.data.error;
+              }
+            }, function failure(response) {
+              $scope.running = false;
+              $scope.runError = 'Job Validation Failed due to Unknown Error';
+            });
+          }
         }
       }
       else {

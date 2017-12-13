@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>ZooPhy</title>
+    <meta name="author" content="ASU Biodesign Center for Environmental Security's ZooPhy Lab">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-dialog/1.34.7/css/bootstrap-dialog.min.css">
+    <link rel="stylesheet" href="stylesheets/app.css">    
+    <nav class="navbar navbar-default" role="navigation">
+      <div class="container">
+          <div class="navbar-header"></div>
+          <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li><img id="main-logo" class="img-rounded img-responsive" src="images/zoophy.png"/></li>
+            </ul>
+            <ul class="nav navbar-nav navbar-center">
+                <li><h3>About ZooPhy</h3></li>
+              </ul>
+          </div>
+      </div>
+    </nav>
+  </head>
+  <body>
+    <div ng-controller="aboutController" id="about" class="container">
+      <div class="row">
+        <h3>What is ZooPhy?</h3>
+        <h4>ZooPhy is a public health informatics application for phylogeography of zoonotic RNA viruses.<h4>
+      </div>
+      <div class="row">
+        <h3>Who is it intended for?</h3>
+        <h4>The intended users of ZooPhy are health agencies, agriculture agencies, wildlife agencies, and any other researcher interested in surveillance of zoonotic diseases in either animals or humans. <h4>
+      </div>
+      <div class="row">
+          <h3>I am not any of those. Can I still use ZooPhy?</h3>
+          <h4>Yes, ZooPhy is freely available to the public with the hope that it will help enhance population surveillance of human and animal zoonotic diseases and inform public health decision making.<h4>
+      </div>
+      <div class="row">
+        <h3>What can I use ZooPhy for?</h3>
+        <h4>
+          Phylogeography of viruses, such as zoonotic viruses (animal-human transmission) can support public health and disease surveillance. 
+          <br>For example, it can help epidemiologists answer questions such as 
+          <i>Given a particular geographical area and timeframe:
+          <ul>
+            <li>Which animal hosts most impact virus propagation?</li>
+            <li>For a particular virus, what was the migration path?</li>
+            <li>Where is virus going?</li>
+            <li>What was the trend of the estimated viral population within a specific animal host?</li>
+          </ul>
+          </i>
+        <h4>
+      </div>
+      <div class="row">
+        <h3>What are its functions and features?</h3>
+        <h4>ZooPhy can do the following functions:<h4>
+        <h4><b><i>Bayesian phylogeographic trees : </i></b> ZooPhy includes its own webservice for Bayesian Evolutionary Analysis by Sampling Trees (BEAST) to produce different models of evolution.<h4>
+        <h4><b><i>Bayesian skyline plots : </i></b> Through BEAST, ZooPhy can produce Bayesian skyline plots for analysis of population genetics and estimates of viral population over time.<h4>
+        <h4><b><i>Multiple sequence alignment : </i></b> ZooPhy utilizes a webservice to connect to Clustal to perform alignment of nucleotide or amino acid sequences.<h4>
+        <h4><b><i>Evaluation of substitution models : </i></b> Through jModeltest, ZooPhy can evaluate the fit of up to 88 different substitution models for a given input of aligned nucleotide sequences.<h4>
+      </div>
+      <div class="row">
+        <h3>How can I cite ZooPhy?</h3>
+        <h4>The publications related to ZooPhy are:<h4>
+          <i><ul>
+            <li>Scotch M, Mei C, Brandt C, Sarkar IN, Cheung K. At the intersection of public-health informatics and bioinformatics: using advanced Web technologies for phylogeography. Epidemiology. 2010 Nov;21(6):764-8.</li>
+            <li>Scotch M, Mei C. Phylogeography of swine influenza H3N2 in the United States: translational public health for zoonotic disease surveillance. Infect Genet Evol. 2013 Jan;13:224-9.</li>
+          </ul></i>
+      </div>
+      <div class="row">
+        <h3></h3>
+        <h4><h4>
+      </div>
+      <div class="row">
+        <h3></h3>
+        <h4><h4>
+      </div>
+      <!-- <div class="row">
+        <h3></h3>
+        <h4><h4>
+      </div>
+      <div class="row">
+        <h3></h3>
+        <h4><h4>
+      </div>
+      <div class="row">
+        <h3></h3>
+        <h4><h4>
+      </div>
+      <div class="row">
+        On Search tab
+        Users can search by type, by accession, or upload their own FASTA
+      </div>
+      <div class="row">
+        On Results tab
+        Users can select the records to include
+      </div>
+      <div class="row">
+        On Run tab
+        Users can specify their parameters required for running the job
+      </div> -->
+    </div>
+  </body>
+</html>

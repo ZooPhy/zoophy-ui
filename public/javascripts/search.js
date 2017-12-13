@@ -29,12 +29,16 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.isPDMO9 = false;
   $scope.filename = 'none';
   $scope.fileToSend = null;
-
+  
+  $scope.fastaFilename = 'none';
+  $scope.fastaFile = null;
+  
   $scope.showDetails = false;
   $scope.selectedRecord = null;
   $scope.searchError = null;
 
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
+  var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
 
   $scope.reset = function() {
     $scope.virus = $scope.allowed_values.viruses[0].tax_id;
@@ -230,6 +234,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
         RecordData.setRecords(response.data.records);
+        RecordData.setTypeGenbank(true);
         RecordData.incrementSearchCount();
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
@@ -276,6 +281,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
           headers: {'Content-Type': undefined}
       }).then(function (response) {
         RecordData.setRecords(response.data.records);
+        RecordData.setTypeGenbank(true);
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
         }
@@ -301,6 +307,66 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     BootstrapDialog.show({
       title: 'Accession Upload Help',
       message: 'The Accession file needs to be a new line delimited .txt file containing 1 Accession per line. The current search limit is 2500 Accessions.'
+    });
+  };
+
+  $scope.uploadFasta = function(rawFile) {
+    $scope.searchError = null;
+    var newFile = rawFile[0];
+    if (newFile && newFile.size < 1000000) { //1mb
+      var filename = newFile.name.trim();
+      console.log(filename);
+      if (FASTA_FILE_RE.test(filename)) {
+        $scope.fastaFile = newFile;
+        $scope.fastaFilename = String(filename).trim();
+      }
+      else {
+        $scope.searchError = 'Invalid File Name. Must be .txt file.';
+      }
+    }
+    else {
+      $scope.searchError = 'Invalid File Size. Limit is 1mb.';
+    }
+    $scope.$apply();
+  };
+
+  $scope.sendFasta = function() {
+    $scope.searchError = null;
+    if ($scope.fastaFile) {
+      var form = new FormData();
+      var uri = SERVER_URI+'/upfasta';
+      form.append('fastaFile', $scope.fastaFile);
+      console.log("Posting " + uri + " " + $scope.fastaFile.type)
+      $http.post(uri, form, {
+          headers: {'Content-Type': undefined}
+      }).then(function (response) {
+        RecordData.setRecords(response.data.records);
+        RecordData.setTypeGenbank(false);
+        if (response.data.records.length > 0) {
+          $scope.$parent.switchTabs('results');
+        }
+        else {
+          $scope.searchError = 'Processed 0 results.';
+        }
+        RecordData.incrementSearchCount();
+      }, function(error) {
+        if (error.status !== 500) {
+          $scope.searchError = error.data.error;
+        }
+        else {
+          $scope.searchError = 'Parsing Failed on Server. Please refresh and try again.';
+        }
+      });
+    }
+    else {
+      $scope.searchError = 'No FASTA File Selected';
+    }
+  };
+
+  $scope.showFASTAHelp = function() {
+    BootstrapDialog.show({
+      title: 'FASTA Upload Help',
+      message: 'The FILE file needs to have a metadata line preceded by the > symbol. It should be followed by a new line and the sequence string. The current file size limit is 10mb.'
     });
   };
 

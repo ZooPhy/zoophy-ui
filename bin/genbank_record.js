@@ -40,6 +40,24 @@ function humanizeLuceneDate(luceneDate) {
   return UNKNOWN;
 };
 
+function leapYear(year) {
+  return ((year % 4 == 0) && (year % 100 != 0)) || (year % 400 == 0);
+};
+
+function convertDecimalDate(decimalDate) {
+  var year = parseInt(decimalDate);
+  var reminder = decimalDate - year;
+  if (reminder > 0){
+    var daysPerYear = leapYear(year) ? 366 : 365;
+    var miliseconds = reminder * daysPerYear * 24 * 60 * 60 * 1000;
+    var yearDate = new Date(year, 0, 1);
+    yearDate = new Date(yearDate.getTime() + miliseconds)
+    return yearDate.getDate() + "-" + getMonth(yearDate.getMonth()+1) + "-" + year;
+  } else {
+    return "01" + "-" + "Jan" + "-" + year;
+  }
+}
+
 function getMonth(numMonth) {
   numMonth = Number(numMonth);
   switch (numMonth) {
@@ -152,7 +170,32 @@ class SQLRecord {
 
 };
 
+class CustomRecord {
+  constructor(searchApiRecord) {
+    this.accession = String(searchApiRecord.accession);
+    this.genes = UNKNOWN;
+    this.virus = UNKNOWN;
+    this.luceneDate = UNKNOWN;
+    this.host = UNKNOWN;
+    // this.date = convertDecimalDate(searchApiRecord.collectionDate);
+    this.date = searchApiRecord.collectionDate;
+    if (searchApiRecord.geonameLocation) {
+      this.country = String(searchApiRecord.geonameLocation.country || UNKNOWN);
+      this.location = String(searchApiRecord.geonameLocation.location || UNKNOWN);
+      this.geonameid = String(searchApiRecord.geonameLocation.geonameID || UNKNOWN);
+    } else {
+      this.country = UNKNOWN;
+      this.location = UNKNOWN;
+      this.geonameid = UNKNOWN;
+    }
+    this.segmentLength = searchApiRecord.rawSequence.length;
+    this.sequence = searchApiRecord.rawSequence;
+    this.includeInJob = false;
+  };
+};
+
 module.exports = {
   LuceneRecord: LuceneRecord,
-  SQLRecord: SQLRecord
+  SQLRecord: SQLRecord,
+  CustomRecord: CustomRecord
 };

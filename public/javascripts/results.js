@@ -31,7 +31,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
       if ($scope.results.length > 0) {
-        $scope.loadDetails($scope.results[0].accession);
+        $scope.loadDetails($scope.results[0]);
       }
       $scope.groupIsSelected = false;
       $scope.numSelected = 0;
@@ -46,17 +46,25 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
   });
 
-  $scope.loadDetails = function(accession) {
-    $scope.warning = null;
-    $http.get(SERVER_URI+'/record?accession='+accession.trim()).then(function(response) {
-      if (response.status === 200) {
-        $scope.selectedRecord = response.data.record;
-        $scope.showDetails = true;
-      }
-      else {
-        $scope.warning = 'Could not load record: '+accession;
-      }
-    });
+  $scope.loadDetails = function(selrecord) {
+    var isGenbankJob = Boolean(RecordData.isTypeGenbank());
+    if(isGenbankJob){
+      $scope.warning = null;
+      $http.get(SERVER_URI+'/record?accession='+selrecord.accession.trim()).then(function(response) {
+        if (response.status === 200) {
+          $scope.selectedRecord = response.data.record;
+          $scope.showDetails = true;
+          $scope.showCustDetails = false;
+        }
+        else {
+          $scope.warning = 'Could not load record: '+selrecord;
+        }
+      });
+    } else {
+      $scope.selectedRecord = selrecord;
+      $scope.showDetails = false;
+      $scope.showCustDetails = true;
+}
   };
 
   $scope.toggleRecord = function(record) {

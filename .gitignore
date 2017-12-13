@@ -43,3 +43,6 @@ coverage/*
 
 # VS code crap
 .vscode/*
+
+# project local content
+files
