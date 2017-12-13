@@ -98,16 +98,13 @@
   <div class="row col-xs-12 pushed-down">
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
-      <div class="col-sm-6 col-xs-12 col-xs-offset-1">
-        <label ng-click="showHelp();">Accession List Search <span class="help-info" data-toggle="tooltip" data-placement="top" title="Line delimited text (.txt) file of up to 2500 GenBank Accessions"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+      <div class="col-sm-6 col-xs-12">
+        <label ng-click="showHelp();">Search using GenBank Accessions <span class="help-info" data-toggle="tooltip" data-placement="top" title="Line delimited text (.txt) file of up to 2500 GenBank Accessions"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
         <input type="button" class="btn btn-info btn-sm fa" ng-click="sendAccessions();" value="&#xf093; Upload File" ng-disabled="fileToSend === null || fileToSend === undefined"></input>
         <label class="btn btn-default btn-file btn-sm">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadAccessions(this.files);"></input></label>
         {{filename}}
       </div>
-    </div>
-    <label data-toggle="collapse" class="btn btn-default" data-target="#upload-fasta"><i class="fa fa-sliders" aria-hidden="true"></i> Upload FASTA</label>
-    <div id="upload-fasta" class="row pushed-down collapse">
-      <div class="col-sm-6 col-xs-12 col-xs-offset-1">
+      <div class="col-sm-6 col-xs-12">
         <label ng-click="showFastaHelp();">Upload FASTA file <span class="help-info" data-toggle="tooltip" data-placement="top" title="Upload sequences in FASTA format (upto 10mb/1000 accessions)"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
         <input type="button" class="btn btn-info btn-sm fa" ng-click="sendFasta();" value="&#xf093; Upload FASTA" ng-disabled="fastaFile === null || fastaFile === undefined"></input>
         <label class="btn btn-default btn-file btn-sm">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadFasta(this.files);"></input></label>
