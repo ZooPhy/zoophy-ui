@@ -31,10 +31,10 @@ const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
 const MODEL_RE = /^(HKY)$/;
 
 const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
-// const FASTA_MET_DATE_RE = /^\d{4}((\-(0?[1-9]|1[012])?\-(0?[1-9]|[12][0-9]|3[01]))|(\.\d{1,4}))?$/;
-const FASTA_MET_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
-// const FASTA_MET_LOC_RE = /^((([a-zA-Z-]){1,30})|\d{4,10})?$/;
-const FASTA_MET_LOC_RE = /^\d{4,10}$/;
+const FASTA_MET_HUM_DATE_RE = /^((0[1-9]|[12][0-9]|3[01])\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
+const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
+const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
+const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
 
 let router = express.Router();
@@ -235,8 +235,8 @@ router.post('/runcustom', function(req, res) {
       for (let i = 0; i < req.body.records.length; i++) {
         
         if (checkInput(req.body.records[i].id, 'string', FASTA_MET_UID_RE) &&
-              checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_DATE_RE) &&
-              checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_LOC_RE) &&
+              (checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_GEOID_RE) || checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_LOCNAME_RE)) &&
+              (checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_DEC_DATE_RE)) &&
               checkInput(req.body.records[i].rawSequence, 'string', FASTA_MET_SEQ_RE)) {
           let rec = {
             id:String(req.body.records[i].id),

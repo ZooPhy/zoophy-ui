@@ -39,13 +39,16 @@ let upfasta = multer(multerOptionsFasta);
 
 const FASTA_UPLOAD_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
 const FASTA_UPLOAD_LIMIT = 1000;
-const FASTA_MET_ITEMS = 4;
+const FASTA_MET_ITEMS = 3;
 const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
-// const FASTA_MET_DATE_RE = /^\d{4}((\-(0?[1-9]|1[012])?\-(0?[1-9]|[12][0-9]|3[01]))|(\.\d{1,4}))?$/;
-const FASTA_MET_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
-// const FASTA_MET_LOC_RE = /^((([a-zA-Z-]){1,30})|\d{4,10})?$/;
-const FASTA_MET_LOC_RE = /^\d{4,10}$/;
+// const FASTA_MET_NORM_DATE_RE = /^\d{4}((\-(0?[1-9]|1[012])?\-(0?[1-9]|[12][0-9]|3[01]))|(\.\d{1,4}))?$/;
+const FASTA_MET_HUM_DATE_RE = /^((0[1-9]|[12][0-9]|3[01])\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
+const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
+const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
+const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
+
+
 let router = express.Router();
 
 router.get('/', function(req, res) {
@@ -450,8 +453,8 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                     let loc = metitems[1];
                     let date = metitems[2];
                     if (checkInput(uid, 'string', FASTA_MET_UID_RE) &&
-                      checkInput(loc, 'string', FASTA_MET_LOC_RE) &&
-                      checkInput(date, 'string', FASTA_MET_DATE_RE) &&
+                      (checkInput(loc, 'string', FASTA_MET_LOCNAME_RE) || checkInput(loc, 'string', FASTA_MET_GEOID_RE)) &&
+                      (checkInput(date, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(date, 'string', FASTA_MET_DEC_DATE_RE)) &&
                       checkInput(seqData, 'string', FASTA_MET_SEQ_RE)) {
                         let cust_record = {
                           "id" : uid,

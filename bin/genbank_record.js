@@ -1,6 +1,8 @@
 'use strict';
 
+let checkInput = require('../bin/validator_tool').checkInput;
 const UNKNOWN = 'Unknown';
+const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 
 function stringifyGenes(geneList) {
   if (geneList && geneList.length > 0) {
@@ -177,8 +179,11 @@ class CustomRecord {
     this.virus = UNKNOWN;
     this.luceneDate = UNKNOWN;
     this.host = UNKNOWN;
-    // this.date = convertDecimalDate(searchApiRecord.collectionDate);
-    this.date = searchApiRecord.collectionDate;
+    if(checkInput(searchApiRecord.collectionDate, 'string', FASTA_MET_DEC_DATE_RE)){
+      this.date = convertDecimalDate(searchApiRecord.collectionDate);
+    } else {
+      this.date = searchApiRecord.collectionDate;
+    }
     if (searchApiRecord.geonameLocation) {
       this.country = String(searchApiRecord.geonameLocation.country || UNKNOWN);
       this.location = String(searchApiRecord.geonameLocation.location || UNKNOWN);
