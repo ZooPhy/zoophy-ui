@@ -41,6 +41,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
 
   $scope.reset = function() {
+    $scope.searchError = null;
     $scope.virus = $scope.allowed_values.viruses[0].tax_id;
     $scope.hantaSub = 11599;
     $scope.fluAH = 1;
@@ -49,7 +50,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.host = $scope.allowed_values.hosts[0].tax_id;
     $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
     $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
-    $scope.genes.push(completeGenes);
+    // $scope.genes.push(completeGenes);
     $scope.selectedGenes = [];
     $scope.continent = 1;
     $scope.selectedCountries = [];
@@ -61,7 +62,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.isPDMO9 = false;
     $scope.filename = 'none';
     $scope.fileToSend = null;
-  };
+    $scope.fastaFilename = 'none';
+    $scope.fastaFile = null;
+    };
 
   $scope.checkH1N1 = function() {
     $scope.isH1N1 = Boolean($scope.fluAH === 1 && $scope.fluAN === 1);
@@ -70,7 +73,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.updateGenes = function() {
     var virusIndex = $('#virus')[0].selectedIndex;
     $scope.genes = $scope.allowed_values.viruses[virusIndex].genes.slice();
-    $scope.genes.push(completeGenes);
+    if($scope.allowed_values.viruses[virusIndex].tax_id != 0) {
+      $scope.genes.push(completeGenes);
+      // $scope.search-btn = 
+    } else {
+      //search-btn
+
+    }
   };
 
   $scope.updateCountries = function() {
@@ -131,7 +140,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       $('#regions-container').removeClass('hidden');
       $scope.virus = $scope.allowed_values.viruses[0].tax_id;
       $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
-      $scope.genes.push(completeGenes);
+      // if($scope.genes = $scope.allowed_values.viruses[virusIndex].tax_id != 0) {
+      //   $scope.genes.push(completeGenes);
+      // }
       $scope.updateCountries();
     }
     else {

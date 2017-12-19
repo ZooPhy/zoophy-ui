@@ -130,7 +130,7 @@
   <div class="row">
     <div class="col-xs-12 pushed-down">
       <button class="btn btn-warning pull-left" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>
-      <button class="btn btn-info pull-right search-button" ng-click="search();"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+      <button class="btn btn-info pull-right search-button" ng-click="search();" ng-model="searchBtn" ng-disabled="virus === 0"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
     </div>
   </div>
 </div>
