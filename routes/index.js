@@ -29,10 +29,34 @@ const ACCESSION_UPLOAD_RE = /^(\w|-|\.){1,250}?\.txt$/;
 const ACCESSION_VERSION_RE = /^([A-Z]|\d|_|\.){5,10}?\.\d{1,2}?$/;
 const UPLOAD_QUERY_LIMIT = 2500;
 
+const multerOptionsFasta = {
+  dest: 'upfasta/',
+  limits: {
+    fileSize: 1000000 //1mb
+  }
+};
+let upfasta = multer(multerOptionsFasta);
+
+const FASTA_UPLOAD_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
+const FASTA_UPLOAD_LIMIT = 1000;
+const FASTA_MET_ITEMS = 3;
+const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
+// const FASTA_MET_NORM_DATE_RE = /^\d{4}((\-(0?[1-9]|1[012])?\-(0?[1-9]|[12][0-9]|3[01]))|(\.\d{1,4}))?$/;
+const FASTA_MET_HUM_DATE_RE = /^((0[1-9]|[12][0-9]|3[01])\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
+const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
+const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
+const FASTA_MET_LOCNAME_RE = /^((([\w -,']){1,30})|\d{4,10})?$/;
+const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
+
+
 let router = express.Router();
 
 router.get('/', function(req, res) {
   res.status(200).render('home', {allowed_values: ALLOWED_VALUES});
+});
+
+router.get('/about', function(req, res) {
+  res.status(200).render('about');
 });
 
 router.get('/allowed', function(req, res) {
@@ -385,5 +409,158 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
     res.status(result.status).send(result);
   }
 });
+
+router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
+  let result;
+  try {
+    if (req.file) {
+      logger.info('Processing FASTA file upload...');
+      let fastaFile = req.file;
+      if (checkInput(fastaFile.originalname, 'string', FASTA_UPLOAD_RE)) {
+        fs.readFile(fastaFile.path, function (err, data) {
+          if (err) {
+            logger.error(error);
+            result = {
+              status: 500,
+              error: String(error)
+            };
+            res.status(result.status).send(result);
+          }
+          else {
+            let rawRecords = data.toString().trim().split('>');
+            fs.unlink(fastaFile.path, function (err) {
+              if (err) {
+                logger.warn('Failed to delete valid file: '+fastaFile.path);
+              }
+              else {
+                logger.info('Successfully deleted valid file.');
+              }
+            });
+            let cleanRecords = [];
+            let fileErrors = [];
+            for (let i = 1; i < rawRecords.length && i < FASTA_UPLOAD_LIMIT; i++) {
+              let fastaLines = rawRecords[i].split(/\r?\n+/);
+              if(fastaLines.length > 1) {
+                let metaData = fastaLines[0];
+                let seqData = "";
+                for (let j=1; j < fastaLines.length; j++){
+                  seqData += fastaLines[j].trim();
+                }
+                if(metaData != "" && seqData.length > 0){
+                  let metitems = metaData.split("|");
+                  if(metitems.length == FASTA_MET_ITEMS){
+                    let uid = metitems[0];
+                    let loc = metitems[1];
+                    let date = metitems[2];
+                    if (checkInput(uid, 'string', FASTA_MET_UID_RE) &&
+                      (checkInput(loc, 'string', FASTA_MET_LOCNAME_RE) || checkInput(loc, 'string', FASTA_MET_GEOID_RE)) &&
+                      (checkInput(date, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(date, 'string', FASTA_MET_DEC_DATE_RE)) &&
+                      checkInput(seqData, 'string', FASTA_MET_SEQ_RE)) {
+                        let cust_record = {
+                          "id" : uid,
+                          "collectionDate": date,
+                          "geonameID" : loc,
+                          "rawSequence" : seqData
+                        }
+                        logger.info(i + " : " + JSON.stringify(cust_record));
+                        cleanRecords.push(cust_record);
+                    } else {
+                      fileErrors.push(String('Metadata errors "'+metaData+'" on item #'+String(i)));
+                    }
+                  } else {
+                    fileErrors.push(String('Entries "'+metitems.length+'" Expected "'+ FASTA_MET_ITEMS +'" on item #'+String(i)));
+                  }
+                }
+                else {
+                  fileErrors.push(String('Empty entries on item #'+String(i)));  
+                }
+              }
+              else {
+                fileErrors.push(String('Lines on item #'+String(i)));
+              }
+            }
+            if (fileErrors.length > 0) {
+              let humanizedErrors = 'Invalid FASTA entries: '+fileErrors[0];
+              for (let i = 1; i < fileErrors.length; i++) {
+                humanizedErrors += ', '+fileErrors[i];
+              }
+              logger.warn(humanizedErrors.trim());
+              result = {
+                status: 400,
+                error: humanizedErrors.trim()
+              };
+              res.status(result.status).send(result);
+            }
+            else {
+              console.log("Passed");
+              request.post({
+                url: API_URI+'/upfasta',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(cleanRecords)
+              }, function(error, response, body) {
+                if (error) {
+                  logger.error(error);
+                  result = {
+                    status: 500,
+                    error: String(error)
+                  };
+                  res.status(result.status).send(result);
+                }
+                else {
+                  let rawRecords = JSON.parse(body);
+                  let records = [];
+                  for (let i = 0; i < rawRecords.length; i++) {
+                    let record = new GenBankRecord.CustomRecord(rawRecords[i]);
+                    records.push(record);
+                  }
+                  result = {
+                    status: 200,
+                    records: records
+                  };
+                  res.status(result.status).send(result);
+                }
+              });   
+            }
+          }
+        });
+      }
+      else {
+        logger.warn('Invalid file received. Deleting...');
+        fs.unlink(fastaFile.path, function (err) {
+          if (err) {
+            logger.error('Failed to delete invalid file: '+fastaFile.path);
+          }
+          else {
+            logger.info('Successfully deleted invalid file.');
+          }
+        });
+        result = {
+          status: 400,
+          error: 'Invalid File'
+        };
+        res.status(result.status).send(result);
+      }
+    }
+    else {
+      logger.error('Missing FASTA File');
+      result = {
+        status: 400,
+        error: 'Missing FASTA File'
+      };
+      res.status(result.status).send(result);
+    }
+  }
+  catch (err) {
+    logger.error('Failed to proccess FASTA upload '+err);
+    result = {
+      status: 500,
+      error: 'Failed to proccess FASTA upload'
+    };
+    res.status(result.status).send(result);
+  }
+});
+
 
 module.exports = router;

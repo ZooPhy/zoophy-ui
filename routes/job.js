@@ -30,6 +30,13 @@ const STATE_RE = /^(\w|-|\.|,| |'){1,255}?$/;
 const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
 const MODEL_RE = /^(HKY)$/;
 
+const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
+const FASTA_MET_HUM_DATE_RE = /^((0[1-9]|[12][0-9]|3[01])\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
+const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
+const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
+const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
+const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
+
 let router = express.Router();
 
 router.post('/run', function(req, res) {
@@ -136,6 +143,203 @@ router.post('/run', function(req, res) {
             logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
             request.post({
               url: API_URI+'/run',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: zoophyJob
+            }, function(error, response, body) {
+              if (error) {
+                logger.error(error);
+                result = {
+                  status: 500,
+                  error: 'Unknown ZooPhy API Error during Start'
+                };
+                res.status(result.status).send(result);
+              }
+              else {
+                logger.info('Job Started: ', response.statusCode, body);
+                if (response.statusCode === 202) {
+                  result = {
+                    status: 202,
+                    message: String(body),
+                    jobSize: validationResults.accessionsUsed.length,
+                    recordsRemoved: validationResults.accessionsRemoved
+                  };
+                  logger.info(result)
+                }
+                else {
+                  result = {
+                    status: 500,
+                    error: 'Unknown ZooPhy API Error during Start'
+                  };
+                }
+                res.status(result.status).send(result);
+              }
+            });
+          }
+          else if (validationResults.error) {
+            logger.warn(validationResults.error);
+            result = {
+              status: 200,
+              error: String(validationResults.error)
+            };
+            res.status(result.status).send(result);
+          }
+          else {
+            logger.warn('Unknown ZooPhy API Error');
+            result = {
+              status: 200,
+              error: 'Unknown ZooPhy API Error during Validation'
+            };
+            res.status(result.status).send(result);
+          }
+        }
+      });
+    }
+    else {
+      if (jobErrors.endsWith(', ')) {
+        jobErrors = jobErrors.substring(0,jobErrors.length-2);
+      }
+      logger.warn(jobErrors);
+      result = {
+        status: 400,
+        error: jobErrors
+      };
+      res.status(result.status).send(result);
+    }
+  }
+  catch (err) {
+    logger.error('Failed to start ZooPhy Job: '+err);
+    result = {
+      status: 500,
+      error: 'Failed to start ZooPhy Job'
+    };
+    res.status(result.status).send(result);
+  }
+});
+
+router.post('/runcustom', function(req, res) {
+  let result;
+  try {
+    let jobErrors = BASE_ERROR;
+    let records;
+    if (!req.body.records) {
+      jobErrors += 'Missing Records, ';
+    }
+    else if (req.body.records.length < 5 || req.body.records.length > 1000) {
+      jobErrors += 'Invalid number of Records: '+req.body.records.length+', ';
+    }
+    else {
+      logger.info(req.body.records.length + " records")
+      records = [];
+      for (let i = 0; i < req.body.records.length; i++) {
+        
+        if (checkInput(req.body.records[i].id, 'string', FASTA_MET_UID_RE) &&
+              (checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_GEOID_RE) || checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_LOCNAME_RE)) &&
+              (checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_DEC_DATE_RE)) &&
+              checkInput(req.body.records[i].rawSequence, 'string', FASTA_MET_SEQ_RE)) {
+          let rec = {
+            id:String(req.body.records[i].id),
+            collectionDate:String(req.body.records[i].collectionDate),
+            geonameID:String(req.body.records[i].geonameID),
+            rawSequence:String(req.body.records[i].rawSequence)
+          };
+          // records.push(JSON.stringify(req.body.records[i]));
+          records.push(rec);
+        }
+        else {
+          jobErrors += 'Invalid Records: '+req.body.records[i]+', ';
+          let object = req.body.records[i];
+          let output = '';
+          for (let property in object) {
+            output += property + ': ' + object[property]+'; ';
+          }
+          logger.info(output);
+          break;
+        }
+      }
+    }
+    let email = null;
+    if (!req.body.replyEmail) {
+      jobErrors += 'Missing Reply Email, ';
+    }
+    else if (checkInput(req.body.replyEmail, 'string', EMAIL_RE)) {
+      email = String(req.body.replyEmail);
+    }
+    else {
+      jobErrors += 'Invalid Email: '+req.body.replyEmail+', ';
+    }
+    let jobName = null;
+    if (req.body.jobName) {
+      if (checkInput(req.body.jobName, 'string', JOB_NAME_RE)) {
+        jobName = String(req.body.jobName);
+      }
+      else {
+        jobErrors += 'Invalid Job Name: '+req.body.jobName+', ';
+      }
+    }
+    let useGLM = Boolean(req.body.useGLM === true);
+    let predictors = null;
+    if (useGLM && req.body.predictors !== undefined && req.body.predictors !== null) {
+      logger.info('Job is using Custom Predictors');
+      let predictorsAreValid = true;
+      for (let state in req.body.predictors) {
+        if (req.body.predictors.hasOwnProperty(state)) {
+          if (!validatePredictor(state, req.body.predictors[state])) {
+            predictorsAreValid = false;
+          }
+        }
+      }
+      if (predictorsAreValid) {
+        predictors = req.body.predictors;
+      }
+      else {
+        jobErrors += 'Invalid Custom Job Predictors, ';
+      }
+    }
+    let xmlOptions = null;
+    if (checkInput(req.body.xmlOptions.chainLength, 'number', null) && checkInput(req.body.xmlOptions.subSampleRate, 'number', null) && checkInput(req.body.xmlOptions.substitutionModel, 'string', MODEL_RE)) {
+      xmlOptions = {
+        chainLength: Number(req.body.xmlOptions.chainLength),
+        subSampleRate: Number(req.body.xmlOptions.subSampleRate),
+        substitutionModel: String(req.body.xmlOptions.substitutionModel)
+      };
+    }
+    else {
+       jobErrors += 'Invalid XML Parameters, ';
+    }
+    if (jobErrors === BASE_ERROR) {
+      const zoophyJob = JSON.stringify({
+        records: records,
+        replyEmail: email,
+        jobName: jobName,
+        useGLM: useGLM,
+        predictors: predictors,
+        xmlOptions: xmlOptions
+      });
+      logger.info('Parameters valid, testing ZooPhy Job with '+records.length+' records:\n'+zoophyJob);
+      request.post({
+        url: API_URI+'/validatecustom',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: zoophyJob
+      }, function(error, response, body) {
+        if (error) {
+          logger.error(error);
+          result = {
+            status: 500,
+            error: String(error)
+          };
+          res.status(result.status).send(result);
+        }
+        else {
+          let validationResults = JSON.parse(body);
+          if (response.statusCode === 200 && validationResults.error === null) {
+            logger.warn('Records removed in job validation: '+validationResults.accessionsRemoved);
+            logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
+            request.post({
+              url: API_URI+'/runcustom',
               headers: {
                 'Content-Type': 'application/json',
               },
@@ -440,5 +644,8 @@ function validatePredictor(state, predictors) {
     return false;
   }
 };
+
+function validateNumOfRecords(records) {
+}  
 
 module.exports = router;

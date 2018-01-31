@@ -2,6 +2,12 @@
 
 const VIRUSES = [
   {
+    name: 'Select Virus...',
+    tax_id: 0,
+    genes: [
+    ]
+  },
+  {
     name: 'Influenza A',
     tax_id: 197911,
     genes: [

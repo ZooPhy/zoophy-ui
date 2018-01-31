@@ -34,12 +34,24 @@ input::-webkit-inner-spin-button {
     margin: 0;
 }
 
+.nopadding {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
 @media(min-width:767px) {
   /* Small and Up */
   #main-logo {
-    height: 9rem;
-    display: inline-block;
-    margin-left: 14rem;
+    height: 5rem;
+    margin-left: 0rem;
+    margin-right: 0rem;
+    margin-top: 0rem;
+    margin-bottom: 0rem;
+  }
+  .navbar-nav.navbar-center {
+    position: absolute;
+    left: 50%;
+    transform: translatex(-50%);
   }
 }
 

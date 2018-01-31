@@ -98,18 +98,39 @@
   <div class="row col-xs-12 pushed-down">
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
-      <div class="col-sm-6 col-xs-12 col-xs-offset-1">
-        <label ng-click="showHelp();">Accession List Search <span class="help-info" data-toggle="tooltip" data-placement="top" title="Line delimited text (.txt) file of up to 2500 GenBank Accessions"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+      <div class="col-sm-6 col-xs-12">
+        <label ng-click="showHelp();">Search using GenBank Accessions <span class="help-info" data-toggle="tooltip" data-placement="top" title="Line delimited text (.txt) file of up to 2500 GenBank Accessions"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
         <input type="button" class="btn btn-info btn-sm fa" ng-click="sendAccessions();" value="&#xf093; Upload File" ng-disabled="fileToSend === null || fileToSend === undefined"></input>
         <label class="btn btn-default btn-file btn-sm">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadAccessions(this.files);"></input></label>
         {{filename}}
+      </div>
+      <div class="col-sm-6 col-xs-12">
+        <label ng-click="showFastaHelp();">Upload FASTA file <span class="help-info" data-toggle="tooltip" data-placement="top" 
+          title="
+          The .FASTA file needs to be a new line delimited .txt file. The current search limit is 2500 sequences.
+          Please structure your definition lines as such:
+          >[ID]|[GeonamesIDorName]|[Time]
+          Where ID = Some unique ID
+          GeonamesID = the unique geonames.org ID of your location or location name
+          Time = the decimal day or year of your sample or date in format DD-mmm-YYYY e.g. 08-Oct-2011
+          
+          For example:
+          >1|5308655|2006.23
+          ATGGAGAAAATAGTGC...
+          >2|5317058|2008.01
+          ATGGAGAAAATAGTGC...
+          "> 
+          <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+        <input type="button" class="btn btn-info btn-sm fa" ng-click="sendFasta();" value="&#xf093; Upload FASTA" ng-disabled="fastaFile === null || fastaFile === undefined"></input>
+        <label class="btn btn-default btn-file btn-sm">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadFasta(this.files);"></input></label>
+        {{fastaFilename}}
       </div>
     </div>
   </div>
   <div class="row">
     <div class="col-xs-12 pushed-down">
       <button class="btn btn-warning pull-left" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>
-      <button class="btn btn-info pull-right search-button" ng-click="search();"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+      <button class="btn btn-info pull-right search-button" ng-click="search();" ng-model="searchBtn" ng-disabled="virus === 0"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
     </div>
   </div>
 </div>
