@@ -3,6 +3,8 @@
 let checkInput = require('../bin/validator_tool').checkInput;
 const UNKNOWN = 'Unknown';
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
+const SOURCEGenbank = "1";
+const SOURCEFasta = "2";
 
 function stringifyGenes(geneList) {
   if (geneList && geneList.length > 0) {
@@ -54,7 +56,8 @@ function convertDecimalDate(decimalDate) {
     var miliseconds = reminder * daysPerYear * 24 * 60 * 60 * 1000;
     var yearDate = new Date(year, 0, 1);
     yearDate = new Date(yearDate.getTime() + miliseconds)
-    return yearDate.getDate() + "-" + getMonth(yearDate.getMonth()+1) + "-" + year;
+    var date = ("0" + yearDate.getDate()).slice(-2);
+    return date + "-" + getMonth(yearDate.getMonth()+1) + "-" + year;
   } else {
     return "01" + "-" + "Jan" + "-" + year;
   }
@@ -135,6 +138,7 @@ class LuceneRecord {
     }
     this.segmentLength = Number(searchApiRecord.sequence.segmentLength);
     this.includeInJob = false;
+    this.resourceSource = SOURCEGenbank;
   };
 
 };
@@ -194,8 +198,9 @@ class CustomRecord {
       this.geonameid = UNKNOWN;
     }
     this.segmentLength = searchApiRecord.rawSequence.length;
-    this.sequence = searchApiRecord.rawSequence;
+    this.sequence =searchApiRecord.rawSequence;
     this.includeInJob = false;
+    this.resourceSource = SOURCEFasta;
   };
 };
 

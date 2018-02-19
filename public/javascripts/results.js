@@ -18,6 +18,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.sampleType = 'percent';
   $scope.sampleAmount = 20;
 
+  const SOURCEGenbank = "1";
+  const SOURCEFasta = "2";
+
   $scope.updateSort = function(field) {
     if (field === $scope.sortField) {
       $scope.sortReverse = !$scope.sortReverse;
@@ -31,7 +34,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
       if ($scope.results.length > 0) {
-        $scope.loadDetails($scope.results[0]);
+        $scope.LoadDetails($scope.results[0]);
       }
       $scope.groupIsSelected = false;
       $scope.numSelected = 0;
@@ -46,9 +49,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
   });
 
-  $scope.loadDetails = function(selrecord) {
-    var isGenbankJob = Boolean(RecordData.isTypeGenbank());
-    if(isGenbankJob){
+  $scope.LoadDetails = function(selrecord) {
+    var resourceSource = selrecord.resourceSource;
+    if(resourceSource === SOURCEGenbank){
       $scope.warning = null;
       $http.get(SERVER_URI+'/record?accession='+selrecord.accession.trim()).then(function(response) {
         if (response.status === 200) {
