@@ -246,4 +246,91 @@ describe('File Upload and Download tests', function(done) {
       done();
     });
   });
+  describe('Fasta File Upload', function(done) {
+    it('Should require file', function(done) {
+      request(app)
+        .post('/upfasta')
+        .send({file: undefined})
+        .end(function(err, res) {
+        if (err) done(err);
+        assert.strictEqual(res.body.error, 'Missing FASTA File','Should return error');
+        assert.strictEqual(res.status, 400, "Should not perform upload search");
+        done();
+      });
+    });
+    it('Should require .txt/.fasta file', function(done) {
+      let path = __dirname+'/bad-upload.xml';
+      request(app)
+        .post('/upfasta')
+        .attach('fastaFile', path)
+        .end(function(err, res) {
+        if (err) done(err);
+        assert.strictEqual(res.body.error, 'Invalid File','Should return error');
+        assert.strictEqual(res.status, 400, "Should not perform upload search");
+        done();
+      });
+    });
+    it('Should require valid sequence', function(done) {
+      let path = __dirname+'/bad-fasta.fasta';
+      request(app)
+        .post('/upfasta')
+        .attach('fastaFile', path)
+        .end(function(err, res) {
+        if (err) done(err);
+        assert.strictEqual(res.body.error, 'Invalid FASTA entries: Empty entries on item #1', 'Should return error');
+        assert.strictEqual(res.status, 400, "Should not perform upload search");
+        done();
+      });
+    });
+    it('Should require complete metadata', function(done) {
+      let path = __dirname+'/bad-fasta1.fasta';
+      request(app)
+        .post('/upfasta')
+        .attach('fastaFile', path)
+        .end(function(err, res) {
+        if (err) done(err);
+        assert.strictEqual(res.body.error, 'Invalid FASTA entries: Entries "2" Expected "3" on item #3', 'Should return error');
+        assert.strictEqual(res.status, 400, "Should not perform upload search");
+        done();
+      });
+    });
+    it('Should require valid metadata', function(done) {
+      let path = __dirname+'/bad-fasta2.fasta';
+      request(app)
+        .post('/upfasta')
+        .attach('fastaFile', path)
+        .end(function(err, res) {
+        if (err) done(err);
+        assert.strictEqual(res.body.error, 'Invalid FASTA entries: Metadata errors "EPI_ISL_150187|8900568|2004." on item #4', 'Should return error');
+        assert.strictEqual(res.status, 400, "Should not perform upload search");
+        done();
+      });
+    });
+    it('Should require valid metadata', function(done) {
+      let path = __dirname+'/bad-fasta2.fasta';
+      request(app)
+        .post('/upfasta')
+        .attach('fastaFile', path)
+        .end(function(err, res) {
+        if (err) done(err);
+        assert.strictEqual(res.body.error, 'Invalid FASTA entries: Metadata errors "EPI_ISL_150187|8900568|2004." on item #4', 'Should return error');
+        assert.strictEqual(res.status, 400, "Should not perform upload search");
+        done();
+      });
+    });
+    it('Should search valid Accessions text file', function(done) {
+      let path = __dirname+'/good-fasta.fasta';
+      request(app)
+        .post('/upfasta')
+        .attach('fastaFile', path)
+        .end(function(err, res) {
+        if (err) done(err);
+        assert.isUndefined(res.body.error, 'Should not return error');
+        assert.strictEqual(res.status, 200, "Should perform upload search");
+        assert.isArray(res.body.records, 'Should return Array of records');
+        assert.strictEqual(res.body.records.length, 8, 'Should return correct number of results');
+        done();
+      });
+    });
+  });
 });

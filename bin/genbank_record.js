@@ -192,10 +192,14 @@ class CustomRecord {
       this.country = String(searchApiRecord.geonameLocation.country || UNKNOWN);
       this.location = String(searchApiRecord.geonameLocation.location || UNKNOWN);
       this.geonameid = String(searchApiRecord.geonameLocation.geonameID || UNKNOWN);
+      this.latitude = String(searchApiRecord.geonameLocation.latitude || UNKNOWN);
+      this.longitude = String(searchApiRecord.geonameLocation.longitude || UNKNOWN);
     } else {
       this.country = UNKNOWN;
       this.location = UNKNOWN;
       this.geonameid = UNKNOWN;
+      this.latitude = UNKNOWN;
+      this.longitude = UNKNOWN;
     }
     this.segmentLength = searchApiRecord.rawSequence.length;
     this.sequence =searchApiRecord.rawSequence;
