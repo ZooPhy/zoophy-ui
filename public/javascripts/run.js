@@ -3,8 +3,9 @@
 angular.module('ZooPhy').controller('runController', function ($scope, $http, RecordData) {
 
   var EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
-  var PREDICTOR_FILE_RE = /^(\w|-|\.){1,250}?\.tsv$/;
+  var PREDICTOR_FILE_RE = /\.tsv$/;
   var JOB_NAME_RE = /^[-\w\ ]{3,225}$/;
+  var templateString = "";
 
   $scope.numSelected = RecordData.getNumSelected();
   $scope.runError = null;
@@ -228,46 +229,64 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     }
   };
 
-  $scope.setupGLMTemplate = function() {
+  $scope.setupNewGLMTemplate = function() {
     if ($scope.generating === false && $scope.running === false) {
       $scope.generating = true;
       $scope.downloadLink = null;
       $scope.runError = null;
       $scope.success = null;
       $scope.warning = null;
-      var downloadAccessions = [];
+      var locationList = [];
+
+      var locationMap = new Map();
+      var locationValueMap = new Map();
+      var examplePredictor = "123.456";
+      var delimiter = "\t";
+      templateString = "state" + delimiter + "lat" + delimiter + "long" +
+       delimiter + "SampleSize" + delimiter + "ExamplePredictor" + "\n";
+
       var records = RecordData.getRecords();
       for (var i = 0; i < records.length; i++) {
         if (records[i].includeInJob) {
-          downloadAccessions.push(records[i].accession);
+          var glmTemplateObject = {
+            location: "",
+            latitude: 0,
+            longitude: 0
+          };
+          glmTemplateObject.location = records[i].location;
+          glmTemplateObject.latitude = records[i].latitude;
+          glmTemplateObject.longitude = records[i].longitude;
+
+          var count = locationMap.get(records[i].location);
+          if(count!=null){
+            locationMap.set(records[i].location,++count);
+          }else{
+            locationMap.set(records[i].location,1);
+          }
+          locationValueMap.set(records[i].location,glmTemplateObject); 
         }
       }
-      if (downloadAccessions.length < 5) {
-        $scope.runError = 'Too Few Records, Minimun is 5';
-        $scope.generating = false;
+      for (var [key, value] of locationMap) {
+        templateString += key + delimiter;
+        templateString += locationValueMap.get(key).latitude + delimiter;
+        templateString += locationValueMap.get(key).longitude + delimiter;
+        templateString += value + delimiter;
+        templateString += examplePredictor + "\n";
       }
-      else if (downloadAccessions.length > 1000) {
-        $scope.runError = 'Too Many Records, Maximum is 1000';
-        $scope.generating = false;
-      }
-      else {
-        var downloadURI = SERVER_URI+'/job/predictors/template';
-        var downloadList = {accessions: downloadAccessions};
-        $http.post(downloadURI, downloadList).then(function success(response) {
-          $scope.generating = false;
-          if (response.status === 200) {
-            $scope.downloadLink = SERVER_URI+response.data.downloadPath;
-          }
-          else {
-            $scope.runError = 'Error Generating Download';
-          }
-        }, function failure(response) {
-          $scope.generating = false;
-          $scope.runError = 'Error Generating Download';
-        });
-      }
+      $scope.generating = false;
+      $scope.downloadLink = true;
     }
   };
+
+  $scope.downloadGLMTemplate = function() {
+    var element = document.createElement('a');
+      element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(templateString));
+      element.setAttribute('download', "ZooPhyPredictors.tsv");
+      element.style.display = 'none';
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+  }
 
   $scope.showHelp = function() {
     BootstrapDialog.show({
