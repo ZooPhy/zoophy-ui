@@ -3,7 +3,7 @@
 angular.module('ZooPhy').controller('runController', function ($scope, $http, RecordData) {
 
   var EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
-  var PREDICTOR_FILE_RE = /\.tsv$/;
+  var PREDICTOR_FILE_RE = /.{1,250}?\.tsv$/;
   var JOB_NAME_RE = /^[-\w\ ]{3,225}$/;
   var templateString = "";
 

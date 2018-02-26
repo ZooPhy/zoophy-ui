@@ -25,8 +25,8 @@ const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
 const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
 const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
 const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
-const PREDICTOR_FILE_RE = /\.tsv$/;
-const STATE_RE = /^(\w|-|\.|,| |'){1,255}?$/;
+const PREDICTOR_FILE_RE = /.{1,250}?\.tsv$/;
+const STATE_RE = /^(\w|-|\.|\,| |\’|\'){1,255}?$/;
 const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
 const MODEL_RE = /^(HKY)$/;
 
