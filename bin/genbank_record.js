@@ -3,8 +3,8 @@
 let checkInput = require('../bin/validator_tool').checkInput;
 const UNKNOWN = 'Unknown';
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
-const SOURCEGenbank = "1";
-const SOURCEFasta = "2";
+const SOURCE_GENBANK = 1;
+const SOURCE_FASTA = 2;
 
 function stringifyGenes(geneList) {
   if (geneList && geneList.length > 0) {
@@ -146,7 +146,7 @@ class LuceneRecord {
     }
     this.segmentLength = Number(searchApiRecord.sequence.segmentLength);
     this.includeInJob = false;
-    this.resourceSource = SOURCEGenbank;
+    this.resourceSource = SOURCE_GENBANK;
   };
 
 };
@@ -212,7 +212,7 @@ class CustomRecord {
     this.segmentLength = searchApiRecord.rawSequence.length;
     this.sequence =searchApiRecord.rawSequence;
     this.includeInJob = false;
-    this.resourceSource = SOURCEFasta;
+    this.resourceSource = SOURCE_FASTA;
   };
 };
 

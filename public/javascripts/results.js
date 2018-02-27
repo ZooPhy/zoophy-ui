@@ -18,8 +18,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.sampleType = 'percent';
   $scope.sampleAmount = 20;
 
-  const SOURCEGenbank = "1";
-  const SOURCEFasta = "2";
+  const SOURCE_GENBANK = 1;
+  const SOURCE_FASTA = 2;
 
   $scope.updateSort = function(field) {
     if (field === $scope.sortField) {
@@ -51,7 +51,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
   $scope.LoadDetails = function(selrecord) {
     var resourceSource = selrecord.resourceSource;
-    if(resourceSource === SOURCEGenbank){
+    if(resourceSource === SOURCE_GENBANK){
       $scope.warning = null;
       $http.get(SERVER_URI+'/record?accession='+selrecord.accession.trim()).then(function(response) {
         if (response.status === 200) {

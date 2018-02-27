@@ -168,7 +168,13 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     }
   };
 
+  $scope.resetPredictorTemplate = function() {
+    $scope.customPredictors = null;
+    $scope.downloadLink = null;
+  };
+
   $scope.uploadPredictors = function(rawFile) {
+    console.log("upload");
     $scope.runError = null;
     $scope.success = null;
     var newFile = rawFile[0];
@@ -229,7 +235,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     }
   };
 
-  $scope.setupNewGLMTemplate = function() {
+  $scope.setupGLMTemplate = function() {
     if ($scope.generating === false && $scope.running === false) {
       $scope.generating = true;
       $scope.downloadLink = null;
@@ -237,44 +243,42 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.success = null;
       $scope.warning = null;
       var locationList = [];
-
       var locationMap = new Map();
       var locationValueMap = new Map();
       var examplePredictor = "123.456";
       var delimiter = "\t";
       templateString = "state" + delimiter + "lat" + delimiter + "long" +
        delimiter + "SampleSize" + delimiter + "ExamplePredictor" + "\n";
-
       var records = RecordData.getRecords();
-      for (var i = 0; i < records.length; i++) {
-        if (records[i].includeInJob) {
-          var glmTemplateObject = {
-            location: "",
-            latitude: 0,
-            longitude: 0
-          };
-          glmTemplateObject.location = records[i].location;
-          glmTemplateObject.latitude = records[i].latitude;
-          glmTemplateObject.longitude = records[i].longitude;
+        for (var i = 0; i < records.length; i++) {
+          if (records[i].includeInJob) {
+            var glmTemplateObject = {
+              location: "",
+              latitude: 0,
+              longitude: 0
+            };
+            glmTemplateObject.location = records[i].location;
+            glmTemplateObject.latitude = records[i].latitude;
+            glmTemplateObject.longitude = records[i].longitude;
 
-          var count = locationMap.get(records[i].location);
-          if(count!=null){
-            locationMap.set(records[i].location,++count);
-          }else{
-            locationMap.set(records[i].location,1);
+            var count = locationMap.get(records[i].location);
+            if(count!=null){
+              locationMap.set(records[i].location,++count);
+            }else{
+              locationMap.set(records[i].location,1);
+            }
+            locationValueMap.set(records[i].location,glmTemplateObject); 
           }
-          locationValueMap.set(records[i].location,glmTemplateObject); 
         }
-      }
-      for (var [key, value] of locationMap) {
-        templateString += key + delimiter;
-        templateString += locationValueMap.get(key).latitude + delimiter;
-        templateString += locationValueMap.get(key).longitude + delimiter;
-        templateString += value + delimiter;
-        templateString += examplePredictor + "\n";
-      }
-      $scope.generating = false;
-      $scope.downloadLink = true;
+        for (var [loc, count] of locationMap) {
+          templateString += loc + delimiter;
+          templateString += locationValueMap.get(loc).latitude + delimiter;
+          templateString += locationValueMap.get(loc).longitude + delimiter;
+          templateString += count + delimiter;
+          templateString += examplePredictor + "\n";
+        }
+        $scope.generating = false;
+        $scope.downloadLink = true;
     }
   };
 

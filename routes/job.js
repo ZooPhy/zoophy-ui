@@ -36,8 +36,8 @@ const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
 const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
-const SOURCEGenbank = "1";
-const SOURCEFasta = "2";
+const SOURCE_GENBANK = 1;
+const SOURCE_FASTA = 2;
 
 let router = express.Router();
 
@@ -57,7 +57,7 @@ router.post('/run', function(req, res) {
       records = [];
       for (let i = 0; i < req.body.records.length; i++) {
         
-        if(req.body.records[i].resourceSource==SOURCEFasta){
+        if(req.body.records[i].resourceSource==SOURCE_FASTA){
           if (checkInput(req.body.records[i].id, 'string', FASTA_MET_UID_RE) &&
           (checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_GEOID_RE) || checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_LOCNAME_RE)) &&
           (checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_DEC_DATE_RE)) &&
@@ -82,7 +82,7 @@ router.post('/run', function(req, res) {
             logger.info(output);
           }
         }
-        else if(req.body.records[i].resourceSource==SOURCEGenbank){
+        else if(req.body.records[i].resourceSource==SOURCE_GENBANK){
           if (checkInput(req.body.records[i].id, 'string', ACCESSION_RE)) {
             let rec = {
               id:String(req.body.records[i].id),
