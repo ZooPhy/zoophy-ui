@@ -81,6 +81,7 @@ router.get('/search', function(req, res) {
         }
         else if (response && response.statusCode === 200) {
           let rawRecords = JSON.parse(body);
+          console.log(rawRecords);
           let records = [];
           for (let i = 0; i < rawRecords.length; i++) {
             let record = new GenBankRecord.LuceneRecord(rawRecords[i]);
@@ -462,7 +463,6 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                           "geonameID" : loc,
                           "rawSequence" : seqData
                         }
-                        logger.info(i + " : " + JSON.stringify(cust_record));
                         cleanRecords.push(cust_record);
                     } else {
                       fileErrors.push(String('Metadata errors "'+metaData+'" on item #'+String(i)));

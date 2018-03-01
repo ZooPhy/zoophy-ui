@@ -3,6 +3,8 @@
 let checkInput = require('../bin/validator_tool').checkInput;
 const UNKNOWN = 'Unknown';
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
+const SOURCE_GENBANK = 1;
+const SOURCE_FASTA = 2;
 
 function stringifyGenes(geneList) {
   if (geneList && geneList.length > 0) {
@@ -54,7 +56,8 @@ function convertDecimalDate(decimalDate) {
     var miliseconds = reminder * daysPerYear * 24 * 60 * 60 * 1000;
     var yearDate = new Date(year, 0, 1);
     yearDate = new Date(yearDate.getTime() + miliseconds)
-    return yearDate.getDate() + "-" + getMonth(yearDate.getMonth()+1) + "-" + year;
+    var date = ("0" + yearDate.getDate()).slice(-2);
+    return date + "-" + getMonth(yearDate.getMonth()+1) + "-" + year;
   } else {
     return "01" + "-" + "Jan" + "-" + year;
   }
@@ -129,12 +132,21 @@ class LuceneRecord {
     }
     if (searchApiRecord.geonameLocation) {
       this.country = String(searchApiRecord.geonameLocation.country || UNKNOWN);
+      this.location = String(searchApiRecord.geonameLocation.location || UNKNOWN);
+      this.geonameid = String(searchApiRecord.geonameLocation.geonameID || UNKNOWN);
+      this.latitude = String(searchApiRecord.geonameLocation.latitude || UNKNOWN);
+      this.longitude = String(searchApiRecord.geonameLocation.longitude || UNKNOWN);
     }
     else {
       this.country = UNKNOWN;
+      this.location = UNKNOWN;
+      this.geonameid = UNKNOWN;
+      this.latitude = UNKNOWN;
+      this.longitude = UNKNOWN;
     }
     this.segmentLength = Number(searchApiRecord.sequence.segmentLength);
     this.includeInJob = false;
+    this.resourceSource = SOURCE_GENBANK;
   };
 
 };
@@ -188,14 +200,19 @@ class CustomRecord {
       this.country = String(searchApiRecord.geonameLocation.country || UNKNOWN);
       this.location = String(searchApiRecord.geonameLocation.location || UNKNOWN);
       this.geonameid = String(searchApiRecord.geonameLocation.geonameID || UNKNOWN);
+      this.latitude = String(searchApiRecord.geonameLocation.latitude || UNKNOWN);
+      this.longitude = String(searchApiRecord.geonameLocation.longitude || UNKNOWN);
     } else {
       this.country = UNKNOWN;
       this.location = UNKNOWN;
       this.geonameid = UNKNOWN;
+      this.latitude = UNKNOWN;
+      this.longitude = UNKNOWN;
     }
     this.segmentLength = searchApiRecord.rawSequence.length;
-    this.sequence = searchApiRecord.rawSequence;
+    this.sequence =searchApiRecord.rawSequence;
     this.includeInJob = false;
+    this.resourceSource = SOURCE_FASTA;
   };
 };
 

@@ -39,6 +39,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
 
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
+  var combinedRecords =[];
 
   $scope.reset = function() {
     $scope.searchError = null;
@@ -244,7 +245,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
-        RecordData.setRecords(response.data.records);
+        combinedRecords = combinedRecords.concat(response.data.records);
+        RecordData.setRecords(combinedRecords);
+        combinedRecords =[];
         RecordData.setTypeGenbank(true);
         RecordData.incrementSearchCount();
         if (response.data.records.length > 0) {
@@ -326,7 +329,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     var newFile = rawFile[0];
     if (newFile && newFile.size < 1000000) { //1mb
       var filename = newFile.name.trim();
-      console.log(filename);
       if (FASTA_FILE_RE.test(filename)) {
         $scope.fastaFile = newFile;
         $scope.fastaFilename = String(filename).trim();
@@ -374,7 +376,38 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
   };
 
-  $scope.showFASTAHelp = function() {
+  $scope.sendFastaNgenbank = function() {
+    $scope.searchError = null;
+    if ($scope.fastaFile) {
+      var form = new FormData();
+      var uri = SERVER_URI+'/upfasta';
+      form.append('fastaFile', $scope.fastaFile);
+      $http.post(uri, form, {
+          headers: {'Content-Type': undefined}
+      }).then(function (response) {
+        if (response.data.records.length > 0) {
+          combinedRecords = response.data.records;
+          $scope.search();
+        }
+        else {
+          $scope.searchError = 'Processed 0 results.';
+        }
+        RecordData.incrementSearchCount();
+      }, function(error) {
+        if (error.status !== 500) {
+          $scope.searchError = error.data.error;
+        }
+        else {
+          $scope.searchError = 'Parsing Failed on Server. Please refresh and try again.';
+        }
+      });
+    }
+    else {
+      $scope.searchError = 'No FASTA File Selected';
+    }
+  };
+
+  $scope.showFastaHelp = function() {
     BootstrapDialog.show({
       title: 'FASTA Upload Help',
       message: 'The FILE file needs to have a metadata line preceded by the > symbol. It should be followed by a new line and the sequence string. The current file size limit is 10mb.'

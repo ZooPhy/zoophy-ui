@@ -49,12 +49,13 @@
           <div ng-hide="customPredictors">
             <label ng-click="showHelp();">Upload Custom Predictors <span class="help" data-toggle="tooltip" data-placement="top" title="Tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
             <label ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Template</label>
-            <input ng-hide="generating || downloadLink" type="button" ng-click="setupGLMTemplate();" class="btn btn-md btn-default" ng-disabled="useDefaultGLM" value="Generate Template"></input>
-            <a class="btn btn-info" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyPredictors.tsv" target="_self" ng-click="showUpload();">Download Predictors Template</a>
-            <label ng-show="downloadLink" class="btn btn-default btn-file">Upload Completed Template<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadPredictors(this.files);" ng-disabled="useDefaultGLM"/></label>
+            <input ng-hide="generating || downloadLink " type="button" ng-click="setupGLMTemplate();" class="btn btn-md btn-default" ng-disabled="useDefaultGLM || numSelected === 0" value="Generate Template"></input>
+            <input ng-show="downloadLink" type="button" ng-click="downloadGLMTemplate();" class="btn btn-md btn-default" ng-disabled="useDefaultGLM" value="Download Predictors Template"></input>
+            <label ng-show="downloadLink" class="btn btn-default btn-file">Upload Completed Template<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadPredictors(this.files);this.value=null" ng-disabled="useDefaultGLM"/></label>
           </div>
           <div ng-show="customPredictors">
             <h6 class="text-center"><i class="fa fa-check-square-o" aria-hidden="true"></i> Predictors set from {{filename}}</h6>
+            <input type="button" ng-click="resetPredictorTemplate();" class="btn btn-md btn-default" ng-disabled="useDefaultGLM " value="Reset"></input>
           </div>
         </div>
       </div>

@@ -38,7 +38,7 @@
       	</tr>
     	</thead>
     	<tbody>
-      	<tr ng-class="(selectedRecord.accession === record.accession) ? 'selected' : ''" dir-paginate="record in results | orderBy:sortField:sortReverse | itemsPerPage:recordsPerPage" ng-click="loadDetails(record);">
+      	<tr ng-class="(selectedRecord.accession === record.accession) ? 'selected' : ''" dir-paginate="record in results | orderBy:sortField:sortReverse | itemsPerPage:recordsPerPage" ng-click="LoadDetails(record);">
           <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="toggleRecord(record); $event.stopPropagation();"></td>
           <td class="col-sm-1">{{record.accession}}</td>
       		<td class="col-sm-1">{{record.genes}}</td>
