@@ -16,10 +16,16 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.recordsPerPage = 25;
   $scope.warning = null;
   $scope.sampleType = 'percent';
+  $scope.combineSearch = 'false';
   $scope.sampleAmount = 20;
+  $scope.fastaFilename = 'none';
+  $scope.fastaFile = null;
+  $scope.fastaError = null;
+  $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
+  var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
 
   $scope.updateSort = function(field) {
     if (field === $scope.sortField) {
@@ -45,7 +51,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.warning = null;
       $scope.downloadError = null;
       $scope.sampleType = 'percent';
+      $scope.combineSearch = 'fasle';
       $scope.sampleAmount = 20;
+      $scope.fastaFilename = 'none';
+      $scope.fastaFile = null;
+      $scope.fastaError = null;
+      $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
     }
   });
 
@@ -109,7 +120,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.downloadLink = null;
       $scope.downloadFormat = null;
       $scope.downloadError = null;
-      if ($scope.results.length < 1) {
+      if ($scope.results.length < 1 || $scope.numSelected < 1) {
         $scope.generating = false;
         $scope.downloadError = 'No Results to Download';
       }
@@ -117,7 +128,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.downloadFormat = format;
         var downloadAccessions = [];
         for (var i = 0; i < $scope.results.length; i++) {
-          downloadAccessions.push($scope.results[i].accession);
+          if($scope.results[i].includeInJob){
+            downloadAccessions.push($scope.results[i].accession);
+          }
         }
         var downloadURI = SERVER_URI+'/download/'+format;
         var downloadList = {accessions: downloadAccessions};
@@ -201,8 +214,77 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     RecordData.setNumSelected($scope.numSelected);
   };
 
-});
+  $scope.uploadFasta = function(rawFile) {
+    $scope.fastaError = null;
+    $scope.warning = null;
+    var newFile = rawFile[0];
+    if (newFile && newFile.size < 1000000) { //1mb
+      var filename = newFile.name.trim();
+      if (FASTA_FILE_RE.test(filename)) {
+        $scope.fastaFile = newFile;
+        $scope.fastaFilename = String(filename).trim();
+      }
+      else {
+        $scope.fastaError = 'Invalid File Name. Must be .txt file.';
+      }
+    }
+    else {
+      $scope.fastaError = 'Invalid File Size. Limit is 1mb.';
+    }
+    $scope.$apply();
+  };
 
+  $scope.sendFasta = function() {
+    var combinedSearch = String($scope.combineSearch);
+      $scope.fastaError = null;
+      if ($scope.fastaFile) {
+        var form = new FormData();
+        var uri = SERVER_URI+'/upfasta';
+        form.append('fastaFile', $scope.fastaFile);
+        console.log("Posting " + uri + " " + $scope.fastaFile.type)
+        $http.post(uri, form, {
+            headers: {'Content-Type': undefined}
+        }).then(function (response) {
+          var AccessionRecords =  RecordData.getRecords();
+          RecordData.setRecords(response.data.records);
+          var CombinedRecords = RecordData.getRecords();
+          if(combinedSearch === 'true'){
+            CombinedRecords = CombinedRecords.concat(AccessionRecords);
+          }
+          RecordData.setRecords(CombinedRecords);
+          RecordData.setTypeGenbank(false);
+          if (response.data.records.length > 0) {
+            $scope.$parent.switchTabs('results');
+          }
+          else {
+            $scope.warning = 'Processed 0 results.';
+          }
+          RecordData.incrementSearchCount();
+        }, function(error) {
+          if (error.status !== 500) {
+            $scope.warning = error.data.error;
+          }
+          else {
+            $scope.warning = 'Parsing Failed on Server. Please refresh and try again.';
+          }
+        });
+      }
+      else {
+        $scope.warning = 'No FASTA File Selected';
+      }
+    };
+
+    $scope.showFastaHelp = function() {
+      BootstrapDialog.show({
+        title: 'FASTA Upload Help',
+        message: 'The FILE file needs to have a metadata line preceded by the > symbol. It should be followed by a new line and the sequence string. The current file size limit is 10mb.'
+      });
+    };
+
+    $scope.updatePercentOfRecords = function() {
+      $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
+    };
+});
 /*
 Copyright 2017 ASU Biodesign Center for Environmental Security's ZooPhy Lab
 

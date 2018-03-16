@@ -55,7 +55,7 @@ router.get('/', function(req, res) {
   res.status(200).render('home', {allowed_values: ALLOWED_VALUES});
 });
 
-router.get('/about', function(req, res) {
+router.get('/aboutzoophy', function(req, res) {
   res.status(200).render('about');
 });
 
