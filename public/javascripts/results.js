@@ -16,7 +16,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.recordsPerPage = 25;
   $scope.warning = null;
   $scope.sampleType = 'percent';
-  $scope.combineSearch = 'false';
+  $scope.combineResults = 'false';
   $scope.sampleAmount = 20;
   $scope.fastaFilename = 'none';
   $scope.fastaFile = null;
@@ -51,7 +51,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.warning = null;
       $scope.downloadError = null;
       $scope.sampleType = 'percent';
-      $scope.combineSearch = 'fasle';
+      $scope.combineResults = 'fasle';
       $scope.sampleAmount = 20;
       $scope.fastaFilename = 'none';
       $scope.fastaFile = null;
@@ -235,7 +235,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   };
 
   $scope.sendFasta = function() {
-    var combinedSearch = String($scope.combineSearch);
+    var combinedSearch = String($scope.combineResults);
       $scope.fastaError = null;
       if ($scope.fastaFile) {
         var form = new FormData();
