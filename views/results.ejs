@@ -5,25 +5,37 @@
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{warning}}
       </div>
     </div>
+    <h5 class="text-center">Search Returned {{results.length}} results</h5>
     <div class="row">
-      <div class="col-sm-4"><h6 class="text-center">Search Returned {{results.length}} results</h6></div>
-      <div class="col-sm-4"><h6 class="text-center">{{numSelected}} records selected.</h6></div>
-      <h6 class="text-center"><i class="fa fa-info-circle" aria-hidden="true"></i> ZooPhy Jobs must contain 5 to 1000 Records</h6>
+      <div class="col-sm-4"><h6 class="text-left">{{numSelected}} records selected.</h6></div>
+      <h6 class="text-right"><i class="fa fa-info-circle" aria-hidden="true"></i> ZooPhy Jobs must contain 5 to 1000 Records</h6>
   </div>
-    <div class="row">
-      <div class="col-sm-8">
-        <h6 ng-hide="generating">Download All Search Results as <button class="btn btn-xs btn-default" ng-click="setupDownload('csv');">CSV</button> or <button ng-click="setupDownload('fasta');" class="btn btn-xs btn-default">FASTA</button>
-          <a class="results-link" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyData.{{downloadFormat}}" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a><span class="text-danger results-link" ng-show="downloadError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{downloadError}}</span></h6>
-        <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
+  <div class="row form-group">
+    <div class="col-sm-5">
+      <div class="col-sm-3">
+          <div class="dropdown">
+              <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Export
+              <span class="caret"></span></button>
+              <ul class="dropdown-menu">
+                <li><a href="#" ng-click="setupDownload('csv');">CSV</a></li>
+                <li><a href="#" ng-click="setupDownload('fasta');">FASTA</a></li>
+              </ul>
+              </div>
       </div>
-      <div class="col-sm-4 text-right">
-        <label>Random Downsample:</label>
-        <input type="radio" name="sampleTypeNumber" id="number" ng-model="sampleType" value="number"/>Number
-        <input type="radio" name="sampleTypePercent" id="percent" ng-model="sampleType" value="percent" ng-checked="true"/>Percentage
-        <input class="form-control sampleBox" type="number" min="0" name="sampleAmount" ng-model="sampleAmount"/>
-        <button class="btn btn-sm btn-default" ng-click="validateDownSample();">Sample</button>
+      <div class="col-sm-3">
+          <button type="button" class="btn btn-sm btn-default" data-toggle="modal" data-target="#fastaModel">Import FASTA </button>
       </div>
     </div>
+    <div class="text-right">
+        <button type="button" class="btn btn-sm btn-default" data-toggle="modal" data-target="#sampleSelectionModel">Random Sample</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-sm-5">
+        <h6 ng-show="generating"><i class="fa fa-hourglass-start" aria-hidden="true"></i> Generating Download... </h6>
+        <a class="results-link" ng-show="downloadLink" ng-href="{{downloadLink}}" download="ZooPhyData.{{downloadFormat}}" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a><span class="text-danger results-link" ng-show="downloadError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{downloadError}}</span></h6>
+    </div>
+  </div>
     <table class="table table-striped table-hover table-condensed table-responsive">
     	<thead>
       	<tr>
@@ -97,4 +109,76 @@
       </div>
     </div>
   </div>
+
+<div class="modal fade" id="fastaModel" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <label ng-click="showFastaHelp();">
+          <h4 class="modal-title">FASTA
+            <span class="help-info" data-toggle="tooltip" data-placement="top" 
+            title="The .FASTA file needs to be a new line delimited .txt file. The current search limit is 2500 sequences.
+            Please structure your definition lines as such:
+            >[ID]|[GeonamesIDorName]|[Time]
+            Where ID = Some unique ID
+            GeonamesID = the unique geonames.org ID of your location or location name
+            Time = the decimal day or year of your sample or date in format DD-mmm-YYYY e.g. 08-Oct-2011
+            
+            For example:
+            >1|5308655|2006.23
+            ATGGAGAAAATAGTGC...
+            >2|5317058|2008.01
+            ATGGAGAAAATAGTGC..."> <i class="fa fa-question-circle" aria-hidden="true"></i></span>
+          </h4></label>
+        </div>
+        <div class="modal-body">
+          <div class="container">
+            <div class="row form-group">
+                Select a file  
+                <label class="btn btn-default btn-file btn-sm">Select<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadFasta(this.files);this.value=null"></input></label>
+                <p style="display:inline" class="text-muted">&nbsp;{{fastaFilename}}</p>
+                <span class="text-danger results-link" ng-show="fastaError"><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{fastaError}}</span>
+            </div>
+            <div class="row" >
+                <label class="checkbox-inline"><input type="checkbox" ng-disabled="results.length === 0" ng-model="combineResults"/>
+                <p style="display:inline" class="text-muted" ng-show="results.length === 0" >Combined with searched accession</p>
+                <p style="display:inline" ng-show="results.length !== 0">Combined with searched accession</p>
+              </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" ng-click="sendFasta();" ng-disabled="fastaFile === null || fastaFile === undefined" data-dismiss="modal">Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="sampleSelectionModel" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Select Random Downsample<span class="help-info" data-toggle="tooltip" data-placement="top" 
+            title="Select random records for job"> <i class="fa fa-question-circle" aria-hidden="true"></i></span>
+          </div>
+        </h4>
+          <div class="modal-body">
+            <div class="container">
+              <div class="row form-group">
+                <input type="radio" name="sampleTypeNumber" id="number" ng-model="sampleType" value="number"/> Number&nbsp;&nbsp;
+                <input type="radio" name="sampleTypePercent" id="percent" ng-model="sampleType" value="percent" ng-checked="true"/> Percentage                      </div>
+                  <div class="row">
+                    {{sampleType}} of records
+                    <input class="form-control sampleBox" type="number" min="0" name="sampleAmount" ng-change="updatePercentOfRecords();" ng-model="sampleAmount"/>
+                    <p style="display:inline" class="text-muted" ng-show="sampleType === 'percent'" >&nbsp;{{percentOfRecords}} records</p>
+                  </div>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" ng-click="validateDownSample();" data-dismiss="modal">Done</button>
+          </div>
+        </div>
+      </div>
+    </div>
 </div>
