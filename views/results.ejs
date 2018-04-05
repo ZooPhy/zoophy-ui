@@ -13,14 +13,7 @@
   <div class="row form-group">
     <div class="col-sm-5">
       <div class="col-sm-3">
-          <div class="dropdown">
-              <button class="btn btn-default btn-sm dropdown-toggle" type="button" data-toggle="dropdown">Export
-              <span class="caret"></span></button>
-              <ul class="dropdown-menu">
-                <li><a href="#" ng-click="setupDownload('csv');">CSV</a></li>
-                <li><a href="#" ng-click="setupDownload('fasta');">FASTA</a></li>
-              </ul>
-              </div>
+        <button class="btn btn-default btn-sm" type="button" data-toggle="modal" data-target="#exportModel">Export
       </div>
       <div class="col-sm-3">
           <button type="button" class="btn btn-sm btn-default" data-toggle="modal" data-target="#fastaModel">Import FASTA </button>
@@ -110,6 +103,52 @@
     </div>
   </div>
 
+  <div class="modal fade" id="exportModel" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Download Options</h4>
+        </div>
+        <div class="modal-body row">
+            <div class="container col-md-12">
+                <div class="row">
+                    <div class="col-md-5">
+                      <h5>Select downlaod format</h5>
+                      <input type="radio" name="downloadFormatCSV" id="csv" ng-model="downloadFormat" value="csv" ng-checked="true"/> CSV <br>
+                      <input type="radio" name="downloadFormatFasta" id="fasta" ng-model="downloadFormat" value="fasta"/> FASTA
+                    </div>
+
+                     <div class="col-md-6">
+                        <h5>Select Columns </h5>
+                        <div class="row">
+                        <div class="col-md-4">
+                            <label class="checkbox-inline"><input type="checkbox" value="Id" class="columnsForDownload" ng-model="columnID" ng-disabled="true" ng-checked="true" >ID</label> <br>
+                            <label class="checkbox-inline"><input type="checkbox" value="Genes" class="columnsForDownload" ng-model="columnGenes">Genes</label> <br>
+                            <label class="checkbox-inline"><input type="checkbox" value="Virus_ID" class="columnsForDownload" ng-model="columnVirus_ID">Virus ID</label> <br>
+                            <label class="checkbox-inline"><input type="checkbox" value="Virus" class="columnsForDownload" ng-model="columnVirus">Virus</label> <br>
+                            <label class="checkbox-inline"><input type="checkbox" value="Date" class="columnsForDownload" ng-model="columnDate">Date</label> <br>
+                            
+                        </div>
+                        <div class="col-md-6">
+                        <label class="checkbox-inline"><input type="checkbox" value="Host_ID" class="columnsForDownload" ng-model="columnHost_ID">Host ID</label> <br>
+                        <label class="checkbox-inline"><input type="checkbox" value="Host" class="columnsForDownload" ng-model="columnHost">Host</label> <br>
+                        <label class="checkbox-inline"><input type="checkbox" value="Country" class="columnsForDownload" ng-model="columnCountry">Country</label> <br>
+                        <label class="checkbox-inline"><input type="checkbox" value="Length" class="columnsForDownload" ng-model="columnLength">Length</label> <br>
+                        <label class="checkbox-inline" ng-show="downloadFormat === 'fasta'"><input type="checkbox" value="Raw_Sequence" class="columnsForDownload" ng-model="columnRaw_Sequence" ng-disabled="true" ng-checked="downloadFormat === 'fasta'">Raw Sequence</label> <br>
+                     </div>
+                    </div>
+                    </div>
+                 </div>
+             </div>
+            </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" ng-disabled="!columnGenes && !columnVirus_ID && !columnVirus && !columnDate && !columnHost_ID && !columnHost && !columnCountry && !columnLength" ng-click="exportRecords();" data-dismiss="modal">Download</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <div class="modal fade" id="fastaModel" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -120,7 +159,7 @@
             <span class="help-info" data-toggle="tooltip" data-placement="top" 
             title="The .FASTA file needs to be a new line delimited .txt file. The current search limit is 2500 sequences.
             Please structure your definition lines as such:
-            >[ID]|[GeonamesIDorName]|[Time]
+            >[ID]|[GeonamesID or LocationName]|[Time]
             Where ID = Some unique ID
             GeonamesID = the unique geonames.org ID of your location or location name
             Time = the decimal day or year of your sample or date in format DD-mmm-YYYY e.g. 08-Oct-2011
@@ -142,13 +181,32 @@
             </div>
             <div class="row" >
                 <label class="checkbox-inline"><input type="checkbox" ng-disabled="results.length === 0" ng-model="combineResults"/>
-                <p style="display:inline" class="text-muted" ng-show="results.length === 0" >Combined with searched accession</p>
-                <p style="display:inline" ng-show="results.length !== 0">Combined with searched accession</p>
+                <p style="display:inline" class="text-muted" ng-show="results.length === 0" >Combine with search results</p>
+                <p style="display:inline" ng-show="results.length !== 0">Combine with search results</p>
               </div>
             </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" ng-click="sendFasta();" ng-disabled="fastaFile === null || fastaFile === undefined" data-dismiss="modal">Upload</button>
+          <button type="button" class="btn btn-default" ng-click="confirmSendFasta()" ng-disabled="fastaFile === null || fastaFile === undefined" data-dismiss="modal">Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="confirmFastaModel" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Warning</h4>
+        </div>
+        <div class="modal-body">
+          <div class="container">
+                You are about to overwrite your search results!
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" ng-click="sendFasta();" data-dismiss="modal">Confirm</button>
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.selectedRecord = null;
   $scope.downloadLink = null;
   $scope.generating = false;
-  $scope.downloadFormat = null;
+  $scope.downloadFormat = "csv";
   $scope.downloadError = null;
   $scope.sortField = 'accession';
   $scope.sortReverse = false;
@@ -47,11 +47,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       RecordData.setNumSelected($scope.numSelected);
       $scope.downloadLink = null;
       $scope.generating = false;
-      $scope.downloadFormat = null;
+      $scope.downloadFormat = "csv";
       $scope.warning = null;
       $scope.downloadError = null;
       $scope.sampleType = 'percent';
-      $scope.combineResults = 'fasle';
+      $scope.combineResults = 'false';
       $scope.sampleAmount = 20;
       $scope.fastaFilename = 'none';
       $scope.fastaFile = null;
@@ -113,9 +113,19 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.$parent.switchTabs('run');
   };
 
-  $scope.setupDownload = function(format) {
+  $scope.exportRecords = function(){
+    var downloadFormat = String($scope.downloadFormat);
+    var downloadColumns = [];
+    $('.columnsForDownload:checkbox:checked').each(function () {
+      downloadColumns.push($(this).val());
+    });
+    $scope.setupDownload(downloadColumns);
+  }
+
+  $scope.setupDownload = function(downloadColumns) {
     $scope.warning = null;
     if (!$scope.generating) {
+      var format = String($scope.downloadFormat);
       $scope.generating = true;
       $scope.downloadLink = null;
       $scope.downloadFormat = null;
@@ -123,6 +133,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if ($scope.results.length < 1 || $scope.numSelected < 1) {
         $scope.generating = false;
         $scope.downloadError = 'No Results to Download';
+      }else if(downloadColumns.length<1){
+        $scope.generating = false;
+        $scope.downloadError = 'No Column selected for Download';
       }
       else if (format === 'csv' || format === 'fasta') {
         $scope.downloadFormat = format;
@@ -133,7 +146,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           }
         }
         var downloadURI = SERVER_URI+'/download/'+format;
-        var downloadList = {accessions: downloadAccessions};
+        var downloadList = {
+          accessions: downloadAccessions,
+          columns: downloadColumns};
         $http.post(downloadURI, downloadList).then(function success(response) {
           $scope.generating = false;
           if (response.status === 200) {
@@ -218,7 +233,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.fastaError = null;
     $scope.warning = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 1000000) { //1mb
+    if (newFile && newFile.size < 5000000) { //5mb
       var filename = newFile.name.trim();
       if (FASTA_FILE_RE.test(filename)) {
         $scope.fastaFile = newFile;
@@ -233,6 +248,15 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
     $scope.$apply();
   };
+
+  $scope.confirmSendFasta = function(){
+    var combinedSearch = String($scope.combineResults);
+    if($scope.results.length>0 && combinedSearch==='false'){
+      $('#confirmFastaModel').modal('show'); 
+    }else{
+      $scope.sendFasta();
+    }
+  }
 
   $scope.sendFasta = function() {
     var combinedSearch = String($scope.combineResults);
@@ -255,6 +279,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.setTypeGenbank(false);
           if (response.data.records.length > 0) {
             $scope.$parent.switchTabs('results');
+            $('<div id="warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center">Successfully added '+ response.data.records.length+' records</div>').insertBefore('#warning-alert').delay(3000).fadeOut();
           }
           else {
             $scope.warning = 'Processed 0 results.';
