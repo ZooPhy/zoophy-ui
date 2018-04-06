@@ -233,7 +233,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.fastaError = null;
     $scope.warning = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 5000000) { //5mb
+    if (newFile && newFile.size < 10000000) { //10mb
       var filename = newFile.name.trim();
       if (FASTA_FILE_RE.test(filename)) {
         $scope.fastaFile = newFile;
