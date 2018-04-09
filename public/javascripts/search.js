@@ -327,7 +327,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.uploadFasta = function(rawFile) {
     $scope.searchError = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 1000000) { //1mb
+    if (newFile && newFile.size < 10000000) { //10mb
       var filename = newFile.name.trim();
       if (FASTA_FILE_RE.test(filename)) {
         $scope.fastaFile = newFile;

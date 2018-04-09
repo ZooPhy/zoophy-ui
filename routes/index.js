@@ -32,7 +32,7 @@ const UPLOAD_QUERY_LIMIT = 2500;
 const multerOptionsFasta = {
   dest: 'upfasta/',
   limits: {
-    fileSize: 1000000 //1mb
+    fileSize: 10000000 //10mb
   }
 };
 let upfasta = multer(multerOptionsFasta);
@@ -45,7 +45,7 @@ const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
 const FASTA_MET_HUM_DATE_RE = /^((0[1-9]|[12][0-9]|3[01])\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
-const FASTA_MET_LOCNAME_RE = /^((([\w -,']){1,30})|\d{4,10})?$/;
+const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,|\’|\'){1,30}?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
 
 
@@ -195,6 +195,7 @@ router.post('/download/:format', function(req, res) {
       let format = String(req.params.format);
       if (req.body.accessions) {
         let accessions = [];
+        let columns = req.body.columns;
         let invalidAcc = -1;
         for (let i = 0; i < req.body.accessions.length; i++) {
           if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
@@ -203,10 +204,9 @@ router.post('/download/:format', function(req, res) {
           else {
             logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
             invalidAcc = i;
-            break;
           }
         }
-        if (invalidAcc !== -1) {
+        if (invalidAcc !== -1 && accessions.length === 0) {
           result = {
             status: 400,
             error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc])
@@ -220,7 +220,7 @@ router.post('/download/:format', function(req, res) {
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify(accessions)
+            body: JSON.stringify({accessions,columns})
           }, function(error, response, body) {
             if (error) {
               logger.error(error);
