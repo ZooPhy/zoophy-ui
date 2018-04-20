@@ -42,11 +42,11 @@ const FASTA_UPLOAD_LIMIT = 1000;
 const FASTA_MET_ITEMS = 3;
 const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
 // const FASTA_MET_NORM_DATE_RE = /^\d{4}((\-(0?[1-9]|1[012])?\-(0?[1-9]|[12][0-9]|3[01]))|(\.\d{1,4}))?$/;
-const FASTA_MET_HUM_DATE_RE = /^((0[1-9]|[12][0-9]|3[01])\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
+const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
-const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,|\’|\'){1,30}?$/;
-const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
+const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,| |\’|\'){1,30}?$/;
+const FASTA_MET_SEQ_RE = /^([ACGTYNacgtyn-]){1,20000}$/;
 
 
 let router = express.Router();
@@ -453,19 +453,28 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                     let uid = metitems[0];
                     let loc = metitems[1];
                     let date = metitems[2];
-                    if (checkInput(uid, 'string', FASTA_MET_UID_RE) &&
-                      (checkInput(loc, 'string', FASTA_MET_LOCNAME_RE) || checkInput(loc, 'string', FASTA_MET_GEOID_RE)) &&
-                      (checkInput(date, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(date, 'string', FASTA_MET_DEC_DATE_RE)) &&
-                      checkInput(seqData, 'string', FASTA_MET_SEQ_RE)) {
-                        let cust_record = {
-                          "id" : uid,
-                          "collectionDate": date,
-                          "geonameID" : loc,
-                          "rawSequence" : seqData
+                    if (checkInput(uid, 'string', FASTA_MET_UID_RE)){
+                      if(checkInput(loc, 'string', FASTA_MET_LOCNAME_RE) || checkInput(loc, 'string', FASTA_MET_GEOID_RE)){
+                        if(checkInput(date, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(date, 'string', FASTA_MET_DEC_DATE_RE)){
+                          if(checkInput(seqData, 'string', FASTA_MET_SEQ_RE)){
+                            let cust_record = {
+                              "id" : uid,
+                              "collectionDate": date,
+                              "geonameID" : loc,
+                              "rawSequence" : seqData
+                            }
+                            cleanRecords.push(cust_record);
+                          }else{
+                            fileErrors.push(String('Metadata errors: Invalid Sequence on item #'+String(i)));
+                          }
+                        }else{
+                          fileErrors.push(String('Metadata errors "'+date+'" on item #'+String(i)));
                         }
-                        cleanRecords.push(cust_record);
-                    } else {
-                      fileErrors.push(String('Metadata errors "'+metaData+'" on item #'+String(i)));
+                      }else{
+                        fileErrors.push(String('Metadata errors "'+loc+'" on item #'+String(i)));
+                      }
+                    }else{
+                      fileErrors.push(String('Metadata errors "'+uid+'" on item #'+String(i)));
                     }
                   } else {
                     fileErrors.push(String('Entries "'+metitems.length+'" Expected "'+ FASTA_MET_ITEMS +'" on item #'+String(i)));

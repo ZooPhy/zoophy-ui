@@ -22,9 +22,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.fastaFile = null;
   $scope.fastaError = null;
   $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
+  $scope.downloadColumnsCount = 0;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
+  const MAX_COLUMNS = 8;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
 
   $scope.updateSort = function(field) {
@@ -56,6 +58,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaFilename = 'none';
       $scope.fastaFile = null;
       $scope.fastaError = null;
+      $scope.downloadColumns = 0;
       $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
     }
   });
@@ -113,22 +116,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.$parent.switchTabs('run');
   };
 
-  $scope.exportRecords = function(){
-    var downloadFormat = String($scope.downloadFormat);
-    var downloadColumns = [];
-    $('.columnsForDownload:checkbox:checked').each(function () {
-      downloadColumns.push($(this).val());
-    });
-    $scope.setupDownload(downloadColumns);
-  }
-
   $scope.setupDownload = function(downloadColumns) {
     $scope.warning = null;
     if (!$scope.generating) {
       var format = String($scope.downloadFormat);
       $scope.generating = true;
       $scope.downloadLink = null;
-      $scope.downloadFormat = null;
       $scope.downloadError = null;
       if ($scope.results.length < 1 || $scope.numSelected < 1) {
         $scope.generating = false;
@@ -254,11 +247,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if($scope.results.length>0 && combinedSearch==='false'){
       $('#confirmFastaModel').modal('show'); 
     }else{
-      $scope.sendFasta();
+      $scope.sendFasta();      
     }
   }
 
   $scope.sendFasta = function() {
+    $('#fastaModel').modal('toggle');
     var combinedSearch = String($scope.combineResults);
       $scope.fastaError = null;
       if ($scope.fastaFile) {
@@ -279,11 +273,13 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.setTypeGenbank(false);
           if (response.data.records.length > 0) {
             $scope.$parent.switchTabs('results');
-            $('<div id="warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center">Successfully added '+ response.data.records.length+' records</div>').insertBefore('#warning-alert').delay(3000).fadeOut();
+            $('<div id="warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center">Successfully added '+ response.data.records.length+' records</div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
           }
           else {
             $scope.warning = 'Processed 0 results.';
           }
+          $scope.groupIsSelected = false;
+          $scope.toggleAll();
           RecordData.incrementSearchCount();
         }, function(error) {
           if (error.status !== 500) {
@@ -308,6 +304,60 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
     $scope.updatePercentOfRecords = function() {
       $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
+    };
+
+    $scope.columnUp = function() {
+      let $selected = $('#toSelectBox').find('option:selected');
+      $selected.insertBefore($selected.prev());
+    };
+
+    $scope.columnDown = function() {
+      let $selected = $('#toSelectBox').find('option:selected');
+      $selected.insertAfter($selected.next());
+    };
+
+    $scope.columnAdd = function() {
+      var selected = $('#fromSelectBox option:selected');
+      if(selected.length>0){
+        $('#toSelectBox').append($(selected).clone());
+        $(selected).remove();
+        $scope.downloadColumnsCount++;
+      }
+    };
+
+    $scope.columnAddAll = function() {
+      var selected = $('#fromSelectBox option');
+      if(selected.length>0){
+        $('#toSelectBox').append($(selected).clone());
+        $(selected).remove();
+        $scope.downloadColumnsCount = MAX_COLUMNS;
+      }
+    };
+
+    $scope.columnRemove = function() {
+      var selected = $('#toSelectBox option:selected');
+      if(selected.length>0){
+        $('#fromSelectBox').append($(selected).clone());
+        $(selected).remove();
+        $scope.downloadColumnsCount--;
+      }
+    };
+
+    $scope.columnRemoveAll = function() {
+      var selected = $('#toSelectBox option');
+      if(selected.length>0){
+        $('#fromSelectBox').append($(selected).clone());
+        $(selected).remove();
+        $scope.downloadColumnsCount = 0;
+      }
+    };
+
+    $scope.downloadColumn = function() {
+      var downloadColumns = [];
+      var selected = $('#toSelectBox option').each(function(i, option){
+        downloadColumns[i] = $(option).text();
+      });
+      $scope.setupDownload(downloadColumns);
     };
 });
 /*
