@@ -22,6 +22,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.countryHasRegions = false;
   $scope.regions = [];
   $scope.selectedRegions = [];
+  $scope.searchCount = 0;
 
   $scope.from = 0;
   $scope.to = Number(new Date().getFullYear());
@@ -65,6 +66,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.fileToSend = null;
     $scope.fastaFilename = 'none';
     $scope.fastaFile = null;
+    $scope.searchCount = 0;
     };
 
   $scope.checkH1N1 = function() {
@@ -151,7 +153,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
   });
 
-  $scope.search = function() {
+  $scope.generateQuery = function() {
     $scope.searchError = null;
     var virus = Number($scope.virus);
     var pdmo9 = false;
@@ -242,6 +244,11 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
       query += ' AND Date:[00000000 TO '+toYear+'1231]';
     }
+    return query;
+  }
+
+  $scope.search = function() {
+    var query = $scope.generateQuery();
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
@@ -256,6 +263,24 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Search returned 0 results.';
         }
+      }
+      else {
+        $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
+      }
+    });
+    $(window).scroll(function() {
+      $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
+    });
+  };
+
+  $scope.count = function() {
+    var query = $scope.generateQuery();
+    query = encodeURIComponent(query.trim());
+    $http.get(SERVER_URI+'/search/count?query='+query).then(function(response) {
+      if (response.status === 200) {
+        let count = response.data.count;
+        console.log("count:: "+count)
+        $scope.searchCount = count;
       }
       else {
         $scope.searchError = 'Search Failed on Server. Please refresh and try again.';

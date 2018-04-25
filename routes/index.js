@@ -81,7 +81,7 @@ router.get('/search', function(req, res) {
         }
         else if (response && response.statusCode === 200) {
           let rawRecords = JSON.parse(body);
-          console.log(rawRecords);
+         // console.log(rawRecords);
           let records = [];
           for (let i = 0; i < rawRecords.length; i++) {
             let record = new GenBankRecord.LuceneRecord(rawRecords[i]);
@@ -120,6 +120,62 @@ router.get('/search', function(req, res) {
     result = {
       status: 500,
       error: 'Failed to retrieve records from ZooPhy API'
+    };
+    res.status(result.status).send(result);
+  }
+});
+
+router.get('/search/count', function(req, res) {
+  let result;
+  try {
+    if (checkInput(req.query.query, 'string', QUERY_RE)) {
+      let query = String(req.query.query.trim());
+      logger.info('sending query: '+query);
+      query = encodeURIComponent(query.trim());
+      let uri = API_URI+'/search/count?query='+query;
+      request.get(uri, function (error, response, body) {
+        if (error) {
+          logger.error('Search failed to call ZooPhy API'+error);
+          result = {
+            status: 500,
+            error: 'Failed to call ZooPhy API'
+          };
+        }
+        else if (response && response.statusCode === 200) {
+          let count = JSON.parse(body);
+          result = {
+            status: 200,
+            count: count
+          };
+        }
+        else {
+          let err = '';
+          if (response) {
+            err = body;
+          }
+          logger.error('Search failed to retrieve records count from ZooPhy API'+err);
+          result = {
+            status: 500,
+            error: 'Failed to retrieve records from ZooPhy API'
+          };
+        }
+        res.status(result.status).send(result);
+      });
+    }
+    else {
+      logger.warn('Bad Search query'+String(req.query.query));
+      result = {
+        status: 400,
+        error: 'Invalid Lucene Query'
+      };
+      res.status(result.status).send(result);
+    }
+  }
+  catch (err) {
+    logger.error('Failed to retrieve records count from ZooPhy API'+err);
+    result = {
+      status: 500,
+      error: 'Failed to retrieve records count from ZooPhy API'
     };
     res.status(result.status).send(result);
   }
