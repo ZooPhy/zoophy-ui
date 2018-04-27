@@ -42,11 +42,11 @@ const FASTA_UPLOAD_LIMIT = 1000;
 const FASTA_MET_ITEMS = 3;
 const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
 // const FASTA_MET_NORM_DATE_RE = /^\d{4}((\-(0?[1-9]|1[012])?\-(0?[1-9]|[12][0-9]|3[01]))|(\.\d{1,4}))?$/;
-const FASTA_MET_HUM_DATE_RE = /^((0[1-9]|[12][0-9]|3[01])\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
+const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
-const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,|\’|\'){1,30}?$/;
-const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
+const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,| |\’|\'){1,30}?$/;
+const FASTA_MET_SEQ_RE = /^([ACGTYNacgtyn-]){1,20000}$/;
 
 
 let router = express.Router();
@@ -81,7 +81,7 @@ router.get('/search', function(req, res) {
         }
         else if (response && response.statusCode === 200) {
           let rawRecords = JSON.parse(body);
-          console.log(rawRecords);
+         // console.log(rawRecords);
           let records = [];
           for (let i = 0; i < rawRecords.length; i++) {
             let record = new GenBankRecord.LuceneRecord(rawRecords[i]);
@@ -120,6 +120,62 @@ router.get('/search', function(req, res) {
     result = {
       status: 500,
       error: 'Failed to retrieve records from ZooPhy API'
+    };
+    res.status(result.status).send(result);
+  }
+});
+
+router.get('/search/count', function(req, res) {
+  let result;
+  try {
+    if (checkInput(req.query.query, 'string', QUERY_RE)) {
+      let query = String(req.query.query.trim());
+      logger.info('sending query: '+query);
+      query = encodeURIComponent(query.trim());
+      let uri = API_URI+'/search/count?query='+query;
+      request.get(uri, function (error, response, body) {
+        if (error) {
+          logger.error('Search failed to call ZooPhy API'+error);
+          result = {
+            status: 500,
+            error: 'Failed to call ZooPhy API'
+          };
+        }
+        else if (response && response.statusCode === 200) {
+          let count = JSON.parse(body);
+          result = {
+            status: 200,
+            count: count
+          };
+        }
+        else {
+          let err = '';
+          if (response) {
+            err = body;
+          }
+          logger.error('Search failed to retrieve records count from ZooPhy API'+err);
+          result = {
+            status: 500,
+            error: 'Failed to retrieve records from ZooPhy API'
+          };
+        }
+        res.status(result.status).send(result);
+      });
+    }
+    else {
+      logger.warn('Bad Search query'+String(req.query.query));
+      result = {
+        status: 400,
+        error: 'Invalid Lucene Query'
+      };
+      res.status(result.status).send(result);
+    }
+  }
+  catch (err) {
+    logger.error('Failed to retrieve records count from ZooPhy API'+err);
+    result = {
+      status: 500,
+      error: 'Failed to retrieve records count from ZooPhy API'
     };
     res.status(result.status).send(result);
   }
@@ -453,19 +509,28 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                     let uid = metitems[0];
                     let loc = metitems[1];
                     let date = metitems[2];
-                    if (checkInput(uid, 'string', FASTA_MET_UID_RE) &&
-                      (checkInput(loc, 'string', FASTA_MET_LOCNAME_RE) || checkInput(loc, 'string', FASTA_MET_GEOID_RE)) &&
-                      (checkInput(date, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(date, 'string', FASTA_MET_DEC_DATE_RE)) &&
-                      checkInput(seqData, 'string', FASTA_MET_SEQ_RE)) {
-                        let cust_record = {
-                          "id" : uid,
-                          "collectionDate": date,
-                          "geonameID" : loc,
-                          "rawSequence" : seqData
+                    if (checkInput(uid, 'string', FASTA_MET_UID_RE)){
+                      if(checkInput(loc, 'string', FASTA_MET_LOCNAME_RE) || checkInput(loc, 'string', FASTA_MET_GEOID_RE)){
+                        if(checkInput(date, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(date, 'string', FASTA_MET_DEC_DATE_RE)){
+                          if(checkInput(seqData, 'string', FASTA_MET_SEQ_RE)){
+                            let cust_record = {
+                              "id" : uid,
+                              "collectionDate": date,
+                              "geonameID" : loc,
+                              "rawSequence" : seqData
+                            }
+                            cleanRecords.push(cust_record);
+                          }else{
+                            fileErrors.push(String('Metadata errors: Invalid Sequence on item #'+String(i)));
+                          }
+                        }else{
+                          fileErrors.push(String('Metadata errors "'+date+'" on item #'+String(i)));
                         }
-                        cleanRecords.push(cust_record);
-                    } else {
-                      fileErrors.push(String('Metadata errors "'+metaData+'" on item #'+String(i)));
+                      }else{
+                        fileErrors.push(String('Metadata errors "'+loc+'" on item #'+String(i)));
+                      }
+                    }else{
+                      fileErrors.push(String('Metadata errors "'+uid+'" on item #'+String(i)));
                     }
                   } else {
                     fileErrors.push(String('Entries "'+metitems.length+'" Expected "'+ FASTA_MET_ITEMS +'" on item #'+String(i)));

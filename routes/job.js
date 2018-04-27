@@ -31,7 +31,7 @@ const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
 const MODEL_RE = /^(HKY)$/;
 
 const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
-const FASTA_MET_HUM_DATE_RE = /^((0[1-9]|[12][0-9]|3[01])\-((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
+const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)?\d{4})$/;
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
 const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
@@ -86,9 +86,9 @@ router.post('/run', function(req, res) {
           if (checkInput(req.body.records[i].id, 'string', ACCESSION_RE)) {
             let rec = {
               id:String(req.body.records[i].id),
-              collectionDate:String(req.body.records[i].collectionDate),
-              geonameID:String(req.body.records[i].geonameID),
-              rawSequence:String(req.body.records[i].rawSequence),
+              collectionDate:null,
+              geonameID:null,
+              rawSequence:null,
               resourceSource: String(req.body.records[i].resourceSource)
             };
             records.push(rec);
