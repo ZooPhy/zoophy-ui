@@ -81,7 +81,6 @@ router.get('/search', function(req, res) {
         }
         else if (response && response.statusCode === 200) {
           let rawRecords = JSON.parse(body);
-         // console.log(rawRecords);
           let records = [];
           for (let i = 0; i < rawRecords.length; i++) {
             let record = new GenBankRecord.LuceneRecord(rawRecords[i]);

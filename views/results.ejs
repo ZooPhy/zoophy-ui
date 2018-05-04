@@ -6,7 +6,7 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-sm-4"><h6 class="text-left">{{numSelected}}/{{results.length}} records selected.</h6></div>
+      <div class="col-sm-4"><h6 class="text-left">{{numSelected}}/{{results.length}} <b>{{searchedVirusName}}</b> records selected.</h6></div>
       <h6 class="text-right"><i class="fa fa-info-circle" aria-hidden="true"></i> ZooPhy Jobs must contain 5 to 1000 Records</h6>
   </div>
 
@@ -29,7 +29,6 @@
           <th class="col-sm-1 text-center">ALL <input type="checkbox" ng-model="groupIsSelected" ng-click="toggleAll(); $event.stopPropagation();"></th>
         	<th class="col-sm-1" ng-click="updateSort('accession');"><i class="fa fa-sort" aria-hidden="true"></i>ID</th>
         	<th class="col-sm-1" ng-click="updateSort('genes');"><i class="fa fa-sort" aria-hidden="true"></i> Genes</th>
-        	<th class="col-sm-2 hidden-xs" ng-click="updateSort('virus');"><i class="fa fa-sort" aria-hidden="true"></i> Virus</th>
         	<th class="col-sm-2" ng-click="updateSort('luceneDate');"><i class="fa fa-sort" aria-hidden="true"></i> Date</th>
         	<th class="col-sm-2 hidden-xs" ng-click="updateSort('host');"><i class="fa fa-sort" aria-hidden="true"></i> Host</th>
           <th class="col-sm-2" ng-click="updateSort('country');"><i class="fa fa-sort" aria-hidden="true"></i> Country</th>
@@ -41,7 +40,6 @@
           <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="toggleRecord(record); $event.stopPropagation();"></td>
           <td class="col-sm-1">{{record.accession}}</td>
       		<td class="col-sm-1">{{record.genes}}</td>
-      		<td class="col-sm-2 hidden-xs">{{record.virus}}</td>
       		<td class="col-sm-2">{{record.date}}</td>
       		<td class="col-sm-2 hidden-xs">{{record.host}}</td>
           <td class="col-sm-2">{{record.country}}</td>

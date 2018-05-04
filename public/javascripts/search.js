@@ -279,7 +279,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $http.get(SERVER_URI+'/search/count?query='+query).then(function(response) {
       if (response.status === 200) {
         let count = response.data.count;
-        console.log("count:: "+count)
         $scope.searchCount = count;
       }
       else {
@@ -438,7 +437,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       message: 'The FILE file needs to have a metadata line preceded by the > symbol. It should be followed by a new line and the sequence string. The current file size limit is 10mb.'
     });
   };
-
 });
 
 /*
