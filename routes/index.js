@@ -45,7 +45,7 @@ const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
 const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
-const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,| |\’|\'){1,30}?$/;
+const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,| |\’|\'){1,60}?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTYNacgtyn-]){1,20000}$/;
 
 
