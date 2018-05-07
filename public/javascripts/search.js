@@ -279,7 +279,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $http.get(SERVER_URI+'/search/count?query='+query).then(function(response) {
       if (response.status === 200) {
         let count = response.data.count;
-        console.log("count:: "+count)
         $scope.searchCount = count;
       }
       else {
@@ -294,7 +293,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.uploadAccessions = function(rawFile) {
     $scope.searchError = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 50000) { //5kb
+    if (newFile && newFile.size < 4000000) { //4MB
       var filename = newFile.name.trim();
       if (ACCESSION_FILE_RE.test(filename)) {
         $scope.fileToSend = newFile;
@@ -352,7 +351,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.uploadFasta = function(rawFile) {
     $scope.searchError = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 10000000) { //10mb
+    if (newFile && newFile.size < 10000000) { //10MB
       var filename = newFile.name.trim();
       if (FASTA_FILE_RE.test(filename)) {
         $scope.fastaFile = newFile;
@@ -438,7 +437,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       message: 'The FILE file needs to have a metadata line preceded by the > symbol. It should be followed by a new line and the sequence string. The current file size limit is 10mb.'
     });
   };
-
 });
 
 /*

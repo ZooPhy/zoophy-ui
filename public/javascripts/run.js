@@ -178,7 +178,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.runError = null;
     $scope.success = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 500000) { //50kb
+    if (newFile && newFile.size < 50000) { //50kb
       var filename = newFile.name.trim();
       if (PREDICTOR_FILE_RE.test(filename)) {
         $scope.fileToSend = newFile;

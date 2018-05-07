@@ -23,6 +23,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.fastaError = null;
   $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
   $scope.downloadColumnsCount = 0;
+  $scope.searchedVirusName = null;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -42,7 +43,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
       if ($scope.results.length > 0) {
-        $scope.LoadDetails($scope.results[0]);
+        var totalRecords = $scope.results.length
+        $scope.LoadDetails($scope.results[totalRecords-1]);
+        $scope.searchedVirusName = $scope.results[totalRecords-1].virus;
       }
       $scope.groupIsSelected = false;
       $scope.numSelected = 0;
@@ -58,7 +61,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaFilename = 'none';
       $scope.fastaFile = null;
       $scope.fastaError = null;
-      $scope.downloadColumns = 0;
       $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
     }
   });

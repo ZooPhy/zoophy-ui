@@ -13,7 +13,7 @@ let multer = require('multer');
 const multerOptions = {
   dest: 'uploads/',
   limits: {
-    fileSize: 50000 //5KB
+    fileSize: 4000000 //4MB
   }
 };
 let upload = multer(multerOptions);
@@ -45,7 +45,7 @@ const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
 const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
-const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,| |\’|\'){1,30}?$/;
+const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,| |\’|\'){1,60}?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTYNacgtyn-]){1,20000}$/;
 
 
@@ -81,7 +81,6 @@ router.get('/search', function(req, res) {
         }
         else if (response && response.statusCode === 200) {
           let rawRecords = JSON.parse(body);
-         // console.log(rawRecords);
           let records = [];
           for (let i = 0; i < rawRecords.length; i++) {
             let record = new GenBankRecord.LuceneRecord(rawRecords[i]);
@@ -260,9 +259,10 @@ router.post('/download/:format', function(req, res) {
           else {
             logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
             invalidAcc = i;
+            break;
           }
         }
-        if (invalidAcc !== -1 && accessions.length === 0) {
+        if (invalidAcc !== -1 && accessions.length !== 0) {
           result = {
             status: 400,
             error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc])
