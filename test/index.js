@@ -146,19 +146,26 @@ describe('File Upload and Download tests', function(done) {
     });
   });
   it('Should require valid accessions', function(done) {
-    let badList = helperData.accessions.slice();
-    badList.push('GQ/*rm**/0');
+    let badAccessions = helperData.accessions.slice();
+    badAccessions.push('GQ/*rm**/0');
     request(app)
       .post('/download/csv')
-      .send({accessions: badList})
+      .send({accessions: badAccessions,
+            columns: helperData.downloadColumns
+         })
       .end(function(err, res) {
       if (err) done(err);
       assert.strictEqual(res.body.error, 'Invalid Accession: GQ/*rm**/0','Should return error');
       assert.strictEqual(res.status, 400, "Should not generate CSV file");
       done();
     });
-  });
+ });
   it('Should require accession list', function(done) {
+    let columnsList = helperData.downloadColumns.slice();
+    let DOWNLOAD_ACCESSIONS = {
+      accessions: undefined,
+      columns: columnsList
+    };
     request(app)
       .post('/download/csv')
       .send({accessions: undefined})
@@ -172,7 +179,8 @@ describe('File Upload and Download tests', function(done) {
   it('Should download CSV file', function(done) {
     request(app)
       .post('/download/csv')
-      .send({accessions: helperData.accessions})
+      .send({accessions: helperData.accessions,
+              columns: helperData.downloadColumns})
       .end(function(err, res) {
       if (err) done(err);
       assert.isUndefined(res.body.error, 'Should not return error');
@@ -186,7 +194,8 @@ describe('File Upload and Download tests', function(done) {
   it('Should download FASTA file', function(done) {
     request(app)
       .post('/download/fasta')
-      .send({accessions: helperData.accessions})
+      .send({accessions: helperData.accessions,
+        columns: helperData.downloadColumns})
       .end(function(err, res) {
       if (err) done(err);
       assert.isUndefined(res.body.error, 'Should not return error');
@@ -246,6 +255,7 @@ describe('File Upload and Download tests', function(done) {
       done();
     });
   });
+  
   describe('Fasta File Upload', function(done) {
     it('Should require file', function(done) {
       request(app)
@@ -301,19 +311,7 @@ describe('File Upload and Download tests', function(done) {
         .attach('fastaFile', path)
         .end(function(err, res) {
         if (err) done(err);
-        assert.strictEqual(res.body.error, 'Invalid FASTA entries: Metadata errors "EPI_ISL_150187|8900568|2004." on item #4', 'Should return error');
-        assert.strictEqual(res.status, 400, "Should not perform upload search");
-        done();
-      });
-    });
-    it('Should require valid metadata', function(done) {
-      let path = __dirname+'/bad-fasta2.fasta';
-      request(app)
-        .post('/upfasta')
-        .attach('fastaFile', path)
-        .end(function(err, res) {
-        if (err) done(err);
-        assert.strictEqual(res.body.error, 'Invalid FASTA entries: Metadata errors "EPI_ISL_150187|8900568|2004." on item #4', 'Should return error');
+        assert.strictEqual(res.body.error, 'Invalid FASTA entries: Metadata errors "2004." on item #4', 'Should return error');
         assert.strictEqual(res.status, 400, "Should not perform upload search");
         done();
       });

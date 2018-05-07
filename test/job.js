@@ -185,7 +185,7 @@ describe('Run Genbank Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'Too few distinct locations (need at least 2): 0');
+      assert.strictEqual(res.body.error, 'Too few distinct locations (need at least 2): 1\nLocation: wisconsin');
       assert.strictEqual(res.status, 200, "Should not run Job");
       done();
     });

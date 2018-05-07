@@ -13,7 +13,7 @@ let multer = require('multer');
 const multerOptions = {
   dest: 'uploads/',
   limits: {
-    fileSize: 50000 //5KB
+    fileSize: 4000000 //4MB
   }
 };
 let upload = multer(multerOptions);
@@ -259,9 +259,10 @@ router.post('/download/:format', function(req, res) {
           else {
             logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
             invalidAcc = i;
+            break;
           }
         }
-        if (invalidAcc !== -1 && accessions.length === 0) {
+        if (invalidAcc !== -1 && accessions.length !== 0) {
           result = {
             status: 400,
             error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc])

@@ -168,8 +168,12 @@
         </div>
          <div class="modal-body">
           <h5>Select download format</h5>
-          <input type="radio" name="downloadFormatCSV" id="csv" ng-model="downloadFormat" value="csv" ng-checked="true"/> CSV &nbsp;
-          <input type="radio" name="downloadFormatFasta" id="fasta" ng-model="downloadFormat" value="fasta"/> FASTA <br>
+          <label class="radio-inline">
+            <input type="radio" name="downloadFormatCSV" id="csv" ng-model="downloadFormat" value="csv" ng-checked="true"/> CSV
+          </label>
+          <label class="radio-inline">
+            <input type="radio" name="downloadFormatFasta" id="fasta" ng-model="downloadFormat" value="fasta"/>  FASTA 
+          </label> <br>
           <h5>Select Columns</h5>
           <table>
             <tbody>
@@ -226,13 +230,17 @@
           <div class="modal-body">
             <div class="container">
               <div class="row form-group">
-                <input type="radio" name="sampleTypeNumber" id="number" ng-model="sampleType" value="number"/> Number&nbsp;&nbsp;
-                <input type="radio" name="sampleTypePercent" id="percent" ng-model="sampleType" value="percent" ng-checked="true"/> Percentage                      </div>
-                  <div class="row">
-                    {{sampleType}} of records
-                    <input class="form-control sampleBox" type="number" min="0" name="sampleAmount" ng-change="updatePercentOfRecords();" ng-model="sampleAmount"/>
-                    <p style="display:inline" class="text-muted" ng-show="sampleType === 'percent'" >&nbsp;{{percentOfRecords}} records</p>
-                  </div>
+                <label class="radio-inline">
+                  <input type="radio" name="sampleTypeNumber" id="number" ng-model="sampleType" value="number"/> Number
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="sampleTypePercent" id="percent" ng-model="sampleType" value="percent" ng-checked="true"/> Percentage
+                </label>
+              </div>
+              <div class="row">
+                {{sampleType}} of records
+                <input class="form-control sampleBox" type="number" min="0" name="sampleAmount" ng-change="updatePercentOfRecords();" ng-model="sampleAmount"/>
+                <p style="display:inline" class="text-muted" ng-show="sampleType === 'percent'" >&nbsp;{{percentOfRecords}} records</p>                </div>
               </div>
           </div>
           <div class="modal-footer">

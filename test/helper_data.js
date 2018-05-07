@@ -174,6 +174,18 @@ const ACCESSION_LIST = [
     'CY060728'
 ];
 
+const DOWNLOAD_COLUMNS = [
+    'Id',
+    'Genes',
+    'VirusId',
+    'Virus',
+    'Date',
+    'HostId',
+    'Host',
+    'Country',
+    'Length'
+];
+
 const CANADA_PREDICTORS = {
     "manitoba" : [
         {"state": "manitoba", "name": "lat", "value": 55.000191, "year": null},
@@ -275,6 +287,7 @@ const TEST_DATA = {
   sqlRecord: SQL_RECORD,
   predictor: PREDICTOR,
   accessions: ACCESSION_LIST,
+  downloadColumns: DOWNLOAD_COLUMNS,
   canadianPredictors: CANADA_PREDICTORS,
   xmlOptions: XML_OPTIONS,
   jobSequenceGenbank: JOBSEQUENCE_GENBANK_LIST,

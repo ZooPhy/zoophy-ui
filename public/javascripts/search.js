@@ -293,7 +293,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.uploadAccessions = function(rawFile) {
     $scope.searchError = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 50000) { //5kb
+    if (newFile && newFile.size < 4000000) { //4MB
       var filename = newFile.name.trim();
       if (ACCESSION_FILE_RE.test(filename)) {
         $scope.fileToSend = newFile;
@@ -351,7 +351,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.uploadFasta = function(rawFile) {
     $scope.searchError = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 10000000) { //10mb
+    if (newFile && newFile.size < 10000000) { //10MB
       var filename = newFile.name.trim();
       if (FASTA_FILE_RE.test(filename)) {
         $scope.fastaFile = newFile;
