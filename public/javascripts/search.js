@@ -22,6 +22,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.countryHasRegions = false;
   $scope.regions = [];
   $scope.selectedRegions = [];
+  $scope.searchCount = 0;
 
   $scope.from = 0;
   $scope.to = Number(new Date().getFullYear());
@@ -29,14 +30,20 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.isPDMO9 = false;
   $scope.filename = 'none';
   $scope.fileToSend = null;
-
+  
+  $scope.fastaFilename = 'none';
+  $scope.fastaFile = null;
+  
   $scope.showDetails = false;
   $scope.selectedRecord = null;
   $scope.searchError = null;
 
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
+  var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
+  var combinedRecords =[];
 
   $scope.reset = function() {
+    $scope.searchError = null;
     $scope.virus = $scope.allowed_values.viruses[0].tax_id;
     $scope.hantaSub = 11599;
     $scope.fluAH = 1;
@@ -45,7 +52,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.host = $scope.allowed_values.hosts[0].tax_id;
     $scope.avianHost = $scope.allowed_values.avian_hosts[0].tax_id;
     $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
-    $scope.genes.push(completeGenes);
+    // $scope.genes.push(completeGenes);
     $scope.selectedGenes = [];
     $scope.continent = 1;
     $scope.selectedCountries = [];
@@ -57,7 +64,10 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.isPDMO9 = false;
     $scope.filename = 'none';
     $scope.fileToSend = null;
-  };
+    $scope.fastaFilename = 'none';
+    $scope.fastaFile = null;
+    $scope.searchCount = 0;
+    };
 
   $scope.checkH1N1 = function() {
     $scope.isH1N1 = Boolean($scope.fluAH === 1 && $scope.fluAN === 1);
@@ -66,7 +76,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.updateGenes = function() {
     var virusIndex = $('#virus')[0].selectedIndex;
     $scope.genes = $scope.allowed_values.viruses[virusIndex].genes.slice();
-    $scope.genes.push(completeGenes);
+    if($scope.allowed_values.viruses[virusIndex].tax_id != 0) {
+      $scope.genes.push(completeGenes);
+      // $scope.search-btn = 
+    } else {
+      //search-btn
+
+    }
   };
 
   $scope.updateCountries = function() {
@@ -127,7 +143,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       $('#regions-container').removeClass('hidden');
       $scope.virus = $scope.allowed_values.viruses[0].tax_id;
       $scope.genes = $scope.allowed_values.viruses[0].genes.slice();
-      $scope.genes.push(completeGenes);
+      // if($scope.genes = $scope.allowed_values.viruses[virusIndex].tax_id != 0) {
+      //   $scope.genes.push(completeGenes);
+      // }
       $scope.updateCountries();
     }
     else {
@@ -135,7 +153,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
   });
 
-  $scope.search = function() {
+  $scope.generateQuery = function() {
     $scope.searchError = null;
     var virus = Number($scope.virus);
     var pdmo9 = false;
@@ -226,10 +244,18 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
       query += ' AND Date:[00000000 TO '+toYear+'1231]';
     }
+    return query;
+  }
+
+  $scope.search = function() {
+    var query = $scope.generateQuery();
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
       if (response.status === 200) {
-        RecordData.setRecords(response.data.records);
+        combinedRecords = combinedRecords.concat(response.data.records);
+        RecordData.setRecords(combinedRecords);
+        combinedRecords =[];
+        RecordData.setTypeGenbank(true);
         RecordData.incrementSearchCount();
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
@@ -247,10 +273,27 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     });
   };
 
+  $scope.count = function() {
+    var query = $scope.generateQuery();
+    query = encodeURIComponent(query.trim());
+    $http.get(SERVER_URI+'/search/count?query='+query).then(function(response) {
+      if (response.status === 200) {
+        let count = response.data.count;
+        $scope.searchCount = count;
+      }
+      else {
+        $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
+      }
+    });
+    $(window).scroll(function() {
+      $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
+    });
+  };
+
   $scope.uploadAccessions = function(rawFile) {
     $scope.searchError = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 50000) { //5kb
+    if (newFile && newFile.size < 4000000) { //4MB
       var filename = newFile.name.trim();
       if (ACCESSION_FILE_RE.test(filename)) {
         $scope.fileToSend = newFile;
@@ -276,6 +319,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
           headers: {'Content-Type': undefined}
       }).then(function (response) {
         RecordData.setRecords(response.data.records);
+        RecordData.setTypeGenbank(true);
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
         }
@@ -304,6 +348,95 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     });
   };
 
+  $scope.uploadFasta = function(rawFile) {
+    $scope.searchError = null;
+    var newFile = rawFile[0];
+    if (newFile && newFile.size < 10000000) { //10MB
+      var filename = newFile.name.trim();
+      if (FASTA_FILE_RE.test(filename)) {
+        $scope.fastaFile = newFile;
+        $scope.fastaFilename = String(filename).trim();
+      }
+      else {
+        $scope.searchError = 'Invalid File Name. Must be .txt file.';
+      }
+    }
+    else {
+      $scope.searchError = 'Invalid File Size. Limit is 1mb.';
+    }
+    $scope.$apply();
+  };
+
+  $scope.sendFasta = function() {
+    $scope.searchError = null;
+    if ($scope.fastaFile) {
+      var form = new FormData();
+      var uri = SERVER_URI+'/upfasta';
+      form.append('fastaFile', $scope.fastaFile);
+      console.log("Posting " + uri + " " + $scope.fastaFile.type)
+      $http.post(uri, form, {
+          headers: {'Content-Type': undefined}
+      }).then(function (response) {
+        RecordData.setRecords(response.data.records);
+        RecordData.setTypeGenbank(false);
+        if (response.data.records.length > 0) {
+          $scope.$parent.switchTabs('results');
+        }
+        else {
+          $scope.searchError = 'Processed 0 results.';
+        }
+        RecordData.incrementSearchCount();
+      }, function(error) {
+        if (error.status !== 500) {
+          $scope.searchError = error.data.error;
+        }
+        else {
+          $scope.searchError = 'Parsing Failed on Server. Please refresh and try again.';
+        }
+      });
+    }
+    else {
+      $scope.searchError = 'No FASTA File Selected';
+    }
+  };
+
+  $scope.sendFastaNgenbank = function() {
+    $scope.searchError = null;
+    if ($scope.fastaFile) {
+      var form = new FormData();
+      var uri = SERVER_URI+'/upfasta';
+      form.append('fastaFile', $scope.fastaFile);
+      $http.post(uri, form, {
+          headers: {'Content-Type': undefined}
+      }).then(function (response) {
+        if (response.data.records.length > 0) {
+          combinedRecords = response.data.records;
+          $scope.search();
+        }
+        else {
+          $scope.searchError = 'Processed 0 results.';
+        }
+        RecordData.incrementSearchCount();
+      }, function(error) {
+        if (error.status !== 500) {
+          $scope.searchError = error.data.error;
+        }
+        else {
+          $scope.searchError = 'Parsing Failed on Server. Please refresh and try again.';
+        }
+      });
+    }
+    else {
+      $scope.searchError = 'No FASTA File Selected';
+    }
+  };
+
+  $scope.showFastaHelp = function() {
+    BootstrapDialog.show({
+      title: 'FASTA Upload Help',
+      message: 'The FILE file needs to have a metadata line preceded by the > symbol. It should be followed by a new line and the sequence string. The current file size limit is 10mb.'
+    });
+  };
 });
 
 /*

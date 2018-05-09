@@ -7,19 +7,19 @@
   <div class="row">
     <div class="col-sm-3 col-xs-6">
       <label for="virus">Virus</label>
-      <select id="virus" class="form-control" ng-model="virus" ng-options="virus.tax_id as virus.name for virus in allowed_values.viruses" ng-change="updateGenes();" required>
+      <select id="virus" class="form-control" ng-model="virus" ng-options="virus.tax_id as virus.name for virus in allowed_values.viruses" ng-change="updateGenes(); count();" required>
         <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3">
       <label for="host">Host</label>
-      <select id="host" class="form-control" ng-model="host" ng-options="host.tax_id as host.name for host in allowed_values.hosts" required>
+      <select id="host" class="form-control" ng-model="host" ng-options="host.tax_id as host.name for host in allowed_values.hosts" ng-change="count();" required>
         <!-- handled by Angular -->
       </select>
     </div>
     <div class="col-sm-3 col-xs-6">
       <label for="continent">Continent</label>
-      <select id="continent" class="form-control" ng-model="continent" ng-options="continent.geoname_id as continent.name for continent in allowed_values.continents" ng-change="updateCountries();" required>
+      <select id="continent" class="form-control" ng-model="continent" ng-options="continent.geoname_id as continent.name for continent in allowed_values.continents" ng-change="updateCountries(); count();" required>
         <!-- handled by Angular -->
       </select>
     </div>
@@ -27,11 +27,11 @@
       <% var CURRENT_YEAR = Number(new Date().getFullYear()); %>
       <div class="col-xs-6">
         <label for="from">From</label>
-        <input id="from" type="number" ng-model="from" class="form-control" placeholder="YYYY"/>
+        <input id="from" type="number" ng-model="from" ng-change="count();" class="form-control" placeholder="YYYY"/>
       </div>
       <div class="col-xs-6">
         <label for="to">To</label>
-        <input id="to" type="number" ng-model="to" class="form-control" placeholder="<%= CURRENT_YEAR %>"/>
+        <input id="to" type="number" ng-model="to" class="form-control" ng-change="count();" placeholder="<%= CURRENT_YEAR %>"/>
       </div>
     </div>
   </div>
@@ -41,29 +41,29 @@
         <label>Flu A Sub Type</label>
         <div class="col-sm-6">
           <label class="text-center">H</label>
-          <select id="flu-a-h" class="form-control" ng-model="fluAH" ng-options="h as h for h in fluAHs" ng-change="checkH1N1();">
+          <select id="flu-a-h" class="form-control" ng-model="fluAH" ng-options="h as h for h in fluAHs" ng-change="checkH1N1(); count();">
             <!-- handled by Angular -->
           </select>
         </div>
         <div class="col-sm-6">
           <label class="text-center">N</label>
-          <select id="flu-a-n" class="form-control" ng-model="fluAN" ng-options="n as n for n in fluANs" ng-change="checkH1N1();">
+          <select id="flu-a-n" class="form-control" ng-model="fluAN" ng-options="n as n for n in fluANs" ng-change="checkH1N1(); count();">
             <!-- handled by Angular -->
           </select>
         </div>
         <div class="col-xs-10 col-xs-offset-2 pushed-down" ng-show="isH1N1">
-          <label class="pdmo9-label">pdm09 Only?</label> <input ng-model="isPDMO9" type="checkbox"></input>
+          <label class="pdmo9-label">pdm09 Only?</label> <input ng-model="isPDMO9" ng-click="count();" type="checkbox"></input>
         </div>
       </div>
       <div id="hanta-sub-container" ng-show="virus === 11598">
         <label for="hanta-sub">Hantavirus Sub Type</label>
-        <select id="hanta-sub" class="form-control" ng-model="hantaSub" ng-options="sub.tax_id as sub.name for sub in allowed_values.hantavirus_sub_types">
+        <select id="hanta-sub" class="form-control" ng-model="hantaSub" ng-change="count();" ng-options="sub.tax_id as sub.name for sub in allowed_values.hantavirus_sub_types">
           <!-- handled by Angular -->
         </select>
       </div>
       <div class="pushed-down">
         <label for="genes">Genes</label>
-        <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" class="form-control" multiple>
+        <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" ng-change="count();" class="form-control" multiple>
           <!-- handled by Angular -->
         </select>
       </div>
@@ -71,19 +71,19 @@
     <div class="col-sm-3 col-xs-6">
       <div id="avian-host-container" ng-show="host === 8782">
         <label for="avian-host">Avian Host</label>
-        <select id="avian-host" class="form-control" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts">
+        <select id="avian-host" class="form-control" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts" ng-change="count();">
           <!-- handled by Angular -->
         </select>
       </div>
     </div>
     <div class="col-sm-3 col-xs-6">
       <label for="countries">Countries</label>
-      <select id="countries" ng-model="selectedCountries" ng-options="country as country.name for country in countries" class="form-control" ng-change="updateRegions();" multiple>
+      <select id="countries" ng-model="selectedCountries" ng-options="country as country.name for country in countries" class="form-control" ng-change="updateRegions(); count();" multiple>
         <!-- handled by Angular -->
       </select>
       <div id="regions-container" ng-show="countryHasRegions">
         <label for="regions">Regions</label>
-        <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" class="form-control" multiple>
+        <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" ng-change="count();" class="form-control" multiple>
           <!-- handled by Angular -->
         </select>
       </div>
@@ -91,25 +91,47 @@
     <div class="col-sm-3 col-xs-6 text-center">
       <label for="minimumSequenceLength">Minimum Sequence Length</label>
       <div class="col-xs-6 col-sm-offset-3">
-        <input id="minimumSequenceLength" type="number" ng-model="minimumSequenceLength" min="0" max="99999" placeholder="0" class="form-control"></input>
+        <input id="minimumSequenceLength" type="number" ng-model="minimumSequenceLength" ng-change="count();" min="0" max="99999" placeholder="0" class="form-control"></input>
       </div>
     </div>
   </div>
   <div class="row col-xs-12 pushed-down">
     <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-search"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
     <div id="advanced-search" class="row pushed-down collapse">
-      <div class="col-sm-6 col-xs-12 col-xs-offset-1">
-        <label ng-click="showHelp();">Accession List Search <span class="help-info" data-toggle="tooltip" data-placement="top" title="Line delimited text (.txt) file of up to 2500 GenBank Accessions"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+      <div class="col-sm-6 col-xs-12">
+        <label ng-click="showHelp();">Search using GenBank Accessions <span class="help-info" data-toggle="tooltip" data-placement="top" title="Line delimited text (.txt) file of up to 2500 GenBank Accessions"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
         <input type="button" class="btn btn-info btn-sm fa" ng-click="sendAccessions();" value="&#xf093; Upload File" ng-disabled="fileToSend === null || fileToSend === undefined"></input>
         <label class="btn btn-default btn-file btn-sm">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadAccessions(this.files);"></input></label>
         {{filename}}
       </div>
+      <div class="col-sm-6 col-xs-12">
+        <label ng-click="showFastaHelp();">Upload FASTA file <span class="help-info" data-toggle="tooltip" data-placement="top" 
+          title="
+          The .FASTA file needs to be a new line delimited .txt file. The current search limit is 2500 sequences.
+          Please structure your definition lines as such:
+          >[ID]|[GeonamesID or LocationName]|[Time]
+          Where ID = Some unique ID
+          GeonamesID = the unique geonames.org ID of your location or location name
+          Time = the decimal day or year of your sample or date in format DD-mmm-YYYY e.g. 08-Oct-2011
+          
+          For example:
+          >1|5308655|2006.23
+          ATGGAGAAAATAGTGC...
+          >2|5317058|2008.01
+          ATGGAGAAAATAGTGC...
+          "> 
+          <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+        <input type="button" class="btn btn-info btn-sm fa" ng-click="sendFasta();" value="&#xf093; Upload FASTA" ng-disabled="fastaFile === null || fastaFile === undefined"></input>
+        <label class="btn btn-default btn-file btn-sm">Select File<input id="data-upload" type="file" onchange="angular.element(this).scope().uploadFasta(this.files);"></input></label>
+        {{fastaFilename}}
+      </div>
     </div>
   </div>
   <div class="row">
-    <div class="col-xs-12 pushed-down">
-      <button class="btn btn-warning pull-left" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>
-      <button class="btn btn-info pull-right search-button" ng-click="search();"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
-    </div>
-  </div>
+    <div class="col-xs-12 pushed-down text-center">
+        <button class="btn btn-warning pull-left" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>  
+        <p class="text-center" style="color:red;display:inline; margin:0px 0px 0px 0px;"><b>{{searchCount}} Records</b></p>
+        <button class="btn btn-info pull-right search-button" ng-click="search();" ng-model="searchBtn" ng-disabled="virus === 0"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+      </div>
+    </div> 
 </div>

@@ -25,10 +25,19 @@ const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
 const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
 const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
 const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
-const PREDICTOR_FILE_RE = /^(\w|-|\.){1,250}?\.tsv$/;
-const STATE_RE = /^(\w|-|\.|,| |'){1,255}?$/;
+const PREDICTOR_FILE_RE = /.{1,250}?\.tsv$/;
+const STATE_RE = /^(\w|-|\.|\,| |\’|\'){1,255}?$/;
 const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
 const MODEL_RE = /^(HKY)$/;
+
+const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
+const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)?\d{4})$/;
+const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
+const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
+const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
+const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
+const SOURCE_GENBANK = 1;
+const SOURCE_FASTA = 2;
 
 let router = express.Router();
 
@@ -36,22 +45,59 @@ router.post('/run', function(req, res) {
   let result;
   try {
     let jobErrors = BASE_ERROR;
-    let accessions;
-    if (!req.body.accessions) {
-      jobErrors += 'Missing Accessions, ';
+    let records;
+    if (!req.body.records) {
+      jobErrors += 'Missing Records, ';
     }
-    else if (req.body.accessions.length < 5 || req.body.accessions.length > 1000) {
-      jobErrors += 'Invalid number of Accessions: '+req.body.accessions.length+', ';
+    else if (req.body.records.length < 5 || req.body.records.length > 1000) {
+      jobErrors += 'Invalid number of Records: '+req.body.records.length+', ';
     }
     else {
-      accessions = [];
-      for (let i = 0; i < req.body.accessions.length; i++) {
-        if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
-          accessions.push(String(req.body.accessions[i]));
+      logger.info(req.body.records.length + " records")
+      records = [];
+      for (let i = 0; i < req.body.records.length; i++) {
+        
+        if(req.body.records[i].resourceSource==SOURCE_FASTA){
+          if (checkInput(req.body.records[i].id, 'string', FASTA_MET_UID_RE) &&
+          (checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_GEOID_RE) || checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_LOCNAME_RE)) &&
+          (checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(req.body.records[i].collectionDate, 'string', FASTA_MET_DEC_DATE_RE)) &&
+          checkInput(req.body.records[i].rawSequence, 'string', FASTA_MET_SEQ_RE)) {
+            let rec = {
+              id:String(req.body.records[i].id),
+              collectionDate:String(req.body.records[i].collectionDate),
+              geonameID:String(req.body.records[i].geonameID),
+              rawSequence:String(req.body.records[i].rawSequence),
+              resourceSource: String(req.body.records[i].resourceSource)
+            };
+            records.push(rec);
+          }else {
+            if(!jobErrors.includes("Invalid Records:"))
+              jobErrors += 'Invalid Records: ';
+            jobErrors += req.body.records[i].id+', ';
+            let object = req.body.records[i];
+            let output = '';
+            for (let property in object) {
+              output += property + ': ' + object[property]+'; ';
+            }
+            logger.info(output);
+          }
         }
-        else {
-          jobErrors += 'Invalid Accession: '+req.body.accessions[i]+', ';
-          break;
+        else if(req.body.records[i].resourceSource==SOURCE_GENBANK){
+          if (checkInput(req.body.records[i].id, 'string', ACCESSION_RE)) {
+            let rec = {
+              id:String(req.body.records[i].id),
+              collectionDate:null,
+              geonameID:null,
+              rawSequence:null,
+              resourceSource: String(req.body.records[i].resourceSource)
+            };
+            records.push(rec);
+          }else{
+            if(!jobErrors.includes("Invalid Records:"))
+              jobErrors += 'Invalid Records: ';
+            jobErrors += req.body.records[i].id+', ';
+            break;
+          }
         }
       }
     }
@@ -106,14 +152,13 @@ router.post('/run', function(req, res) {
     }
     if (jobErrors === BASE_ERROR) {
       const zoophyJob = JSON.stringify({
-        accessions: accessions,
+        records: records,
         replyEmail: email,
         jobName: jobName,
         useGLM: useGLM,
         predictors: predictors,
         xmlOptions: xmlOptions
       });
-      logger.info('Parameters valid, testing ZooPhy Job with '+accessions.length+' accessions:\n'+zoophyJob);
       request.post({
         url: API_URI+'/validate',
         headers: {
@@ -127,6 +172,7 @@ router.post('/run', function(req, res) {
             status: 500,
             error: String(error)
           };
+          
           res.status(result.status).send(result);
         }
         else {
@@ -134,6 +180,8 @@ router.post('/run', function(req, res) {
           if (response.statusCode === 200 && validationResults.error === null) {
             logger.warn('Accessions removed in job validation: '+validationResults.accessionsRemoved);
             logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
+            logger.info('Starting ZooPhy Job for: '+email);
+            logger.info(zoophyJob);
             request.post({
               url: API_URI+'/run',
               headers: {
@@ -168,135 +216,43 @@ router.post('/run', function(req, res) {
                 }
                 res.status(result.status).send(result);
               }
-            });
-          }
-          else if (validationResults.error) {
-            logger.warn(validationResults.error);
-            result = {
-              status: 200,
-              error: String(validationResults.error)
-            };
-            res.status(result.status).send(result);
-          }
-          else {
-            logger.warn('Unknown ZooPhy API Error');
-            result = {
-              status: 200,
-              error: 'Unknown ZooPhy API Error during Validation'
-            };
-            res.status(result.status).send(result);
-          }
+            }); 
+        }  
+        else if (validationResults.error) {
+          logger.warn(validationResults.error);
+          result = {
+            status: 200,
+            error: String(validationResults.error)
+          };
+          res.status(result.status).send(result);
         }
-      });
-    }
-    else {
-      if (jobErrors.endsWith(', ')) {
-        jobErrors = jobErrors.substring(0,jobErrors.length-2);
+        else {
+          logger.warn('Unknown ZooPhy API Error');
+          result = {
+            status: 200,
+            error: 'Unknown ZooPhy API Error during Validation'
+          };
+          res.status(result.status).send(result);
+        }
       }
-      logger.warn(jobErrors);
-      result = {
-        status: 400,
-        error: jobErrors
-      };
-      res.status(result.status).send(result);
+      });
+    }else {
+        if (jobErrors.endsWith(', ')) {
+           jobErrors = jobErrors.substring(0,jobErrors.length-2);
+        }
+        logger.warn(jobErrors);
+         result = {
+           status: 400,
+           error: jobErrors
+        };
+         res.status(result.status).send(result);
+       }
     }
-  }
   catch (err) {
     logger.error('Failed to start ZooPhy Job: '+err);
     result = {
       status: 500,
       error: 'Failed to start ZooPhy Job'
-    };
-    res.status(result.status).send(result);
-  }
-});
-
-router.post('/predictors/template', function(req, res) {
-  let result;
-  try {
-    if (req.body.accessions) {
-      let accessions = [];
-      let invalidAcc = -1;
-      for (let i = 0; i < req.body.accessions.length; i++) {
-        if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
-          accessions.push(String(req.body.accessions[i]));
-        }
-        else {
-          logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
-          invalidAcc = i;
-          break;
-        }
-      }
-      if (invalidAcc !== -1) {
-        result = {
-          status: 400,
-          error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc])
-        };
-        res.status(result.status).send(result);
-      }
-      else {
-        logger.info('Retrieving Predictors Download for '+accessions.length+' records...');
-        request.post({
-          url: API_URI+'/template',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(accessions)
-        }, function(error, response, body) {
-          if (error) {
-            logger.error(error);
-            result = {
-              status: 500,
-              error: String(error)
-            };
-            res.status(result.status).send(result);
-          }
-          else if (response.statusCode === 200) {
-            let fileName = String(uuid())+'.tsv';
-            let filePath = DOWNLOAD_FOLDER+fileName;
-            logger.info('Download received. Writing file: '+filePath);
-            let fileContents = String(body);
-            fs.writeFile(filePath, fileContents, function(err) {
-              if (err) {
-                logger.error('Error writing download: '+err);
-                result = {
-                  status: 500,
-                  error: 'Error writing download'
-                };
-              }
-              else {
-                result = {
-                  status: 200,
-                  downloadPath: '/downloads/'+fileName
-                };
-              }
-              res.status(result.status).send(result);
-            });
-          }
-          else {
-            logger.error('Download request failed: '+response.statusCode);
-            result = {
-              status: 500,
-              error: 'ZooPhy API Download Request Failed'
-            };
-            res.status(result.status).send(result);
-          }
-        });
-      }
-    }
-    else {
-      result = {
-        status: 400,
-        error: 'Missing Accessions'
-      };
-      res.status(result.status).send(result);
-    }
-  }
-  catch (err) {
-    logger.error('Failed to load Predictor Template: '+err);
-    result = {
-      status: 500,
-      error: 'Failed to load Predictor Template'
     };
     res.status(result.status).send(result);
   }
@@ -440,5 +396,8 @@ function validatePredictor(state, predictors) {
     return false;
   }
 };
+
+function validateNumOfRecords(records) {
+}  
 
 module.exports = router;
