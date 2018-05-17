@@ -42,7 +42,8 @@
       <h3 class="pushed-down text-center">GLM Options</h3>
       <div id="glm-options" class="row text-center">
         <div class="col-xs-3 col-xs-offset-3">
-          <label>Use Default GLM (US States ONLY)<span class="help" data-toggle="tooltip" data-placement="top" title="Tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+          <label>Use Default GLM (US States ONLY)<span class="help" data-toggle="tooltip" data-placement="top" title="Select this option to use common predictors for obtaining Generalized Linear Model (GLM) characteristics such as correlations between predictors and the mutation rate.
+            Note: This option is available only for US states."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
           <input type="button" class="btn btn-sm" ng-class="glmButtonClass" ng-click="toggleDefaultGLM();" value="Default Predictors"/>
         </div>
         <div class="col-xs-3">
@@ -63,25 +64,52 @@
     <div class="row">
       <h3 class="pushed-down text-center">Advanced Parameters</h3>
       <div id="xml-options">
-        <div class="col-sm-2 col-sm-offset-2">
-          <label>Substition Model<span class="help" data-toggle="tooltip" data-placement="top" title="Tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
-          <select class="form-control" ng-model="substitutionModel" ng-options="model as model for model in availableModels">
-            <!-- handled by Angular -->
-          </select>
+        <div class="row">
+          <div class="col-sm-2 col-sm-offset-2">
+            <label>Substution Model<span class="help" data-toggle="tooltip" data-placement="top" title="An assumption regarding the nitrogenous bases’ proportions within the sequence and the types of base substitutions that may occur within DNA or RNA.
+              HKY85: Allows for nitrogenous base frequencies to be unequal and distinguishes between transitions (A → ← G, C → ← T) and transversions (A → ← T, A → ← C, G → ← T, G → ← C).
+              GTR: Allows for nitrogenous base frequencies to be unequal and distinguishes between all types of transitions (A → ← G, C → ← T) and transversions (A → ← T, A → ← C, G → ← T, G → ← C)."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+            <select class="form-control" ng-model="substitutionModel" ng-options="model as model for model in availableSubstitutionModels">
+              <!-- handled by Angular -->
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <label>Site Heterogeneity<span class="help" data-toggle="tooltip" data-placement="top" title="The distribution of substitutions over a genome, resulting from the application of positive and negative selection pressures upon certain sites."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+            <div>
+              <label class="gamma-label">&nbsp Gamma <input ng-model="gamma" type="checkbox"></input> &nbsp <span class="help" data-toggle="tooltip" data-placement="top" title="Gamma: Assumes that sites along the genome mutate at different rates."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label> 
+            </div>
+            <div>
+              <label class="invSites-label">&nbsp Invariant <input ng-model="invariantSites" type="checkbox"></input> &nbsp <span class="help" data-toggle="tooltip" data-placement="top" title="Invariant: Assumes that a certain proportion of sites along the genome are immutable, as mutations here would be deleterious or fatal, and assumes that the remainder of sites mutate at equal non zero rates."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <label>Clock Model<span class="help" data-toggle="tooltip" data-placement="top" title="An assumption regarding the mutation rate, and by extension evolutionary rate, between the sequences of interest.
+              Strict: Assumes that the mutations over time across all branches is linear.
+              Relaxed: Assumes that the mutations over time for each branch are variable, and as such are sampled from a probability density distribution."> 
+              <i class="fa fa-question-circle" aria-hidden="true"></i></span>
+            </label>
+            <select class="form-control" ng-model="clockModel" ng-options="model as model for model in availableClockModels">
+            </select>
+          </div>
+          <div class="col-sm-2">
+            <label>Tree Prior<span class="help" data-toggle="tooltip" data-placement="top" title="An assumption regarding the temporal growth of viral population.
+              Constant: Viral population remains constant over time.
+              Skyline: Estimates genetic diversity, which is loosely proportional to population size, as increased genetic diversity is thought to be a byproduct of increased population size and decreased genetic diversity is thought to be a byproduct of decreased population size.
+              Skygrid: (Coming Soon)"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+            <select class="form-control" ng-model="treePrior" ng-options="prior as prior for prior in availablePriors">
+            </select>
+          </div>
         </div>
-        <div class="col-sm-2">
-          <label>Chain Length<span class="help" data-toggle="tooltip" data-placement="top" title="Tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
-          <input type="number" class="form-control" ng-model="chainLength"></input>
-        </div>
-        <div class="col-sm-2">
-          <label>Sample Rate<span class="help" data-toggle="tooltip" data-placement="top" title="Tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
-          <input type="number" class="form-control" ng-model="subSampleRate"></input>
-        </div>
-        <div class="col-sm-2">
-          <label>Tree Prior<span class="help" data-toggle="tooltip" data-placement="top" title="Tab delimited (.tsv) text file in Batch Predictor format. Click for more info."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
-          <select class="form-control" ng-model="treePrior" ng-options="prior as prior for prior in availablePriors">
-            <!-- handled by Angular -->
-          </select>
+        <div class="row top10">
+          <div class="col-sm-2 col-sm-offset-2">
+            <label>Chain Length<span class="help" data-toggle="tooltip" data-placement="top" title="The frequency with which the parameters sampled by the Markov Chain Monte Carlo (MCMC) are printed to the screen."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+            <input type="number" class="form-control" ng-model="chainLength"></input>
+          </div>
+          <div class="col-sm-2">
+            <label>Sample Rate<span class="help" data-toggle="tooltip" data-placement="top" title="The frequency with which the parameters sampled by the Markov Chain Monte Carlo (MCMC) are logged.
+              Note: The ideal chain length to sample rate ratio is 1000:1."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+            <input type="number" class="form-control" ng-model="subSampleRate"></input>
+          </div>
         </div>
       </div>
     </div>
