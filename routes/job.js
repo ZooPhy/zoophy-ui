@@ -30,7 +30,7 @@ const STATE_RE = /^(\w|-|\.|\,| |\’|\'){1,255}?$/;
 const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
 const SUB_MODEL_RE = /^(HKY)|(GTR)$/;
 const CLOCK_MODEL_RE = /^(Strict)|(Relaxed)$/;
-const PRIOR_RE = /^(Constant)$/;
+const PRIOR_RE = /^(Constant)|(Skyline)|(Skygrid)$/;
 
 const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
 const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)?\d{4})$/;

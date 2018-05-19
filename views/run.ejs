@@ -95,7 +95,7 @@
             <label>Tree Prior<span class="help" data-toggle="tooltip" data-placement="top" title="An assumption regarding the temporal growth of viral population.
               Constant: Viral population remains constant over time.
               Skyline: Estimates genetic diversity, which is loosely proportional to population size, as increased genetic diversity is thought to be a byproduct of increased population size and decreased genetic diversity is thought to be a byproduct of decreased population size.
-              Skygrid: (Coming Soon)"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+              Skygrid: Assumes population size changes smoothly over time, places a smooth Gaussian process prior on the population sizes, and allowing events based on multiple loci."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
             <select class="form-control" ng-model="treePrior" ng-options="prior as prior for prior in availablePriors">
             </select>
           </div>
