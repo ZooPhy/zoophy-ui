@@ -6,9 +6,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
 
   $scope.virus = 197911;
   $scope.hantaSub = 11599;
-  $scope.fluAHs = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  $scope.fluAHs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18];//[1, 2, 3, 4, 5, 6, 7, 8, 9];
   $scope.fluAH = 1;
-  $scope.fluANs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+  $scope.fluANs = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];//[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
   $scope.fluAN = 1;
   $scope.isH1N1 = true;
   $scope.genes = [];
