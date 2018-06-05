@@ -6,9 +6,18 @@
       </div>
     </div>
     <div class="row">
-      <div class="col-sm-4"><h6 class="text-left">{{numSelected}}/{{results.length}} <b>{{searchedVirusName}}</b> records selected.</h6></div>
+      <div class="col-sm-4"><h6 class="text-left">{{numSelected}}/{{results.length}} <b>{{searchedVirusName}}</b> records selected</h6></div>
       <h6 class="text-right"><i class="fa fa-info-circle" aria-hidden="true"></i> ZooPhy Jobs must contain 5 to 1000 Records</h6>
-  </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-4"><h6 class="text-left">{{completeRecordsCount}} complete records selected</h6></div>
+      <h6 class="text-right">
+        <span class="help-info" data-toggle="tooltip" data-placement="top" 
+        title="This is an approximate count of number of distinct locations among the selected records. Actual count might vary once the job is run. Select atleast 2 distinct locations for the job to run successfully"> 
+          <i class="fa fa-question-circle" aria-hidden="true"></i>
+        </span>{{distinctLocationsCount}} distinct locations selected</h6>
+    </div>
 
     <table>
       <tbody>
@@ -22,6 +31,9 @@
           <th class="col-sm-1 text-right"> <button type="button" class="btn btn-sm btn-default" data-toggle="modal" data-target="#sampleSelectionModel">Random Sample</button></th>
       </tbody>
     </table>
+
+    
+    
 
     <table class="table table-striped table-hover table-condensed table-responsive">
     	<thead>
@@ -247,7 +259,7 @@
               </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-default" ng-click="validateDownSample();" data-dismiss="modal">Done</button>
+            <button type="button" class="btn btn-default" ng-click="validateDownSample(); recordStats();" data-dismiss="modal">Done</button>
           </div>
         </div>
       </div>

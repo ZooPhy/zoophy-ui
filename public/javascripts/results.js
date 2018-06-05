@@ -24,6 +24,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
   $scope.downloadColumnsCount = 0;
   $scope.searchedVirusName = null;
+  $scope.completeRecordsCount = 0;
+  $scope.distinctLocationsCount = 0;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -62,6 +64,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaFile = null;
       $scope.fastaError = null;
       $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
+      $scope.completeRecordsCount = 0;
+      $scope.distinctLocationsCount = 0;
     }
   });
 
@@ -99,6 +103,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
     record.includeInJob = !record.includeInJob;
     RecordData.setNumSelected($scope.numSelected);
+    $scope.recordStats();
   };
 
   $scope.toggleAll = function() {
@@ -112,7 +117,35 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.numSelected = 0;
     }
     RecordData.setNumSelected($scope.numSelected);
+    $scope.recordStats();
   };
+
+
+  $scope.recordStats = function(){
+    var locationMap = new Map();
+    $scope.completeRecordsCount = 0;
+    for (var i = 0; i < $scope.results.length; i++) {
+      var record = $scope.results[i];
+      if(record.includeInJob && record.country !== "Unknown" ){           //location count
+        var locationString = record.geonameid;
+        var count = locationMap.get(locationString);
+        if(count!=null){
+          locationMap.set(locationString,++count);
+        }else{
+          locationMap.set(locationString,1);
+        }
+      }if(record.includeInJob && record.date !== "Unknown" && record.country !== "Unknown" ){   //complete record
+        $scope.completeRecordsCount++;
+      }
+    }
+
+    for (var [key, value] of locationMap.entries()) {
+      console.log(key + ' = ' + value);
+    }
+
+    $scope.distinctLocationsCount = locationMap.size;
+    console.log("location count "+ $scope.distinctLocationsCount + " complete records "+ $scope.completeRecordsCount);
+  }
 
   $scope.goToRun = function() {
     $scope.$parent.switchTabs('run');
