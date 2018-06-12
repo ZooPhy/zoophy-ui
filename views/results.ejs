@@ -50,7 +50,7 @@
     	<tbody>
       	<tr ng-class="(selectedRecord.accession === record.accession) ? 'selected' : ''" dir-paginate="record in results | orderBy:sortField:sortReverse | itemsPerPage:recordsPerPage" ng-click="LoadDetails(record);">
           <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob" ng-click="toggleRecord(record); $event.stopPropagation();"></td>
-          <td class="col-sm-1">{{record.accession}}</td>
+          <td class="col-sm-1"><a href="https://www.ncbi.nlm.nih.gov/nuccore/{{record.accession}}" target="_blank">{{record.accession}}</a></td>
       		<td class="col-sm-1">{{record.genes}}</td>
       		<td class="col-sm-2">{{record.date}}</td>
           <td class="col-sm-2 hidden-xs">{{record.host}}</td>

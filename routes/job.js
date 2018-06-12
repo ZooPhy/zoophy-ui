@@ -28,7 +28,9 @@ const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
 const PREDICTOR_FILE_RE = /.{1,250}?\.tsv$/;
 const STATE_RE = /^(\w|-|\.|\,| |\’|\'){1,255}?$/;
 const PREDICTOR_RE = /^(\w|-|\.| ){1,255}?$/;
-const MODEL_RE = /^(HKY)$/;
+const SUB_MODEL_RE = /^(HKY)|(GTR)$/;
+const CLOCK_MODEL_RE = /^(Strict)|(Relaxed)$/;
+const PRIOR_RE = /^(Constant)|(Skyline)|(Skygrid)$/;
 
 const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
 const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)?\d{4})$/;
@@ -140,16 +142,33 @@ router.post('/run', function(req, res) {
       }
     }
     let xmlOptions = null;
-    if (checkInput(req.body.xmlOptions.chainLength, 'number', null) && checkInput(req.body.xmlOptions.subSampleRate, 'number', null) && checkInput(req.body.xmlOptions.substitutionModel, 'string', MODEL_RE)) {
-      xmlOptions = {
-        chainLength: Number(req.body.xmlOptions.chainLength),
-        subSampleRate: Number(req.body.xmlOptions.subSampleRate),
-        substitutionModel: String(req.body.xmlOptions.substitutionModel)
-      };
-    }
-    else {
-       jobErrors += 'Invalid XML Parameters, ';
-    }
+    if (checkInput(req.body.xmlOptions.substitutionModel, 'string', SUB_MODEL_RE)){
+      if (checkInput(req.body.xmlOptions.gamma, 'boolean', null)){
+        if (checkInput(req.body.xmlOptions.invariantSites, 'boolean', null)){
+          if (checkInput(req.body.xmlOptions.clockModel, 'string', CLOCK_MODEL_RE)){
+            if (checkInput(req.body.xmlOptions.treePrior, 'string', PRIOR_RE)){
+              if (checkInput(req.body.xmlOptions.chainLength, 'number', null)){
+                if (checkInput(req.body.xmlOptions.subSampleRate, 'number', null)){
+                  xmlOptions = {
+                    substitutionModel: String(req.body.xmlOptions.substitutionModel),
+                    gamma: Boolean(req.body.xmlOptions.gamma),
+                    invariantSites: Boolean(req.body.xmlOptions.invariantSites),
+                    clockModel: String(req.body.xmlOptions.clockModel),
+                    treePrior: String(req.body.xmlOptions.treePrior),
+                    chainLength: Number(req.body.xmlOptions.chainLength),
+                    subSampleRate: Number(req.body.xmlOptions.subSampleRate)
+                  };
+                  console.log(xmlOptions);
+                } else {jobErrors += 'Invalid XML Parameters, '+'subSampleRate';}
+              } else {jobErrors += 'Invalid XML Parameters, '+'chainLength';}
+            } else {jobErrors += 'Invalid XML Parameters, '+'treePrior';}
+          } else {jobErrors += 'Invalid XML Parameters, '+'clockModel:';}
+        } else {jobErrors += 'Invalid XML Parameters, '+'invariantSites';}
+      } else {jobErrors += 'Invalid XML Parameters, '+'gamma';}
+    } else {jobErrors += 'Invalid XML Parameters, '+'substitutionModel';}
+    // else {
+    //    jobErrors += 'Invalid XML Parameters, ';
+    // }
     if (jobErrors === BASE_ERROR) {
       const zoophyJob = JSON.stringify({
         records: records,

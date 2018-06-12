@@ -45,7 +45,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.reset = function() {
     $scope.searchError = null;
     $scope.virus = $scope.allowed_values.viruses[0].tax_id;
-    $scope.hantaSub = 11599;
     $scope.fluAH = 1;
     $scope.fluAN = 1;
     $scope.isH1N1 = true;
@@ -157,10 +156,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.searchError = null;
     var virus = Number($scope.virus);
     var pdmo9 = false;
-    if (virus === 11598) {
-      virus = Number($scope.hantaSub);
-    }
-    else if (virus === 197911) {
+    if (virus === 197911) {
       var subH = Number($scope.fluAH);
       var subN = Number($scope.fluAN);
       virus = Number($scope.allowed_values.influenza_a_sub_type_ids[subH-1][subN-1]);

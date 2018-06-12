@@ -14,6 +14,11 @@ validator_tool.checkInput = function(input, type, regex) {
         return true;
       }
     }
+    else if (type === 'boolean') {
+      if (typeof(input) === 'boolean' || !(isNaN(input))) {
+        return true;
+      }
+    }
   }
   return false;
 }

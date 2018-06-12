@@ -62,15 +62,6 @@ const VIRUSES = [
     ]
   },
   {
-    name: 'Hantavirus',
-    tax_id: 11598,
-    genes: [
-      'S',
-      'M',
-      'L'
-    ]
-  },
-  {
     name: 'Rabies',
     tax_id: 11292,
     genes: [
@@ -122,45 +113,6 @@ const INFLUENZA_A_SUB_TYPE_IDS = [
   [0, 0, 304360, 0, 0, 0, 0, 2004353, 1313083, 0, 0], //H16
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 1129344, 0], //H17
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1249503] //H18
-];
-
-const HANTAVIRUS_SUB_TYPES = [
-  {
-    name: 'Hantaan',
-    tax_id: 11599
-  },
-  {
-    name: 'Puumala',
-    tax_id: 11604
-  },
-  {
-    name: 'Seoul',
-    tax_id: 11608
-  },
-  {
-    name: 'Sin Nombre',
-    tax_id: 37705
-  },
-  {
-    name: 'Unclassified',
-    tax_id: 339351
-  },
-  {
-    name: 'Tula',
-    tax_id: 37133
-  },
-  {
-    name: 'Dobrava-Belgrade',
-    tax_id: 12506
-  },
-  {
-    name: 'Andes',
-    tax_id: 46607
-  },
-  {
-    name: 'Thottapalayam',
-    tax_id: 262967
-  }
 ];
 
 const CONTINENTS = [
@@ -3061,7 +3013,6 @@ const AVIAN_HOSTS = [
 const ALLOWED_VALUES = {
   viruses: VIRUSES,
   influenza_a_sub_type_ids: INFLUENZA_A_SUB_TYPE_IDS,
-  hantavirus_sub_types: HANTAVIRUS_SUB_TYPES,
   continents: CONTINENTS,
   hosts: HOSTS,
   avian_hosts: AVIAN_HOSTS

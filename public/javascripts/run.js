@@ -15,9 +15,13 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.customPredictors = null;
   $scope.chainLength = 10000000;
   $scope.subSampleRate = 1000;
-  $scope.availableModels = ['HKY'];
+  $scope.availableSubstitutionModels = ['HKY','GTR'];
   $scope.substitutionModel = 'HKY';
-  $scope.availablePriors = ['Constant']
+  $scope.invariantSites = false;
+  $scope.gamma = false;
+  $scope.availableClockModels = ['Strict','Relaxed'];
+  $scope.clockModel = 'Strict';
+  $scope.availablePriors = ['Constant', 'Skyline', 'Skygrid']
   $scope.treePrior = 'Constant';
   $scope.warning = 'Too Few Records, Minimum is 5';
   $scope.fileToSend = null;
@@ -32,6 +36,9 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.chainLength = 10000000;
     $scope.subSampleRate = 1000;
     $scope.substitutionModel = 'HKY';
+    $scope.invariantSites = false;
+    $scope.gamma = false;
+    $scope.clockModel = 'Strict';
     $scope.treePrior = 'Constant';
     $scope.jobName = null;
     $scope.runError = null;
@@ -114,10 +121,13 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
             var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
             var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
             var predictors = $scope.customPredictors;
+            var subModel = String($scope.substitutionModel);
+            var clockModel = String($scope.clockModel);
+            var gamma = Boolean($scope.gamma);
+            var invariantSites = Boolean($scope.invariantSites);
+            var prior = String($scope.treePrior).trim();
             var chain = Number($scope.chainLength);
             var rate = Number($scope.subSampleRate);
-            var model = String($scope.substitutionModel);
-            var prior = String($scope.treePrior).trim();//TODO enable in job services
             var jobData = {
               replyEmail: email,
               jobName: currentJobName,
@@ -126,9 +136,13 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
               predictors: predictors,
               isGenbankJob: isGenbankJob,
               xmlOptions: {
+                substitutionModel: subModel,
+                gamma: gamma,
+                invariantSites: invariantSites,
+                clockModel: clockModel,
+                treePrior: prior,
                 chainLength: chain,
-                subSampleRate: rate,
-                substitutionModel: model
+                subSampleRate: rate
               }
             };
             $http.post(runUri, jobData).then(function success(response) {
