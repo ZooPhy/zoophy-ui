@@ -133,6 +133,9 @@ class LuceneRecord {
     if (searchApiRecord.geonameLocation) {
       this.country = String(searchApiRecord.geonameLocation.country || UNKNOWN);
       this.location = String(searchApiRecord.geonameLocation.location || UNKNOWN);
+      if((this.location.toLocaleLowerCase()) === (this.country.toLocaleLowerCase())){
+        this.location = "Unknown";
+      }
       this.geonameid = String(searchApiRecord.geonameLocation.geonameID || UNKNOWN);
       this.latitude = String(searchApiRecord.geonameLocation.latitude || UNKNOWN);
       this.longitude = String(searchApiRecord.geonameLocation.longitude || UNKNOWN);
@@ -173,13 +176,26 @@ class SQLRecord {
       this.host = UNKNOWN;
     }
     if (recordApiRecord.geonameLocation) {
+      this.geonameID = String(recordApiRecord.geonameLocation.geonameID || UNKNOWN);
       this.location = String(recordApiRecord.geonameLocation.location || UNKNOWN);
+      this.latitude = String(recordApiRecord.geonameLocation.latitude || UNKNOWN);
+      this.longitude = String(recordApiRecord.geonameLocation.longitude || UNKNOWN);
     }
     else {
         this.location = UNKNOWN;
     }
     this.genes = stringifyGenes(recordApiRecord.genes);
     this.definition = String(recordApiRecord.sequence.definition || UNKNOWN)
+    if (recordApiRecord.possibleLocations) {
+      var possibleLocations = [];
+      for(var i=0; i<recordApiRecord.possibleLocations.length; i++){
+        var possibleLocation = new PossibleLocation(recordApiRecord.possibleLocations[i]);
+        possibleLocations.push(possibleLocation);
+      }
+      this.possibleLocations = possibleLocations;
+    } else {
+        this.possibleLocations = [];
+    } 
   };
 
 };
@@ -216,8 +232,21 @@ class CustomRecord {
   };
 };
 
+class PossibleLocation {
+
+  constructor(recordPossibleLocation) {
+    this.geonameID = String(recordPossibleLocation.geonameID || UNKNOWN);
+    this.location = String(recordPossibleLocation.location || UNKNOWN);
+    this.latitude = String(recordPossibleLocation.latitude || UNKNOWN);
+    this.longitude = String(recordPossibleLocation.longitude || UNKNOWN);
+    this.probability = String(recordPossibleLocation.probability || UNKNOWN);
+  };
+
+};
+
 module.exports = {
   LuceneRecord: LuceneRecord,
   SQLRecord: SQLRecord,
-  CustomRecord: CustomRecord
+  CustomRecord: CustomRecord,
+  PossibleLocation: PossibleLocation
 };

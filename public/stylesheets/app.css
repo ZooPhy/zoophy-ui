@@ -39,6 +39,11 @@ input::-webkit-inner-spin-button {
   margin: 0 !important;
 }
 
+.detail-panel-padding {
+  padding: 3px !important;
+  margin: 0 !important;
+}
+
 @media(min-width:767px) {
   /* Small and Up */
   #main-logo {
@@ -65,10 +70,6 @@ input::-webkit-inner-spin-button {
 
 #results-table {
   font-size: 1.1rem;
-}
-
-#detailed-view {
-  font-size: 1.25rem;
 }
 
 .selected {
@@ -101,6 +102,65 @@ input::-webkit-inner-spin-button {
   display: inline;
   max-width: 7.5rem;
   min-width: 5rem;
+}
+
+h6{
+  padding-bottom: 6px;
+  padding-right: 10px;
+  margin: 0px;
+}
+
+.heatmap {
+  width:100%;
+}
+
+.geolocmap {
+  margin-left: 0rem;
+  margin-right: 0rem;
+}
+
+#results-table {
+  font-size: 1.2rem;
+  float: left;
+  width: 61%;
+  padding-left: 2px;
+  padding-right: 2px;
+}
+
+#detail-panel {
+  width: 38%;
+  padding-left: 6px;
+  padding-right: 2px;
+  margin-right: 4px;
+  float:right;
+}
+
+#detailed-view {
+  font-size: 1.25rem;
+}
+
+.borderless {
+    border: none;
+}
+
+#info {
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  z-index: 100;
+}
+.tooltip.in {
+  opacity: 1;
+}
+.tooltip.top .tooltip-arrow {
+  border-top-color: white;
+}
+.tooltip-inner {
+  border: 2px solid white;
+}
+
+.checkboxcl {
+  margin: 1px 0px 0px 0px !important;
 }
 
 .top10 { 
