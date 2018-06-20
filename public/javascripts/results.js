@@ -188,6 +188,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             downloadAccessions.push($scope.results[i].accession);
           }
         }
+        console.log("download records: "+ downloadAccessions);
         var downloadURI = SERVER_URI+'/download/'+format;
         var downloadList = {
           accessions: downloadAccessions,
