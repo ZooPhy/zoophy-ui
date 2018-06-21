@@ -153,13 +153,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.completeRecordsCount++;
       }
     }
-
-    for (var [key, value] of locationMap.entries()) {
-      console.log(key + ' = ' + value);
-    }
-
     $scope.distinctLocationsCount = locationMap.size;
-    console.log("location count "+ $scope.distinctLocationsCount + " complete records "+ $scope.completeRecordsCount);
   }
 
   $scope.goToRun = function() {
@@ -182,15 +176,23 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       }
       else if (format === 'csv' || format === 'fasta') {
         $scope.downloadFormat = format;
-        var downloadAccessions = [];
+        var downloadRecords = [];
         for (var i = 0; i < $scope.results.length; i++) {
           if($scope.results[i].includeInJob){
             downloadAccessions.push($scope.results[i].accession);
+            var downloadRecord = {
+              id:$scope.results[i].accession,
+              collectionDate:$scope.results[i].date,
+              geonameID:$scope.results[i].geonameid,
+              rawSequence:$scope.results[i].sequence,
+              resourceSource:$scope.results[i].resourceSource
+            }
+            downloadRecords.push(downloadRecord);
           }
         }
         var downloadURI = SERVER_URI+'/download/'+format;
         var downloadList = {
-          accessions: downloadAccessions,
+          accessions: downloadRecords,
           columns: downloadColumns};
         $http.post(downloadURI, downloadList).then(function success(response) {
           $scope.generating = false;
