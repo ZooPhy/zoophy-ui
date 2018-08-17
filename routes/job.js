@@ -159,13 +159,13 @@ router.post('/run', function(req, res) {
                     subSampleRate: Number(req.body.xmlOptions.subSampleRate)
                   };
                   console.log(xmlOptions);
-                } else {jobErrors += 'Invalid XML Parameters, '+'subSampleRate';}
-              } else {jobErrors += 'Invalid XML Parameters, '+'chainLength';}
-            } else {jobErrors += 'Invalid XML Parameters, '+'treePrior';}
-          } else {jobErrors += 'Invalid XML Parameters, '+'clockModel:';}
-        } else {jobErrors += 'Invalid XML Parameters, '+'invariantSites';}
-      } else {jobErrors += 'Invalid XML Parameters, '+'gamma';}
-    } else {jobErrors += 'Invalid XML Parameters, '+'substitutionModel';}
+                } else {jobErrors += 'Invalid XML Parameters: '+'subSampleRate';}
+              } else {jobErrors += 'Invalid XML Parameters: '+'chainLength';}
+            } else {jobErrors += 'Invalid XML Parameters: '+'treePrior';}
+          } else {jobErrors += 'Invalid XML Parameters: '+'clockModel:';}
+        } else {jobErrors += 'Invalid XML Parameters: '+'invariantSites';}
+      } else {jobErrors += 'Invalid XML Parameters: '+'gamma';}
+    } else {jobErrors += 'Invalid XML Parameters: '+'substitutionModel';}
     // else {
     //    jobErrors += 'Invalid XML Parameters, ';
     // }

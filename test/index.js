@@ -131,6 +131,16 @@ describe('Search', function() {
         done();
       });
   });
+  it('Should return correct count for lucene query', function(done) {
+    request(app)
+      .get('/search/count?query=TaxonID%3A114727%20AND%20HostID%3A1%20AND%20Date%3A%5B00000000%20TO%2020181231%5D')
+      .end(function(err, res) {
+        if (err) done(err);
+        assert.strictEqual(200, res.status, 'Should give 200 for valid query');
+        assert.isNotNull(res.body, 'Should return results on Success');
+        done();
+      });
+  });
 });
 
 describe('File Upload and Download tests', function(done) {
@@ -146,8 +156,8 @@ describe('File Upload and Download tests', function(done) {
     });
   });
   it('Should require valid accessions', function(done) {
-    let badAccessions = helperData.accessions.slice();
-    badAccessions.push('GQ/*rm**/0');
+    let badAccessions = helperData.jobSequenceGenbank.slice();
+    badAccessions.push(helperData.badGenbankAccession);
     request(app)
       .post('/download/csv')
       .send({accessions: badAccessions,
@@ -161,11 +171,6 @@ describe('File Upload and Download tests', function(done) {
     });
  });
   it('Should require accession list', function(done) {
-    let columnsList = helperData.downloadColumns.slice();
-    let DOWNLOAD_ACCESSIONS = {
-      accessions: undefined,
-      columns: columnsList
-    };
     request(app)
       .post('/download/csv')
       .send({accessions: undefined})
@@ -176,10 +181,25 @@ describe('File Upload and Download tests', function(done) {
       done();
     });
   });
-  it('Should download CSV file', function(done) {
+  it('Should download CSV file GENBANK records', function(done) {
     request(app)
       .post('/download/csv')
-      .send({accessions: helperData.accessions,
+      .send({accessions: helperData.jobSequenceGenbank,
+              columns: helperData.downloadColumns})
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.isUndefined(res.body.error, 'Should not return error');
+      assert.strictEqual(res.status, 200, "Should generate CSV file");
+      assert.isDefined(res.body.downloadPath, 'Should return file path');
+      let relativePath = path.join(__dirname, '../public', res.body.downloadPath);
+      assert.pathExists(relativePath, 'Valid CSV file path returned');
+      done();
+    });
+  });
+  it('Should download CSV file FASTA records', function(done) { 
+    request(app)
+      .post('/download/csv')
+      .send({accessions: helperData.jobSequenceFasta,
               columns: helperData.downloadColumns})
       .end(function(err, res) {
       if (err) done(err);
@@ -194,7 +214,7 @@ describe('File Upload and Download tests', function(done) {
   it('Should download FASTA file', function(done) {
     request(app)
       .post('/download/fasta')
-      .send({accessions: helperData.accessions,
+      .send({accessions: helperData.jobSequenceGenbank,
         columns: helperData.downloadColumns})
       .end(function(err, res) {
       if (err) done(err);

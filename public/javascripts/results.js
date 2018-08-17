@@ -179,7 +179,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         var downloadRecords = [];
         for (var i = 0; i < $scope.results.length; i++) {
           if($scope.results[i].includeInJob){
-            downloadAccessions.push($scope.results[i].accession);
             var downloadRecord = {
               id:$scope.results[i].accession,
               collectionDate:$scope.results[i].date,
