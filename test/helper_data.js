@@ -170,19 +170,36 @@ const ACCESSION_LIST = [
     'CY081071',
     'CY060544',
     'CY060736',
-    'CY060688',
+    'CY060696',
     'CY060728'
 ];
 
+const DOWNLOAD_ACCESSION = [
+    { "id": "CY214007",  "resourceSource": 1},
+    { "id": "CY060696",  "resourceSource": 1},
+    { "id": "CY214007",  "resourceSource": 1},
+    { "id": "CY060696",  "resourceSource": 1},
+    { "id": "CY214007",  "resourceSource": 1},
+    { "id": "CY060728",  "resourceSource": 1}
+
+];
+
+const BAD_GENBANK_ACCESSION = {
+    "id": "GQ/*rm**/0", "collectionDate": null, "geonameID": null, 
+    "rawSequence": null, "resourceSource": 1
+};
+
 const DOWNLOAD_COLUMNS = [
-    'Id',
     'Genes',
-    'VirusId',
+    'VirusID',
     'Virus',
     'Date',
-    'HostId',
+    'HostID',
     'Host',
     'Country',
+    'State',
+    'GeonameID',
+    'LocationHierarchy',
     'Length'
 ];
 
@@ -220,9 +237,13 @@ const CANADA_PREDICTORS = {
 };
 
 const XML_OPTIONS = {
-    chainLength: 10000000,
-    subSampleRate: 10000,
-    substitutionModel: 'HKY'
+    substitutionModel:"HKY",
+    gamma:false,
+    invariantSites:false,
+    clockModel :"Strict",
+    treePrior:"Constant",
+    chainLength:10000000,
+    subSampleRate:1000
 };
 
 const JOBSEQUENCE_GENBANK_LIST = [{
@@ -288,6 +309,7 @@ const TEST_DATA = {
   predictor: PREDICTOR,
   accessions: ACCESSION_LIST,
   downloadColumns: DOWNLOAD_COLUMNS,
+  badGenbankAccession: BAD_GENBANK_ACCESSION,
   canadianPredictors: CANADA_PREDICTORS,
   xmlOptions: XML_OPTIONS,
   jobSequenceGenbank: JOBSEQUENCE_GENBANK_LIST,

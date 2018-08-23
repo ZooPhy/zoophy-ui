@@ -260,14 +260,14 @@ router.post('/download/:format', function(req, res) {
             accessions.push(req.body.accessions[i]);
           }
           else {
-            logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
+            logger.warn('Bad Accession Requested: '+req.body.accessions[i].id);
             invalidAcc = i;
           }
         }
-        if (invalidAcc !== -1 && accessions.length === 0) {
+        if (invalidAcc !== -1 && accessions.length !== 0) {
           result = {
             status: 400,
-            error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc])
+            error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc].id)
           };
           res.status(result.status).send(result);
         }
