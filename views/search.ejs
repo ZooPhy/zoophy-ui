@@ -55,12 +55,6 @@
           <label class="pdmo9-label">pdm09 Only?</label> <input ng-model="isPDMO9" ng-click="count();" type="checkbox"></input>
         </div>
       </div>
-      <div id="hanta-sub-container" ng-show="virus === 11598">
-        <label for="hanta-sub">Hantavirus Sub Type</label>
-        <select id="hanta-sub" class="form-control" ng-model="hantaSub" ng-change="count();" ng-options="sub.tax_id as sub.name for sub in allowed_values.hantavirus_sub_types">
-          <!-- handled by Angular -->
-        </select>
-      </div>
       <div class="pushed-down">
         <label for="genes">Genes</label>
         <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" ng-change="count();" class="form-control" multiple>

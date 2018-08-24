@@ -28,6 +28,8 @@ const DOWNLOAD_FORMAT_RE = /^(csv)|(fasta)$/;
 const ACCESSION_UPLOAD_RE = /^(\w|-|\.){1,250}?\.txt$/;
 const ACCESSION_VERSION_RE = /^([A-Z]|\d|_|\.){5,10}?\.\d{1,2}?$/;
 const UPLOAD_QUERY_LIMIT = 2500;
+const SOURCE_GENBANK = 1;
+const SOURCE_FASTA = 2;
 
 const multerOptionsFasta = {
   dest: 'upfasta/',
@@ -253,19 +255,19 @@ router.post('/download/:format', function(req, res) {
         let columns = req.body.columns;
         let invalidAcc = -1;
         for (let i = 0; i < req.body.accessions.length; i++) {
-          if (checkInput(req.body.accessions[i], 'string', ACCESSION_RE)) {
-            accessions.push(String(req.body.accessions[i]));
+          if ((checkInput(req.body.accessions[i].id, 'string', ACCESSION_RE) && req.body.accessions[i].resourceSource === SOURCE_GENBANK)||
+            req.body.accessions[i].resourceSource === SOURCE_FASTA) {
+            accessions.push(req.body.accessions[i]);
           }
           else {
-            logger.warn('Bad Accession Requested: '+String(req.body.accessions[i]))
+            logger.warn('Bad Accession Requested: '+req.body.accessions[i].id);
             invalidAcc = i;
-            break;
           }
         }
         if (invalidAcc !== -1 && accessions.length !== 0) {
           result = {
             status: 400,
-            error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc])
+            error: 'Invalid Accession: '+String(req.body.accessions[invalidAcc].id)
           };
           res.status(result.status).send(result);
         }
