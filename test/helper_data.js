@@ -199,7 +199,6 @@ const DOWNLOAD_COLUMNS = [
     'Country',
     'State',
     'GeonameID',
-    'LocationHierarchy',
     'Length'
 ];
 
