@@ -179,12 +179,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         var downloadRecords = [];
         for (var i = 0; i < $scope.results.length; i++) {
           if($scope.results[i].includeInJob){
-            if(format === 'csv'){
+            if($scope.results[i].resourceSource === SOURCE_GENBANK){
               var downloadRecord = {
                 id:$scope.results[i].accession,
                 resourceSource:$scope.results[i].resourceSource
               }
-            }else if(format === 'fasta'){
+            }else if($scope.results[i].resourceSource === SOURCE_FASTA){
               var downloadRecord = {
                 id:$scope.results[i].accession,
                 collectionDate:$scope.results[i].date,
