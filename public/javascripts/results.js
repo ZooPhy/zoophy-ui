@@ -179,13 +179,19 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         var downloadRecords = [];
         for (var i = 0; i < $scope.results.length; i++) {
           if($scope.results[i].includeInJob){
-            //downloadAccessions.push($scope.results[i].accession);
-            var downloadRecord = {
-              id:$scope.results[i].accession,
-              collectionDate:$scope.results[i].date,
-              geonameID:$scope.results[i].geonameid,
-              rawSequence:$scope.results[i].sequence,
-              resourceSource:$scope.results[i].resourceSource
+            if($scope.results[i].resourceSource === SOURCE_GENBANK){
+              var downloadRecord = {
+                id:$scope.results[i].accession,
+                resourceSource:$scope.results[i].resourceSource
+              }
+            }else if($scope.results[i].resourceSource === SOURCE_FASTA){
+              var downloadRecord = {
+                id:$scope.results[i].accession,
+                collectionDate:$scope.results[i].date,
+                geonameID:$scope.results[i].geonameid,
+                rawSequence:$scope.results[i].sequence,
+                resourceSource:$scope.results[i].resourceSource
+              }
             }
             downloadRecords.push(downloadRecord);
           }
