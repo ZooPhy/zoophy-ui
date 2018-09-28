@@ -223,7 +223,7 @@ router.post('/run', function(req, res) {
                     status: 202,
                     message: String(body),
                     jobSize: validationResults.accessionsUsed.length,
-                    recordsRemoved: validationResults.accessionsRemoved
+                    accessionsRemoved: validationResults.accessionsRemoved
                   };
                   logger.info(result)
                 }

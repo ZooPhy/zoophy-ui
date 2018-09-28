@@ -29,7 +29,9 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.glmButtonClass = null;
   $scope.generating = false;
   $scope.downloadLink = null;
-
+  $scope.successWithExclusion = null;
+  $scope.currentJobName = null;
+  
   $scope.reset = function() {
     $scope.useDefaultGLM = false;
     $scope.customPredictors = null;
@@ -44,12 +46,13 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.runError = null;
     $scope.running = false;
     $scope.success = null;
-    $scope.warning = 'Too Few Records, Minimum is 5';
     $scope.fileToSend = null;
     $scope.filename = 'none';
     $scope.glmButtonClass = null;
     $scope.numSelected = RecordData.getNumSelected();
     $scope.downloadLink = null;
+    $scope.successWithExclusion = null;
+    $scope.currentJobName = null;
   };
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function(newValue, oldValue) {
@@ -57,6 +60,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.warning = null;
       $scope.runError = null;
       $scope.success = null;
+      $scope.successWithExclusion = null;
       $scope.numSelected = newValue;
       if ($scope.numSelected < 5) {
         $scope.warning = 'Too Few Records, Minimum is 5';
@@ -79,106 +83,121 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.running = true;
       $scope.success = null;
       $scope.warning = null;
-      if(JOB_NAME_RE.test($scope.jobName.trim())){
-      if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail.trim())) {
-        var jobAccessions = [];
-        var records = RecordData.getRecords();
-        var isGenbankJob = Boolean(RecordData.isTypeGenbank());
-        for (var i = 0; i < records.length; i++) {
-          if (records[i].includeInJob) {
-            jobAccessions.push(records[i].accession);
-          }
-        }
-        if (jobAccessions.length < 5) {
-          $scope.runError = 'Too Few Records, Minimun is 5';
-          $scope.running = false;
-        }
-        else if (jobAccessions.length > 1000) {
-          $scope.runError = 'Too Many Records, Maximum is 1000';
-          $scope.running = false;
-        }
-        else {
-          //Submit the job to appropriate URL
-            var jobSequences = [];
+      if($scope.jobName && JOB_NAME_RE.test($scope.jobName.trim())){
+        if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail.trim())) {
+          if($scope.chainLength &&  Number($scope.chainLength) >= 10000000 && Number($scope.chainLength) <= 250000000){
+            var jobAccessions = [];
+            var records = RecordData.getRecords();
+            var isGenbankJob = Boolean(RecordData.isTypeGenbank());
             for (var i = 0; i < records.length; i++) {
               if (records[i].includeInJob) {
-                var jobSequence = {
-                  id:records[i].accession,
-                  collectionDate:records[i].date,
-                  geonameID:records[i].geonameid,
-                  rawSequence:records[i].sequence,
-                  resourceSource:records[i].resourceSource
-                }
-                jobSequences.push(jobSequence);
+                jobAccessions.push(records[i].accession);
               }
             }
-            var runUri = SERVER_URI+'/job/run';
-            var email = String($scope.jobEmail).trim();
-            var currentJobName = null;
-            if ($scope.jobName) {
-              currentJobName = String($scope.jobName).trim();
-            }
-            var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
-            var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
-            var predictors = $scope.customPredictors;
-            var subModel = String($scope.substitutionModel);
-            var clockModel = String($scope.clockModel);
-            var gamma = Boolean($scope.gamma);
-            var invariantSites = Boolean($scope.invariantSites);
-            var prior = String($scope.treePrior).trim();
-            var chain = Number($scope.chainLength);
-            var rate = Number($scope.subSampleRate);
-            var jobData = {
-              replyEmail: email,
-              jobName: currentJobName,
-              records: jobSequences,
-              useGLM: glm,
-              predictors: predictors,
-              isGenbankJob: isGenbankJob,
-              xmlOptions: {
-                substitutionModel: subModel,
-                gamma: gamma,
-                invariantSites: invariantSites,
-                clockModel: clockModel,
-                treePrior: prior,
-                chainLength: chain,
-                subSampleRate: rate
-              }
-            };
-            $http.post(runUri, jobData).then(function success(response) {
+            if (jobAccessions.length < 5) {
+              $scope.runError = 'Too Few Records, Minimun is 5';
               $scope.running = false;
-              if (response.status === 202) {
-                if (currentJobName) {
-                  $scope.success = 'Successfully Started the ZooPhy Job: '+currentJobName;
-                }
-                else {
-                  $scope.success = response.data.message;
-                }
-                if (response.data.recordsRemoved.length > 0) {
-                  var success = 'Successfully Started the ZooPhy Job: '+currentJobName+'. The following '+response.data.recordsRemoved.length+' incomplete records were excluded from this job: '+response.data.recordsRemoved[0];
-                  for (var i = 1; i < response.data.recordsRemoved.length; i++) {
-                    success += ', '+response.data.recordsRemoved[i];
+            }
+            else if (jobAccessions.length > 1000) {
+              $scope.runError = 'Too Many Records, Maximum is 1000';
+              $scope.running = false;
+            }
+            else {
+              //Submit the job to appropriate URL
+                var jobSequences = [];
+                for (var i = 0; i < records.length; i++) {
+                  if (records[i].includeInJob) {
+                    var jobSequence = {
+                      id:records[i].accession,
+                      collectionDate:records[i].date,
+                      geonameID:records[i].geonameid,
+                      rawSequence:records[i].sequence,
+                      resourceSource:records[i].resourceSource
+                    }
+                    jobSequences.push(jobSequence);
                   }
-                  $scope.success = success;
                 }
-              }
-              else {
-                $scope.runError = 'Job Validation Failed: '+response.data.error;
-              }
-            }, function failure(response) {
-              $scope.running = false;
-              $scope.runError = 'Job Validation Failed due to Unknown Error';
-            });
+                var runUri = SERVER_URI+'/job/run';
+                var email = String($scope.jobEmail).trim();
+                var currentJobName = null;
+                if ($scope.jobName) {
+                  currentJobName = String($scope.jobName).trim();
+                }
+                var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
+                var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
+                var predictors = $scope.customPredictors;
+                var subModel = String($scope.substitutionModel);
+                var clockModel = String($scope.clockModel);
+                var gamma = Boolean($scope.gamma);
+                var invariantSites = Boolean($scope.invariantSites);
+                var prior = String($scope.treePrior).trim();
+                var chain = Number($scope.chainLength);
+                var rate = Number($scope.subSampleRate);
+                var jobData = {
+                  replyEmail: email,
+                  jobName: currentJobName,
+                  records: jobSequences,
+                  useGLM: glm,
+                  predictors: predictors,
+                  isGenbankJob: isGenbankJob,
+                  xmlOptions: {
+                    substitutionModel: subModel,
+                    gamma: gamma,
+                    invariantSites: invariantSites,
+                    clockModel: clockModel,
+                    treePrior: prior,
+                    chainLength: chain,
+                    subSampleRate: rate
+                  }
+                };
+                $http.post(runUri, jobData).then(function success(response) {
+                  $scope.running = false;
+                  if (response.status === 202) {
+                    if (currentJobName) {
+                      $scope.success = 'Successfully Started the ZooPhy Job: '+currentJobName;
+                    }
+                    else {
+                      $scope.success = response.data.message;
+                    }
+                    if (response.data.accessionsRemoved.length > 0) {
+                      //var success = '<Strong>Successfully Started the ZooPhy Job: '+currentJobName+'. The following records were excluded from this job:';
+                      // for (var i = 0; i < response.data.accessionsRemoved.length; i++) {
+                      //   success += response.data.accessionsRemoved[i].reason;
+                      //   var invalidRecords = response.data.accessionsRemoved[i].accessions;
+                      //   if(invalidRecords.length>0){
+                      //     success += invalidRecords[0];
+                      //     for(var j = 1; j < invalidRecords.length; j++){
+                      //       success += ', '+  invalidRecords[j];
+                      //     }
+                      //   }
+                      // }
+                      $scope.success = null;
+                      $scope.successWithExclusion = response.data.accessionsRemoved;
+                      $scope.currentJobName = currentJobName;
+                    }
+                  }
+                  else {
+                    $scope.runError = 'Job Validation Failed: '+response.data.error;
+                  }
+                }, function failure(response) {
+                  $scope.running = false;
+                  $scope.runError = 'Job Validation Failed due to Unknown Error';
+                });
+            }
+          }else{
+            $scope.runError = 'Invalid Chain Length';
+            $scope.running = false;
+          }
+        }
+        else {
+          $scope.runError = 'Invalid Email';
+          $scope.running = false;
         }
       }
-      else {
-        $scope.runError = 'Invalid Email';
-        $scope.running = false;
+      else{
+        $scope.runError = 'Invalid or Too Short Job Name';
+          $scope.running = false;
       }
-    }else{
-      $scope.runError = 'Invalid Job Name';
-        $scope.running = false;
-    }
     }
   };
 
