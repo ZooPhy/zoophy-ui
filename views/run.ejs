@@ -22,18 +22,13 @@
   <div class="row">
       <div id="run-success-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center" ng-show="successWithExclusion">
         <i class="fa fa-check-circle" aria-hidden="true"></i>
-        <Strong>Successfully Started the ZooPhy Job: </Strong>{{currentJobName}}. The following records were excluded from this job: 
-        <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">&nbsp;&nbsp;expand</a>
+        <Strong>Successfully Started the ZooPhy Job: {{currentJobName}}.</Strong> The following {{ExcludedRecordCount}} records were excluded from this job:
+        <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">&nbsp;&nbsp;Expand</a><br>
+        <a class="results-link"  ng-href="{{ExcludedRecordDownloadLink}}" download="ExcludedRecords.csv" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a>
+        to view the detailed report
         <div class="collapse" id="collapseExample">
           <div class="card card-body">
-            <table class="table table-striped table-hover table-condensed table-responsive">
-              <tbody ng-repeat="item in successWithExclusion">
-                <!-- <td class="col-sm-1">{{item.reason}}</td> -->
-                <tr ng-repeat="accessions in item.accessions">
-                  <td class="col-sm-1"><a href="https://www.ncbi.nlm.nih.gov/nuccore/{{accessions}}" target="_blank">{{accessions}}</a>: &nbsp;&nbsp;{{item.reason}}</td>
-                </tr>
-              </tbody>
-            </table>
+              <p id = "ExclusionList"></p>
           </div>
         </div>
     </div>
@@ -136,6 +131,11 @@
   <div class="row pushed-down btn-toolbar">
   <div class="col-sm-6">
       <button class="btn btn-warning pull-left" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>  
+  </div>
+  <div class="form-group">
+      <div class="g-recaptcha" data-sitekey="6LfKURIUAAAAAO50vlwWZkyK_G2ywqE52NU7YO0S" data-callback="verifyRecaptchaCallback" data-expired-callback="expiredRecaptchaCallback"></div>
+      <input class="form-control d-none" data-recaptcha="true" required data-error="Please complete the Captcha">
+      <div class="help-block with-errors"></div>
   </div>
   <div class="col-sm-6 pull-right">
       <div class="col-sm-4 col-md-offset-4" >

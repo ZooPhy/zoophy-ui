@@ -219,21 +219,67 @@ router.post('/run', function(req, res) {
               else {
                 logger.info('Job Started: ', response.statusCode, body);
                 if (response.statusCode === 202) {
-                  result = {
-                    status: 202,
-                    message: String(body),
-                    jobSize: validationResults.accessionsUsed.length,
-                    accessionsRemoved: validationResults.accessionsRemoved
-                  };
-                  logger.info(result)
+                  if(validationResults.accessionsRemoved.length>0){
+                    let fileName = String(uuid())+'.'+ "csv";
+                    let filePath = DOWNLOAD_FOLDER+fileName;
+                    logger.info('Writing file for excluded records: '+filePath);
+
+                    var CSVexclusionReport = "Accession,AdminLevel,Reason \n";
+                    var exclusionList = "";
+                    for (var i = 0; i < validationResults.accessionsRemoved.length; i++) {
+                      exclusionList += "<br><strong>"+ validationResults.accessionsRemoved[i].reason + ": </strong>"; 
+                      if(validationResults.accessionsRemoved[i].excludedRecords.length>0){
+                        var record = validationResults.accessionsRemoved[i].excludedRecords[0];
+                        exclusionList += '<a href="https://www.ncbi.nlm.nih.gov/nuccore/'+ record.accession +'" target="_blank">' + record.accession + '</a>'
+                                            + " ("+ record.adminLevel +")"
+                      }
+                      for (var j = 0; j < validationResults.accessionsRemoved[i].excludedRecords.length; j++) {
+                        var record = validationResults.accessionsRemoved[i].excludedRecords[j];
+                        CSVexclusionReport += record.accession + "," + record.adminLevel + ", " + validationResults.accessionsRemoved[i].reason + "\n";
+                        exclusionList +=  ", " + '<a href="https://www.ncbi.nlm.nih.gov/nuccore/'+ record.accession +'" target="_blank">' +
+                                                  record.accession +'</a>'+ " ("+ record.adminLevel +")"
+                      }
+                    }
+
+                    let fileContents = String(CSVexclusionReport);
+                    fs.writeFile(filePath, fileContents, function(err) {
+                      if (err) {
+                        logger.error('Error writing download: '+err);
+                        result = {
+                          status: 500,
+                          error: 'Error writing download'
+                        };
+                      }
+                      else {
+                        result = {
+                          status: 202,
+                          message: String(body),
+                          jobSize: validationResults.accessionsUsed.length,
+                          accessionsRemoved: exclusionList,
+                          downloadPath: '/downloads/'+fileName
+                        };
+                        logger.info(result)
+                      }
+                      res.status(result.status).send(result);
+                    });
+                  }
+                  else{
+                    result = {
+                      status: 202,
+                      message: String(body),
+                      jobSize: validationResults.accessionsUsed.length,
+                      accessionsRemoved: null
+                    };
+                    res.status(result.status).send(result);
+                  }
                 }
                 else {
                   result = {
                     status: 500,
                     error: 'Unknown ZooPhy API Error during Start'
                   };
+                  res.status(result.status).send(result);
                 }
-                res.status(result.status).send(result);
               }
             }); 
         }  

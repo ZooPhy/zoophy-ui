@@ -31,6 +31,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.downloadLink = null;
   $scope.successWithExclusion = null;
   $scope.currentJobName = null;
+  $scope.ExcludedRecordDownloadLink = null;
+  $scope.ExcludedRecordCount = null;
   
   $scope.reset = function() {
     $scope.useDefaultGLM = false;
@@ -53,6 +55,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.downloadLink = null;
     $scope.successWithExclusion = null;
     $scope.currentJobName = null;
+    $scope.ExcludedRecordDownloadLink = null;
+    $scope.ExcludedRecordCount = null;
   };
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function(newValue, oldValue) {
@@ -159,21 +163,12 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
                     else {
                       $scope.success = response.data.message;
                     }
-                    if (response.data.accessionsRemoved.length > 0) {
-                      //var success = '<Strong>Successfully Started the ZooPhy Job: '+currentJobName+'. The following records were excluded from this job:';
-                      // for (var i = 0; i < response.data.accessionsRemoved.length; i++) {
-                      //   success += response.data.accessionsRemoved[i].reason;
-                      //   var invalidRecords = response.data.accessionsRemoved[i].accessions;
-                      //   if(invalidRecords.length>0){
-                      //     success += invalidRecords[0];
-                      //     for(var j = 1; j < invalidRecords.length; j++){
-                      //       success += ', '+  invalidRecords[j];
-                      //     }
-                      //   }
-                      // }
+                    if (response.data.accessionsRemoved) {
                       $scope.success = null;
-                      $scope.successWithExclusion = response.data.accessionsRemoved;
+                      $scope.successWithExclusion = true;
                       $scope.currentJobName = currentJobName;
+                      $scope.ExcludedRecordDownloadLink = SERVER_URI+response.data.downloadPath;
+                      document.getElementById("ExclusionList").innerHTML = response.data.accessionsRemoved;
                     }
                   }
                   else {
