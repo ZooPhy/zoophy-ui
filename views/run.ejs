@@ -132,18 +132,17 @@
   <div class="col-sm-6">
       <button class="btn btn-warning pull-left" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>  
   </div>
-  <div class="form-group">
-      <div class="g-recaptcha" data-sitekey="6LfKURIUAAAAAO50vlwWZkyK_G2ywqE52NU7YO0S" data-callback="verifyRecaptchaCallback" data-expired-callback="expiredRecaptchaCallback"></div>
-      <input class="form-control d-none" data-recaptcha="true" required data-error="Please complete the Captcha">
-      <div class="help-block with-errors"></div>
-  </div>
+  <!-- todo: add Captcha -->
+  <!-- <div class="g-recaptcha" data-sitekey="6LeBuXMUAAAAAEqImXUh_j9R8US9wpaKAIaWE7Hk"></div> -->
   <div class="col-sm-6 pull-right">
       <div class="col-sm-4 col-md-offset-4" >
           <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-options"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
         </div>
         <div class="col-sm-3">
             <input type="button" class="btn btn-primary " ng-click="runJob();" ng-disabled="!jobEmail || warning || running" value="Start ZooPhy"/>
+            <!-- <input type="button" class="btn btn-primary " ng-click="verifyCaptcha();" />   -->
         </div>
       </div>
   </div>
 </div>
+<!-- <script src='https://www.google.com/recaptcha/api.js'></script> -->
