@@ -43,6 +43,46 @@ const SOURCE_FASTA = 2;
 
 let router = express.Router();
 
+router.post('/siteverify', function(req, res) {
+  let result;
+  var responseKey = req.body.recaptchRes;
+  var key = "6LeBuXMUAAAAAKZKKatttLRp090KZ27mxEqBqxtf";
+  request.get({
+      url: 'https://www.google.com/recaptcha/api/siteverify?secret='+ key +'&response='+responseKey,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    }
+  , function(error, response, body) {
+    if (error) {
+      logger.error(error);
+      result = {
+        status: 500,
+        error: String(error)
+      };
+      res.status(result.status).send(result);
+    }
+    else {
+      let resBody = JSON.parse(body);
+      logger.info("response: "+ body);
+      if (response.statusCode === 200 && resBody.success){
+        result = {
+          status: 200,
+          timeStamp: String(resBody.challenge_ts),
+          host: String(resBody.hostname)
+        }
+      }else{
+        result = {
+          status: 500,
+          error: String(resBody["error-codes"])
+        };
+      }
+      logger.info(result)
+      res.status(result.status).send(result);
+    }
+  });
+});
+
 router.post('/run', function(req, res) {
   let result;
   try {

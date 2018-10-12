@@ -57,6 +57,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.currentJobName = null;
     $scope.ExcludedRecordDownloadLink = null;
     $scope.ExcludedRecordCount = null;
+    grecaptcha.reset();
   };
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function(newValue, oldValue) {
@@ -83,6 +84,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
 
   $scope.runJob = function() {
     if ($scope.running === false) {
+      grecaptcha.reset();
       $scope.runError = null;
       $scope.running = true;
       $scope.success = null;
@@ -325,6 +327,29 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       title: 'Custom Predictors Upload Help',
       message: 'Follow the steps below to use custom GLM predictors for your ZooPhy Job:\n 1) Generate .tsv template with Job locations\n 2) Fill template with your own Predictor data\n 3) Upload completed template\n\nFor more details on Predictor file formatting, visit the <a target="_new" href="https://github.com/djmagee5/BEAST_GLM#predictor-data-file-requirements">BEAST_GLM</a> page.'
     });
+  };
+
+  $scope.verifyCaptcha = function(){
+    var response = grecaptcha.getResponse();
+    var captchaUri = SERVER_URI+'/job/siteverify';
+    if(response.length > 0){
+      var CaptchaVerify = {
+        recaptchRes: response
+      }
+      $http.post(captchaUri, CaptchaVerify).then(function success(response) {
+        if (response.status === 200) {
+          $scope.runJob();
+        }
+        else {
+          $scope.runError = 'Captcha Validation Failed: '+response.error;   
+        }
+      }, function failure(response) {
+        $scope.runError = 'Captcha Validation Failed';
+      });
+      console.log('Captcha Response: ' + response);
+    }else{
+      $scope.runError = 'Captcha Validation Required to Run the Job';
+    }
   };
 
 });
