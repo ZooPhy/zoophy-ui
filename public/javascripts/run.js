@@ -169,6 +169,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
                       $scope.success = null;
                       $scope.successWithExclusion = true;
                       $scope.currentJobName = currentJobName;
+                      $scope.ExcludedRecordCount = $scope.numSelected - response.data.jobSize;
                       $scope.ExcludedRecordDownloadLink = SERVER_URI+response.data.downloadPath;
                       document.getElementById("ExclusionList").innerHTML = response.data.accessionsRemoved;
                     }
