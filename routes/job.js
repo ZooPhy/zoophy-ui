@@ -231,16 +231,13 @@ router.post('/run', function(req, res) {
             status: 500,
             error: String(error)
           };
-          
           res.status(result.status).send(result);
         }
         else {
           let validationResults = JSON.parse(body);
           if (response.statusCode === 200 && validationResults.error === null) {
-            logger.warn('Accessions removed in job validation: '+validationResults.accessionsRemoved);
             logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
             logger.info('Starting ZooPhy Job for: '+email);
-            logger.info(zoophyJob);
             request.post({
               url: API_URI+'/run',
               headers: {
@@ -262,6 +259,7 @@ router.post('/run', function(req, res) {
                   if(validationResults.accessionsRemoved.length>0){
                     let fileName = String(uuid())+'.'+ "csv";
                     let filePath = DOWNLOAD_FOLDER+fileName;
+                    logger.warn('Accessions removed in job validation');
                     logger.info('Writing file for excluded records: '+filePath);
 
                     var CSVexclusionReport = "Accession,AdminLevel,Reason \n";
@@ -270,14 +268,21 @@ router.post('/run', function(req, res) {
                       exclusionList += "<br><strong>"+ validationResults.accessionsRemoved[i].reason + ": </strong>"; 
                       if(validationResults.accessionsRemoved[i].excludedRecords.length>0){
                         var record = validationResults.accessionsRemoved[i].excludedRecords[0];
-                        exclusionList += '<a href="https://www.ncbi.nlm.nih.gov/nuccore/'+ record.accession +'" target="_blank">' + record.accession + '</a>'
-                                            + " ("+ record.adminLevel +")"
+                        CSVexclusionReport += record.accession + "," + record.adminLevel + ", " + validationResults.accessionsRemoved[i].reason + "\n";
+                        exclusionList += '<a href="https://www.ncbi.nlm.nih.gov/nuccore/'+ record.accession +'" target="_blank">' + 
+                                          record.accession + '</a>'
+                        if(record.adminLevel){
+                          exclusionList += " ("+ record.adminLevel +")"
+                        } 
                       }
-                      for (var j = 0; j < validationResults.accessionsRemoved[i].excludedRecords.length; j++) {
+                      for (var j = 1; j < validationResults.accessionsRemoved[i].excludedRecords.length; j++) {
                         var record = validationResults.accessionsRemoved[i].excludedRecords[j];
                         CSVexclusionReport += record.accession + "," + record.adminLevel + ", " + validationResults.accessionsRemoved[i].reason + "\n";
                         exclusionList +=  ", " + '<a href="https://www.ncbi.nlm.nih.gov/nuccore/'+ record.accession +'" target="_blank">' +
-                                                  record.accession +'</a>'+ " ("+ record.adminLevel +")"
+                                                  record.accession +'</a>'
+                                                    if(record.adminLevel){
+                                                      exclusionList += " ("+ record.adminLevel +")"
+                                                    }
                       }
                     }
 
@@ -298,7 +303,6 @@ router.post('/run', function(req, res) {
                           accessionsRemoved: exclusionList,
                           downloadPath: '/downloads/'+fileName
                         };
-                        logger.info(result)
                       }
                       res.status(result.status).send(result);
                     });
