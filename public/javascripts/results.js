@@ -488,7 +488,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     };
 
     $scope.clearLayerFeatures = function() {
-      console.log("clearing features");
+      // console.log("clearing features");
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, i) {
         if (layer.get('zodolayer')!='tile'){
@@ -519,17 +519,31 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.loadHeatmapLayer = function(records) {
-      console.log("loading heatmap "+records.length);
+      console.log("loading heatmap with "+records.length+ " records");
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, i) {
         if (layer instanceof ol.layer.Heatmap) {
           var features= [];
+          var count = 0
           for (var i=0; i< records.length; i++){
-            var coord = ol.proj.transform([parseFloat(records[i].longitude), parseFloat(records[i].latitude)], 'EPSG:4326', 'EPSG:3857');
-            var pointonmap = new ol.Feature(new ol.geom.Point(coord));
-            pointonmap.setId(records[i].accession);
-            features.push(pointonmap);
+            var record = records[i]
+            var longitude = parseFloat(record.longitude);
+            var latitude = parseFloat(record.latitude);
+            if(record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
+               longitude<-180||longitude>180||latitude<-90||latitude>90){
+              // ignore such records
+              count += 1
+              // console.log("Ignoring:"+record.location+":"+longitude+":"+longitude)
+            } else {
+              var coord = ol.proj.transform([parseFloat(record.longitude),
+                                             parseFloat(record.latitude)],
+                                             'EPSG:4326', 'EPSG:3857');
+              var pointonmap = new ol.Feature(new ol.geom.Point(coord));
+              pointonmap.setId(record.accession);
+              features.push(pointonmap);
+            }
           }
+          console.log(count+" records from " + records.length + " ignored")
           var heatmapSource = new ol.source.Vector({
             features: features
           });
@@ -542,17 +556,14 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     };
 
     $scope.highlightLocation = function(record) {
-      console.log("record highlighted "+$scope.printObject(record));
       var features = [];
       var center = [0,0];
       if(record.possibleLocations.length>0){
-        console.log("Got some " + record.possibleLocations.length);
         var maxProb = 0;
         for(var i=0; i<record.possibleLocations.length;i++){
           var posLoc = record.possibleLocations[i];
           var coord = ol.proj.transform([parseFloat(posLoc.longitude), parseFloat(posLoc.latitude)], 'EPSG:4326', 'EPSG:3857');
           var pointonmap = new ol.Feature(new ol.geom.Point(coord));
-          console.log(i+"\t--------"+$scope.printObject(posLoc));
           pointonmap.set('name',posLoc.location);
           pointonmap.set('accession',record.accession);
           pointonmap.set('probability',posLoc.probability);
@@ -577,10 +588,14 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, i) {
         if (layer.get('zodolayer')=='view'){
-          console.log("updating view layer");
+          // console.log("updating view layer");
           layer.getSource().clear();
           layer.getSource().addFeatures(features);
-          $scope.geoLocMap.getView().setCenter(center);
+          // $scope.geoLocMap.getView().setCenter(center);
+          $scope.geoLocMap.getView().animate({
+            center: center,
+            duration: 1000
+          });
           //$scope.geoLocMap.getView().setZoom(3);
         }
       });
@@ -646,7 +661,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     };
   
     $scope.updateAllSelections = function(records, add) {
-      console.log("records selected " + records.length + " " + add);
+      // console.log("records selected " + records.length + " " + add);
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, i) {
         if (layer.get('zodolayer')==='selection'){
@@ -666,7 +681,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
                 pointonmap.set('accession',record.accession);
                 features.push(pointonmap);
               } else {
-                console.log("No coordinates found for " + record.accession);
+                // console.log("No coordinates found for " + record.accession);
               }
             }
             // var vectorSource = new ol.source.Vector({features: features});
@@ -676,7 +691,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           } else {
             layer.getSource().clear(); 
           }
-          console.log("Done");
+          // console.log("Done");
         }
       });
     };  
