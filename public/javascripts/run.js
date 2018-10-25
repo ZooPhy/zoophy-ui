@@ -254,7 +254,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.runError = null;
       $scope.success = null;
       $scope.warning = null;
-      var locationList = [];
       var locationMap = new Map();
       var locationValueMap = new Map();
       var examplePredictor = "123.456";

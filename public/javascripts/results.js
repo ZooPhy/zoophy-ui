@@ -52,10 +52,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
       if ($scope.results.length > 0) {
-        var totalRecords = $scope.results.length
-        $scope.searchedVirusName = $scope.results[totalRecords-1].virus;
+        $scope.searchedVirusName = $scope.results[0].virus;
         $scope.clearLayerFeatures();
-        $scope.LoadDetails($scope.results[totalRecords-1]);
+        $scope.LoadDetails($scope.results[0]);
         $scope.loadHeatmapLayer($scope.results);
         $('#probThreshold').val(0);
         $('#probThrVal').text("0%");
@@ -271,9 +270,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if (samples.indexOf($scope.results[i].accession) > -1) {
         $scope.results[i].includeInJob = true;
         $scope.numSelected++;
+        $scope.updateSelections($scope.results[i],true);
       }
       else {
         $scope.results[i].includeInJob = false;
+        $scope.updateSelections($scope.results[i],false);
       }
     }
     RecordData.setRecords($scope.results);
@@ -639,12 +640,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.updateSelections = function(record, add) {
-      console.log("record selected " + record.accession + " " + add);
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, i) {
         if (layer.get('zodolayer')=='selection'){
-          console.log("updating selection layer");
+         // console.log("updating selection layer");
           if(add){
+            console.log("record selected " + record.accession + " " + add);
             var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
             var pointonmap = new ol.Feature(new ol.geom.Point(coord));
             console.log('name: '+record.location);
@@ -654,7 +655,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             layer.getSource().addFeature(pointonmap);
             $scope.geoLocMap.getView().setCenter(coord);
           } else {
-            layer.getSource().removeFeature(layer.getSource().getFeatureById(record.accession)); 
+            if(layer.getSource().getFeatureById(record.accession))
+              layer.getSource().removeFeature(layer.getSource().getFeatureById(record.accession)); 
           }
         }
       });
