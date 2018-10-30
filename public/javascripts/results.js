@@ -51,6 +51,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
+      $scope.sampleAmount = 20;
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
         $scope.clearLayerFeatures();
@@ -58,6 +59,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.loadHeatmapLayer($scope.results);
         $('#probThreshold').val(0);
         $('#probThrVal').text("0%");
+        $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
+      }else{
+        $scope.clearLayerFeatures();
+        $scope.showDetails = false;
+        $scope.percentOfRecords = 0;
       }
       $scope.groupIsSelected = false;
       $scope.numSelected = 0;
@@ -69,11 +75,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.downloadError = null;
       $scope.sampleType = 'percent';
       $scope.combineResults = 'false';
-      $scope.sampleAmount = 20;
       $scope.fastaFilename = 'none';
       $scope.fastaFile = null;
       $scope.fastaError = null;
-      $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
       $scope.completeRecordsCount = 0;
       $scope.distinctLocationsCount = 0;
     }
@@ -530,11 +534,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             var record = records[i]
             var longitude = parseFloat(record.longitude);
             var latitude = parseFloat(record.latitude);
+      //      console.log("Record: " +record.location+", " +record.location+":"+longitude+":"+longitude)
             if(record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
                longitude<-180||longitude>180||latitude<-90||latitude>90){
               // ignore such records
               count += 1
-              // console.log("Ignoring:"+record.location+":"+longitude+":"+longitude)
+           //    console.log("Ignoring:"+record.location+":"+longitude+":"+longitude)
             } else {
               var coord = ol.proj.transform([parseFloat(record.longitude),
                                              parseFloat(record.latitude)],
