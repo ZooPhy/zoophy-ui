@@ -70,9 +70,28 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       }
       else if ($scope.numSelected > 1000) {
         $scope.warning = 'Too Many Records, Maximum is 1000';
+      }else if($scope.countryCount() > 25){
+        $scope.warning = 'Too many Countries selected.';
       }
     }
   });
+
+  $scope.countryCount = function(){
+    var records = RecordData.getRecords();
+    var countryMap = new Map();
+
+    for (var i = 0; i < records.length; i++) {
+      if (records[i].includeInJob) {
+        var count = countryMap.get(records[i].country);
+        if(count!=null){
+          countryMap.set(records[i].country,++count);
+        }else{
+          countryMap.set(records[i].country,1);
+        }
+      }
+    }
+    return countryMap.size;
+  }
 
   $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
@@ -261,35 +280,35 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       templateString = "state" + delimiter + "lat" + delimiter + "long" +
        delimiter + "SampleSize" + delimiter + "ExamplePredictor" + "\n";
       var records = RecordData.getRecords();
-        for (var i = 0; i < records.length; i++) {
-          if (records[i].includeInJob) {
-            var glmTemplateObject = {
-              location: "",
-              latitude: 0,
-              longitude: 0
-            };
-            glmTemplateObject.location = records[i].location;
-            glmTemplateObject.latitude = records[i].latitude;
-            glmTemplateObject.longitude = records[i].longitude;
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].includeInJob) {
+          var glmTemplateObject = {
+            location: "",
+            latitude: 0,
+            longitude: 0
+          };
+          glmTemplateObject.location = records[i].location;
+          glmTemplateObject.latitude = records[i].latitude;
+          glmTemplateObject.longitude = records[i].longitude;
 
-            var count = locationMap.get(records[i].location);
-            if(count!=null){
-              locationMap.set(records[i].location,++count);
-            }else{
-              locationMap.set(records[i].location,1);
-            }
-            locationValueMap.set(records[i].location,glmTemplateObject); 
+          var count = locationMap.get(records[i].location);
+          if(count!=null){
+            locationMap.set(records[i].location,++count);
+          }else{
+            locationMap.set(records[i].location,1);
           }
+          locationValueMap.set(records[i].location,glmTemplateObject); 
         }
-        for (var [loc, count] of locationMap) {
-          templateString += loc + delimiter;
-          templateString += locationValueMap.get(loc).latitude + delimiter;
-          templateString += locationValueMap.get(loc).longitude + delimiter;
-          templateString += count + delimiter;
-          templateString += examplePredictor + "\n";
-        }
-        $scope.generating = false;
-        $scope.downloadLink = true;
+      }
+      for (var [loc, count] of locationMap) {
+        templateString += loc + delimiter;
+        templateString += locationValueMap.get(loc).latitude + delimiter;
+        templateString += locationValueMap.get(loc).longitude + delimiter;
+        templateString += count + delimiter;
+        templateString += examplePredictor + "\n";
+      }
+      $scope.generating = false;
+      $scope.downloadLink = true;
     }
   };
 
