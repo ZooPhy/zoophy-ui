@@ -638,15 +638,17 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         if (layer.get('zodolayer')=='selection'){
          // console.log("updating selection layer");
           if(add){
-            console.log("record selected " + record.accession + " " + add);
-            var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
-            var pointonmap = new ol.Feature(new ol.geom.Point(coord));
-            console.log('name: '+record.location);
-            pointonmap.setId(record.accession);
-            pointonmap.set('name',record.location);
-            pointonmap.set('accession',record.accession);
-            layer.getSource().addFeature(pointonmap);
-            $scope.geoLocMap.getView().setCenter(coord);
+            if(record.latitude!='Unknown' && record.longitude!='Unknown'){
+              console.log("record selected " + record.accession +", " +record.latitude+", " +record.latitude+ " " + add);
+              var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
+              var pointonmap = new ol.Feature(new ol.geom.Point(coord));
+              console.log('name: '+record.location);
+              pointonmap.setId(record.accession);
+              pointonmap.set('name',record.location);
+              pointonmap.set('accession',record.accession);
+              layer.getSource().addFeature(pointonmap);
+              $scope.geoLocMap.getView().setCenter(coord);
+            }
           } else {
             if(layer.getSource().getFeatureById(record.accession))
               layer.getSource().removeFeature(layer.getSource().getFeatureById(record.accession)); 
