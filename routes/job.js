@@ -23,7 +23,7 @@ const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
 const DOWNLOAD_FOLDER = path.join(__dirname, '../public/downloads/');
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
 const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
-const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
+const JOB_NAME_RE = /^(\w| |-|#|&){3,255}?$/;
 const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
 const PREDICTOR_FILE_RE = /.{1,250}?\.tsv$/;
 const STATE_RE = /^(\w|-|\.|\,| |\’|\'){1,255}?$/;
@@ -159,7 +159,7 @@ router.post('/run', function(req, res) {
         jobName = String(req.body.jobName);
       }
       else {
-        jobErrors += 'Invalid Job Name: '+req.body.jobName+', ';
+        jobErrors += 'Invalid or Too Short Job Name: '+req.body.jobName+', ';
       }
     }
     let useGLM = Boolean(req.body.useGLM === true);
@@ -187,8 +187,10 @@ router.post('/run', function(req, res) {
         if (checkInput(req.body.xmlOptions.invariantSites, 'boolean', null)){
           if (checkInput(req.body.xmlOptions.clockModel, 'string', CLOCK_MODEL_RE)){
             if (checkInput(req.body.xmlOptions.treePrior, 'string', PRIOR_RE)){
-              if (checkInput(req.body.xmlOptions.chainLength, 'number', null)){
-                if (checkInput(req.body.xmlOptions.subSampleRate, 'number', null)){
+              if (checkInput(req.body.xmlOptions.chainLength, 'number', null)& 
+              (Number(req.body.xmlOptions.chainLength) >=10000000 && Number(req.body.xmlOptions.chainLength) <=250000000)){
+                if (checkInput(req.body.xmlOptions.subSampleRate, 'number', null) & 
+                (Number(req.body.xmlOptions.subSampleRate) >=1000 && Number(req.body.xmlOptions.subSampleRate) <=25000)){
                   xmlOptions = {
                     substitutionModel: String(req.body.xmlOptions.substitutionModel),
                     gamma: Boolean(req.body.xmlOptions.gamma),
@@ -202,7 +204,7 @@ router.post('/run', function(req, res) {
                 } else {jobErrors += 'Invalid XML Parameters: '+'subSampleRate';}
               } else {jobErrors += 'Invalid XML Parameters: '+'chainLength';}
             } else {jobErrors += 'Invalid XML Parameters: '+'treePrior';}
-          } else {jobErrors += 'Invalid XML Parameters: '+'clockModel:';}
+          } else {jobErrors += 'Invalid XML Parameters: '+'clockModel';}
         } else {jobErrors += 'Invalid XML Parameters: '+'invariantSites';}
       } else {jobErrors += 'Invalid XML Parameters: '+'gamma';}
     } else {jobErrors += 'Invalid XML Parameters: '+'substitutionModel';}
@@ -350,9 +352,9 @@ router.post('/run', function(req, res) {
            jobErrors = jobErrors.substring(0,jobErrors.length-2);
         }
         logger.warn(jobErrors);
-         result = {
-           status: 400,
-           error: jobErrors
+        result = {
+          status: 400,
+          error: jobErrors
         };
          res.status(result.status).send(result);
        }

@@ -66,6 +66,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.fastaFilename = 'none';
     $scope.fastaFile = null;
     $scope.searchCount = 0;
+    RecordData.setRecords([]);
+    RecordData.incrementSearchCount();
     };
 
   $scope.checkH1N1 = function() {
