@@ -534,12 +534,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             var record = records[i]
             var longitude = parseFloat(record.longitude);
             var latitude = parseFloat(record.latitude);
-      //      console.log("Record: " +record.location+", " +record.location+":"+longitude+":"+longitude)
-            if(record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
+            if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
                longitude<-180||longitude>180||latitude<-90||latitude>90){
               // ignore such records
               count += 1
-           //    console.log("Ignoring:"+record.location+":"+longitude+":"+longitude)
+              // console.log("Ignoring:"+record.location+":"+longitude+":"+longitude)
             } else {
               var coord = ol.proj.transform([parseFloat(record.longitude),
                                              parseFloat(record.latitude)],
@@ -564,23 +563,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.highlightLocation = function(record) {
       var features = [];
       var center = [0,0];
-      if(record.possibleLocations.length>0){
-        var maxProb = 0;
-        for(var i=0; i<record.possibleLocations.length;i++){
-          var posLoc = record.possibleLocations[i];
-          var coord = ol.proj.transform([parseFloat(posLoc.longitude), parseFloat(posLoc.latitude)], 'EPSG:4326', 'EPSG:3857');
-          var pointonmap = new ol.Feature(new ol.geom.Point(coord));
-          pointonmap.set('name',posLoc.location);
-          pointonmap.set('accession',record.accession);
-          pointonmap.set('probability',posLoc.probability);
-          features.push(pointonmap);
-          if(posLoc.probability>maxProb){
-            center = coord; maxProb = posLoc.probability;
-          }
-        }
-        $('#probThreshold').show();
-        $('#probThrVal').show();
-      } else {
+      var longitude = parseFloat(record.longitude);
+      var latitude = parseFloat(record.latitude);
+      if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
+              longitude<-180||longitude>180||latitude<-90||latitude>90){
+                console.log("Missing location info for highlighted record");
+      }else{
         var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
         var pointonmap = new ol.Feature(new ol.geom.Point(coord));
         pointonmap.set('name',record.location);
@@ -589,22 +577,22 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         center = coord;
         $('#probThreshold').hide();
         $('#probThrVal').hide();
+        $scope.viewLayerfeatures = features;
+        var mapLayers = $scope.geoLocMap.getLayers().getArray();
+        mapLayers.forEach(function (layer, i) {
+          if (layer.get('zodolayer')=='view'){
+            // console.log("updating view layer");
+            layer.getSource().clear();
+            layer.getSource().addFeatures(features);
+            // $scope.geoLocMap.getView().setCenter(center);
+            $scope.geoLocMap.getView().animate({
+              center: center,
+              duration: 1000
+            });
+            //$scope.geoLocMap.getView().setZoom(3);
+          }
+        });
       }
-      $scope.viewLayerfeatures = features;
-      var mapLayers = $scope.geoLocMap.getLayers().getArray();
-      mapLayers.forEach(function (layer, i) {
-        if (layer.get('zodolayer')=='view'){
-          // console.log("updating view layer");
-          layer.getSource().clear();
-          layer.getSource().addFeatures(features);
-          // $scope.geoLocMap.getView().setCenter(center);
-          $scope.geoLocMap.getView().animate({
-            center: center,
-            duration: 1000
-          });
-          //$scope.geoLocMap.getView().setZoom(3);
-        }
-      });
     };
 
     function setTooltip(info) {
