@@ -132,6 +132,7 @@ class LuceneRecord {
     }
     if (searchApiRecord.geonameLocation) {
       this.country = String(searchApiRecord.geonameLocation.country || UNKNOWN);
+      this.state = String(searchApiRecord.geonameLocation.state || UNKNOWN);
       this.location = String(searchApiRecord.geonameLocation.location || UNKNOWN);
       if((this.location.toLocaleLowerCase()) === (this.country.toLocaleLowerCase())){
         this.location = "Unknown";
@@ -142,6 +143,7 @@ class LuceneRecord {
     }
     else {
       this.country = UNKNOWN;
+      this.state = UNKNOWN;
       this.location = UNKNOWN;
       this.geonameid = UNKNOWN;
       this.latitude = UNKNOWN;

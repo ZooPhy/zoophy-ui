@@ -38,6 +38,7 @@
         	<th class="col-sm-1" ng-click="updateSort('genes');"><i class="fa fa-sort" aria-hidden="true"></i> Genes</th>
         	<th class="col-sm-2" ng-click="updateSort('luceneDate');"><i class="fa fa-sort" aria-hidden="true"></i> Date</th>
           <th class="col-sm-2 hidden-xs" ng-click="updateSort('host');"><i class="fa fa-sort" aria-hidden="true"></i> Host</th>
+          <th class="col-sm-2" ng-click="updateSort('state');"><i class="fa fa-sort" aria-hidden="true"></i> State</th>
           <th class="col-sm-2" ng-click="updateSort('country');"><i class="fa fa-sort" aria-hidden="true"></i> Country</th>
           <th class="col-sm-1 hidden-xs" ng-click="updateSort('segmentLength');"><i class="fa fa-sort" aria-hidden="true"></i> Length</th>
       	</tr>
@@ -49,6 +50,7 @@
       		<td class="col-sm-1">{{record.genes}}</td>
       		<td class="col-sm-2">{{record.date}}</td>
           <td class="col-sm-2 hidden-xs">{{record.host}}</td>
+          <td class="col-sm-2">{{record.state}}</td>
           <td class="col-sm-2">{{record.country}}</td>
           <td class="col-sm-1 hidden-xs">{{record.segmentLength}}</td>
       	</tr>

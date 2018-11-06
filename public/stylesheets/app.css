@@ -122,13 +122,13 @@ h6{
 #results-table {
   font-size: 1.2rem;
   float: left;
-  width: 61%;
+  width: 65%;
   padding-left: 2px;
   padding-right: 2px;
 }
 
 #detail-panel {
-  width: 38%;
+  width: 34%;
   padding-left: 6px;
   padding-right: 2px;
   margin-right: 4px;
