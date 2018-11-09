@@ -346,7 +346,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       }, function failure(response) {
         $scope.runError = 'Captcha Validation Failed';
       });
-      console.log('Captcha Response: ' + response);
     }else{
       $scope.runError = 'Captcha Validation Required to Run the Job';
     }
