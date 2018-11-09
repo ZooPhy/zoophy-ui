@@ -38,6 +38,7 @@
         	<th class="col-sm-1" ng-click="updateSort('genes');"><i class="fa fa-sort" aria-hidden="true"></i> Genes</th>
         	<th class="col-sm-2" ng-click="updateSort('luceneDate');"><i class="fa fa-sort" aria-hidden="true"></i> Date</th>
           <th class="col-sm-2 hidden-xs" ng-click="updateSort('host');"><i class="fa fa-sort" aria-hidden="true"></i> Host</th>
+          <th class="col-sm-2" ng-click="updateSort('state');"><i class="fa fa-sort" aria-hidden="true"></i> State</th>
           <th class="col-sm-2" ng-click="updateSort('country');"><i class="fa fa-sort" aria-hidden="true"></i> Country</th>
           <th class="col-sm-1 hidden-xs" ng-click="updateSort('segmentLength');"><i class="fa fa-sort" aria-hidden="true"></i> Length</th>
       	</tr>
@@ -49,6 +50,7 @@
       		<td class="col-sm-1">{{record.genes}}</td>
       		<td class="col-sm-2">{{record.date}}</td>
           <td class="col-sm-2 hidden-xs">{{record.host}}</td>
+          <td class="col-sm-2">{{record.state}}</td>
           <td class="col-sm-2">{{record.country}}</td>
           <td class="col-sm-1 hidden-xs">{{record.segmentLength}}</td>
       	</tr>
@@ -206,14 +208,15 @@
                 <td class="col-sm-2 text-center"> 
                   <select id="fromSelectBox" multiple="multiple" size="10" style="width: 200px;">
                     <option value="Genes">Genes</option>
-                    <option value="VirusID">VirusID</option>
+                    <option value="VirusID">Virus ID</option>
                     <option value="Virus">Virus</option>
-                    <option value="Date">Date</option>
-                    <option value="HostID">HostID</option>
+                    <option value="Human_Date">Date (DD-MMM-YYYY)</option>
+                    <option value="Decimal_Date">Date (Decimal)</option>
+                    <option value="HostID">Host ID</option>
                     <option value="Host">Host</option>
                     <option value="Country">Country</option>
                     <option value="State">State</option>
-                    <option value="GeonameID">GeonameID</option>
+                    <option value="GeonameID">Geoname ID</option>
                     <option value="Length">Length</option>
                   </select>
                   <br><br><br>

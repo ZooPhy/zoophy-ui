@@ -31,7 +31,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
-  const MAX_COLUMNS = 8;
+  const MAX_COLUMNS = 11;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
 
   if($scope.geoLocMap == null){
@@ -213,7 +213,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           }
         }, function failure(response) {
           $scope.generating = false;
-          $scope.downloadError = 'Error generating download';
+          if(response.status === 413){
+            $scope.downloadError = 'Too many records selected';
+          }else{
+            $scope.downloadError = 'Error generating download';
+          }
         });
       }
       else {
@@ -384,7 +388,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(selected.length>0){
         $('#toSelectBox').append($(selected).clone());
         $(selected).remove();
-        $scope.downloadColumnsCount++;
+        $scope.downloadColumnsCount += selected.length;
       }
     };
 
@@ -402,7 +406,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(selected.length>0){
         $('#fromSelectBox').append($(selected).clone());
         $(selected).remove();
-        $scope.downloadColumnsCount--;
+        $scope.downloadColumnsCount -= selected.length;
       }
     };
 
@@ -417,8 +421,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
     $scope.downloadColumn = function() {
       var downloadColumns = [];
-      var selected = $('#toSelectBox option').each(function(i, option){
-        downloadColumns[i] = $(option).text();
+      $('#toSelectBox option').each(function(i, option){
+        downloadColumns[i] = $(option).val();
       });
       $scope.setupDownload(downloadColumns);
     };

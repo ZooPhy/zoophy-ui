@@ -559,7 +559,6 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
               res.status(result.status).send(result);
             }
             else {
-              console.log("Passed");
               request.post({
                 url: API_URI+'/upfasta',
                 headers: {
