@@ -40,15 +40,15 @@ const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
 const SOURCE_GENBANK = 1;
 const SOURCE_FASTA = 2;
+const RECAPTCHA_SECRET_KEY = "6LdOlHoUAAAAAEsOwiu3rnxsgzaqu9sV-4G8uH3_";
 
 let router = express.Router();
 
 router.post('/siteverify', function(req, res) {
   let result;
   var responseKey = req.body.recaptchRes;
-  var key = "6LeBuXMUAAAAAKZKKatttLRp090KZ27mxEqBqxtf";
   request.get({
-      url: 'https://www.google.com/recaptcha/api/siteverify?secret='+ key +'&response='+responseKey,
+      url: 'https://www.google.com/recaptcha/api/siteverify?secret='+ RECAPTCHA_SECRET_KEY +'&response='+responseKey,
       headers: {
         'Content-Type': 'application/json',
       }
@@ -507,8 +507,5 @@ function validatePredictor(state, predictors) {
     return false;
   }
 };
-
-function validateNumOfRecords(records) {
-}  
 
 module.exports = router;
