@@ -23,7 +23,7 @@ const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
 const DOWNLOAD_FOLDER = path.join(__dirname, '../public/downloads/');
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
 const EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
-const JOB_NAME_RE = /^(\w| |-|_|#|&){3,255}?$/;
+const JOB_NAME_RE = /^(\w| |-|#|&){3,255}?$/;
 const BASE_ERROR = 'INVALID JOB PARAMETER(S): ';
 const PREDICTOR_FILE_RE = /.{1,250}?\.tsv$/;
 const STATE_RE = /^(\w|-|\.|\,| |\’|\'){1,255}?$/;
@@ -40,8 +40,48 @@ const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
 const SOURCE_GENBANK = 1;
 const SOURCE_FASTA = 2;
+const RECAPTCHA_SECRET_KEY = "6LdOlHoUAAAAAEsOwiu3rnxsgzaqu9sV-4G8uH3_";
 
 let router = express.Router();
+
+router.post('/siteverify', function(req, res) {
+  let result;
+  var responseKey = req.body.recaptchRes;
+  request.get({
+      url: 'https://www.google.com/recaptcha/api/siteverify?secret='+ RECAPTCHA_SECRET_KEY +'&response='+responseKey,
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    }
+  , function(error, response, body) {
+    if (error) {
+      logger.error(error);
+      result = {
+        status: 500,
+        error: String(error)
+      };
+      res.status(result.status).send(result);
+    }
+    else {
+      let resBody = JSON.parse(body);
+      logger.info("response: "+ body);
+      if (response.statusCode === 200 && resBody.success){
+        result = {
+          status: 200,
+          timeStamp: String(resBody.challenge_ts),
+          host: String(resBody.hostname)
+        }
+      }else{
+        result = {
+          status: 500,
+          error: String(resBody["error-codes"])
+        };
+      }
+      logger.info(result)
+      res.status(result.status).send(result);
+    }
+  });
+});
 
 router.post('/run', function(req, res) {
   let result;
@@ -119,7 +159,7 @@ router.post('/run', function(req, res) {
         jobName = String(req.body.jobName);
       }
       else {
-        jobErrors += 'Invalid Job Name: '+req.body.jobName+', ';
+        jobErrors += 'Invalid or Too Short Job Name: '+req.body.jobName+', ';
       }
     }
     let useGLM = Boolean(req.body.useGLM === true);
@@ -147,8 +187,10 @@ router.post('/run', function(req, res) {
         if (checkInput(req.body.xmlOptions.invariantSites, 'boolean', null)){
           if (checkInput(req.body.xmlOptions.clockModel, 'string', CLOCK_MODEL_RE)){
             if (checkInput(req.body.xmlOptions.treePrior, 'string', PRIOR_RE)){
-              if (checkInput(req.body.xmlOptions.chainLength, 'number', null)){
-                if (checkInput(req.body.xmlOptions.subSampleRate, 'number', null)){
+              if (checkInput(req.body.xmlOptions.chainLength, 'number', null)& 
+              (Number(req.body.xmlOptions.chainLength) >=10000000 && Number(req.body.xmlOptions.chainLength) <=250000000)){
+                if (checkInput(req.body.xmlOptions.subSampleRate, 'number', null) & 
+                (Number(req.body.xmlOptions.subSampleRate) >=1000 && Number(req.body.xmlOptions.subSampleRate) <=25000)){
                   xmlOptions = {
                     substitutionModel: String(req.body.xmlOptions.substitutionModel),
                     gamma: Boolean(req.body.xmlOptions.gamma),
@@ -162,7 +204,7 @@ router.post('/run', function(req, res) {
                 } else {jobErrors += 'Invalid XML Parameters: '+'subSampleRate';}
               } else {jobErrors += 'Invalid XML Parameters: '+'chainLength';}
             } else {jobErrors += 'Invalid XML Parameters: '+'treePrior';}
-          } else {jobErrors += 'Invalid XML Parameters: '+'clockModel:';}
+          } else {jobErrors += 'Invalid XML Parameters: '+'clockModel';}
         } else {jobErrors += 'Invalid XML Parameters: '+'invariantSites';}
       } else {jobErrors += 'Invalid XML Parameters: '+'gamma';}
     } else {jobErrors += 'Invalid XML Parameters: '+'substitutionModel';}
@@ -191,16 +233,13 @@ router.post('/run', function(req, res) {
             status: 500,
             error: String(error)
           };
-          
           res.status(result.status).send(result);
         }
         else {
           let validationResults = JSON.parse(body);
           if (response.statusCode === 200 && validationResults.error === null) {
-            logger.warn('Accessions removed in job validation: '+validationResults.accessionsRemoved);
             logger.info('Starting ZooPhy Job for: '+email+' with '+validationResults.accessionsUsed.length+' records.');
             logger.info('Starting ZooPhy Job for: '+email);
-            logger.info(zoophyJob);
             request.post({
               url: API_URI+'/run',
               headers: {
@@ -219,21 +258,74 @@ router.post('/run', function(req, res) {
               else {
                 logger.info('Job Started: ', response.statusCode, body);
                 if (response.statusCode === 202) {
-                  result = {
-                    status: 202,
-                    message: String(body),
-                    jobSize: validationResults.accessionsUsed.length,
-                    recordsRemoved: validationResults.accessionsRemoved
-                  };
-                  logger.info(result)
+                  if(validationResults.accessionsRemoved.length>0){
+                    let fileName = String(uuid())+'.'+ "csv";
+                    let filePath = DOWNLOAD_FOLDER+fileName;
+                    logger.warn('Accessions removed in job validation');
+                    logger.info('Writing file for excluded records: '+filePath);
+
+                    var CSVexclusionReport = "Accession,AdminLevel,Reason \n";
+                    var exclusionList = "";
+                    for (var i = 0; i < validationResults.accessionsRemoved.length; i++) {
+                      exclusionList += "<br><strong>"+ validationResults.accessionsRemoved[i].reason + ": </strong>"; 
+                      if(validationResults.accessionsRemoved[i].excludedRecords.length>0){
+                        var record = validationResults.accessionsRemoved[i].excludedRecords[0];
+                        CSVexclusionReport += record.accession + "," + record.adminLevel + ", " + validationResults.accessionsRemoved[i].reason + "\n";
+                        exclusionList += '<a href="https://www.ncbi.nlm.nih.gov/nuccore/'+ record.accession +'" target="_blank">' + 
+                                          record.accession + '</a>'
+                        if(record.adminLevel){
+                          exclusionList += " ("+ record.adminLevel +")"
+                        } 
+                      }
+                      for (var j = 1; j < validationResults.accessionsRemoved[i].excludedRecords.length; j++) {
+                        var record = validationResults.accessionsRemoved[i].excludedRecords[j];
+                        CSVexclusionReport += record.accession + "," + record.adminLevel + ", " + validationResults.accessionsRemoved[i].reason + "\n";
+                        exclusionList +=  ", " + '<a href="https://www.ncbi.nlm.nih.gov/nuccore/'+ record.accession +'" target="_blank">' +
+                                                  record.accession +'</a>'
+                                                    if(record.adminLevel){
+                                                      exclusionList += " ("+ record.adminLevel +")"
+                                                    }
+                      }
+                    }
+
+                    let fileContents = String(CSVexclusionReport);
+                    fs.writeFile(filePath, fileContents, function(err) {
+                      if (err) {
+                        logger.error('Error writing download: '+err);
+                        result = {
+                          status: 500,
+                          error: 'Error writing download'
+                        };
+                      }
+                      else {
+                        result = {
+                          status: 202,
+                          message: String(body),
+                          jobSize: validationResults.accessionsUsed.length,
+                          accessionsRemoved: exclusionList,
+                          downloadPath: '/downloads/'+fileName
+                        };
+                      }
+                      res.status(result.status).send(result);
+                    });
+                  }
+                  else{
+                    result = {
+                      status: 202,
+                      message: String(body),
+                      jobSize: validationResults.accessionsUsed.length,
+                      accessionsRemoved: null
+                    };
+                    res.status(result.status).send(result);
+                  }
                 }
                 else {
                   result = {
                     status: 500,
                     error: 'Unknown ZooPhy API Error during Start'
                   };
+                  res.status(result.status).send(result);
                 }
-                res.status(result.status).send(result);
               }
             }); 
         }  
@@ -260,9 +352,9 @@ router.post('/run', function(req, res) {
            jobErrors = jobErrors.substring(0,jobErrors.length-2);
         }
         logger.warn(jobErrors);
-         result = {
-           status: 400,
-           error: jobErrors
+        result = {
+          status: 400,
+          error: jobErrors
         };
          res.status(result.status).send(result);
        }
@@ -415,8 +507,5 @@ function validatePredictor(state, predictors) {
     return false;
   }
 };
-
-function validateNumOfRecords(records) {
-}  
 
 module.exports = router;

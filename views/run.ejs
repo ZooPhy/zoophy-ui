@@ -19,6 +19,20 @@
       <i class="fa fa-check-circle" aria-hidden="true"></i> {{success}}
     </div>
   </div>
+  <div class="row">
+      <div id="run-success-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center" ng-show="successWithExclusion">
+        <i class="fa fa-check-circle" aria-hidden="true"></i>
+        <Strong>Successfully Started the ZooPhy Job: {{currentJobName}}.</Strong> The following {{ExcludedRecordCount}} records were excluded from this job:
+        <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample">&nbsp;&nbsp;Expand</a><br>
+        <a class="results-link"  ng-href="{{ExcludedRecordDownloadLink}}" download="ExcludedRecords.csv" target="_self"><i class="fa fa-download" aria-hidden="true"></i> Download File</a>
+        to view the detailed report
+        <div class="collapse" id="collapseExample">
+          <div class="card card-body">
+              <p id = "ExclusionList"></p>
+          </div>
+        </div>
+    </div>
+  </div>
   <h2 class="row text-center">Run ZooPhy Job Settings</h2>
   <div class="row text-center">
     <h5 class="text-center">Selected Records: {{numSelected}}</h5>
@@ -30,7 +44,7 @@
         </div>
       </div>
       <div class="col-sm-3 col-xs-6">
-        <label for="jobName">Job Name (optional):</label>
+        <label for="jobName">Job Name:</label>
         <div class="">
           <input id="jobName" type="text" ng-model="jobName" placeholder="ex. Influenza B Asia 2011" class="form-control"></input>
         </div>
@@ -102,20 +116,35 @@
         </div>
         <div class="row top10">
           <div class="col-sm-2 col-sm-offset-2">
-            <label>Chain Length<span class="help" data-toggle="tooltip" data-placement="top" title="The frequency with which the parameters sampled by the Markov Chain Monte Carlo (MCMC) are printed to the screen."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
-            <input type="number" class="form-control" ng-model="chainLength"></input>
+            <label>Chain Length<span class="help" data-toggle="tooltip" data-placement="top" title="The frequency with which the parameters sampled by the Markov Chain Monte Carlo (MCMC) are printed to the screen. The Chain length can vary between 10000000 - 250000000"  > <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+            <input type="number" class="form-control " ng-model="chainLength"></input>
           </div>
           <div class="col-sm-2">
             <label>Sample Rate<span class="help" data-toggle="tooltip" data-placement="top" title="The frequency with which the parameters sampled by the Markov Chain Monte Carlo (MCMC) are logged.
-              Note: The ideal chain length to sample rate ratio is 1000:1."> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+              Note: The ideal chain length to sample rate ratio is 1000:1. The Sample Rate can vary between 1000 - 25000"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
             <input type="number" class="form-control" ng-model="subSampleRate"></input>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="col-xs-10 col-xs-offset-1 pushed-down btn-toolbar">
-    <input type="button" class="btn btn-primary pull-right" ng-click="runJob();" ng-disabled="!jobEmail || warning || running" value="Start ZooPhy"/>
-    <label data-toggle="collapse" class="btn btn-default pull-right" data-target="#advanced-options"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
+  <div class="row pushed-down btn-toolbar">
+    <div class="col-sm-4 col-md-offset-4">
+      <div class="g-recaptcha" data-sitekey="6LdOlHoUAAAAAClqTRhif8OSSqdGlSN1R-Adg-TH" data-expired-callback="recaptchaExpired"></div>
+    </div>
+  </div>
+  <div class="row pushed-down btn-toolbar">
+  <div class="col-sm-6">
+      <button class="btn btn-warning pull-left" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>  
+  </div>
+  <div class="col-sm-6 pull-right">
+      <div class="col-sm-4 col-md-offset-4" >
+          <label data-toggle="collapse" class="btn btn-default" data-target="#advanced-options"><i class="fa fa-sliders" aria-hidden="true"></i> Advanced Options</label>
+        </div>
+        <div class="col-sm-3">
+            <input type="button" class="btn btn-primary " ng-click="verifyCaptcha();" ng-disabled="!jobEmail || warning || running" value="Start ZooPhy"/>
+        </div>
+      </div>
   </div>
 </div>
+<script src='https://www.google.com/recaptcha/api.js'></script>

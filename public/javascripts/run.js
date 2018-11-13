@@ -2,9 +2,7 @@
 
 angular.module('ZooPhy').controller('runController', function ($scope, $http, RecordData) {
 
-  var EMAIL_RE = /^[^@\s]+?@[^@\s]+?\.[^@\s]+?$/;
   var PREDICTOR_FILE_RE = /.{1,250}?\.tsv$/;
-  var JOB_NAME_RE = /^[-\w\ ]{3,225}$/;
   var templateString = "";
 
   $scope.numSelected = RecordData.getNumSelected();
@@ -29,7 +27,11 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.glmButtonClass = null;
   $scope.generating = false;
   $scope.downloadLink = null;
-
+  $scope.successWithExclusion = null;
+  $scope.currentJobName = null;
+  $scope.ExcludedRecordDownloadLink = null;
+  $scope.ExcludedRecordCount = null;
+  
   $scope.reset = function() {
     $scope.useDefaultGLM = false;
     $scope.customPredictors = null;
@@ -44,12 +46,16 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.runError = null;
     $scope.running = false;
     $scope.success = null;
-    $scope.warning = 'Too Few Records, Minimum is 5';
     $scope.fileToSend = null;
     $scope.filename = 'none';
     $scope.glmButtonClass = null;
     $scope.numSelected = RecordData.getNumSelected();
     $scope.downloadLink = null;
+    $scope.successWithExclusion = null;
+    $scope.currentJobName = null;
+    $scope.ExcludedRecordDownloadLink = null;
+    $scope.ExcludedRecordCount = null;
+    grecaptcha.reset();
   };
 
   $scope.$watch(function () {return RecordData.getNumSelected();}, function(newValue, oldValue) {
@@ -57,15 +63,35 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.warning = null;
       $scope.runError = null;
       $scope.success = null;
+      $scope.successWithExclusion = null;
       $scope.numSelected = newValue;
       if ($scope.numSelected < 5) {
         $scope.warning = 'Too Few Records, Minimum is 5';
       }
       else if ($scope.numSelected > 1000) {
         $scope.warning = 'Too Many Records, Maximum is 1000';
+      }else if($scope.countryCount() > 25){
+        $scope.warning = 'Too many Countries selected.';
       }
     }
   });
+
+  $scope.countryCount = function(){
+    var records = RecordData.getRecords();
+    var countryMap = new Map();
+
+    for (var i = 0; i < records.length; i++) {
+      if (records[i].includeInJob) {
+        var count = countryMap.get(records[i].country);
+        if(count!=null){
+          countryMap.set(records[i].country,++count);
+        }else{
+          countryMap.set(records[i].country,1);
+        }
+      }
+    }
+    return countryMap.size;
+  }
 
   $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
@@ -75,110 +101,101 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
 
   $scope.runJob = function() {
     if ($scope.running === false) {
+      grecaptcha.reset();
       $scope.runError = null;
       $scope.running = true;
       $scope.success = null;
       $scope.warning = null;
-      if(JOB_NAME_RE.test($scope.jobName.trim())){
-      if ($scope.jobEmail && EMAIL_RE.test($scope.jobEmail.trim())) {
-        var jobAccessions = [];
-        var records = RecordData.getRecords();
-        var isGenbankJob = Boolean(RecordData.isTypeGenbank());
-        for (var i = 0; i < records.length; i++) {
-          if (records[i].includeInJob) {
-            jobAccessions.push(records[i].accession);
-          }
+      var jobAccessions = [];
+      var records = RecordData.getRecords();
+      var isGenbankJob = Boolean(RecordData.isTypeGenbank());
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].includeInJob) {
+          jobAccessions.push(records[i].accession);
         }
-        if (jobAccessions.length < 5) {
-          $scope.runError = 'Too Few Records, Minimun is 5';
-          $scope.running = false;
-        }
-        else if (jobAccessions.length > 1000) {
-          $scope.runError = 'Too Many Records, Maximum is 1000';
-          $scope.running = false;
-        }
-        else {
-          //Submit the job to appropriate URL
-            var jobSequences = [];
-            for (var i = 0; i < records.length; i++) {
-              if (records[i].includeInJob) {
-                var jobSequence = {
-                  id:records[i].accession,
-                  collectionDate:records[i].date,
-                  geonameID:records[i].geonameid,
-                  rawSequence:records[i].sequence,
-                  resourceSource:records[i].resourceSource
-                }
-                jobSequences.push(jobSequence);
-              }
-            }
-            var runUri = SERVER_URI+'/job/run';
-            var email = String($scope.jobEmail).trim();
-            var currentJobName = null;
-            if ($scope.jobName) {
-              currentJobName = String($scope.jobName).trim();
-            }
-            var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
-            var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
-            var predictors = $scope.customPredictors;
-            var subModel = String($scope.substitutionModel);
-            var clockModel = String($scope.clockModel);
-            var gamma = Boolean($scope.gamma);
-            var invariantSites = Boolean($scope.invariantSites);
-            var prior = String($scope.treePrior).trim();
-            var chain = Number($scope.chainLength);
-            var rate = Number($scope.subSampleRate);
-            var jobData = {
-              replyEmail: email,
-              jobName: currentJobName,
-              records: jobSequences,
-              useGLM: glm,
-              predictors: predictors,
-              isGenbankJob: isGenbankJob,
-              xmlOptions: {
-                substitutionModel: subModel,
-                gamma: gamma,
-                invariantSites: invariantSites,
-                clockModel: clockModel,
-                treePrior: prior,
-                chainLength: chain,
-                subSampleRate: rate
-              }
-            };
-            $http.post(runUri, jobData).then(function success(response) {
-              $scope.running = false;
-              if (response.status === 202) {
-                if (currentJobName) {
-                  $scope.success = 'Successfully Started the ZooPhy Job: '+currentJobName;
-                }
-                else {
-                  $scope.success = response.data.message;
-                }
-                if (response.data.recordsRemoved.length > 0) {
-                  var success = 'Successfully Started the ZooPhy Job: '+currentJobName+'. The following '+response.data.recordsRemoved.length+' incomplete records were excluded from this job: '+response.data.recordsRemoved[0];
-                  for (var i = 1; i < response.data.recordsRemoved.length; i++) {
-                    success += ', '+response.data.recordsRemoved[i];
-                  }
-                  $scope.success = success;
-                }
-              }
-              else {
-                $scope.runError = 'Job Validation Failed: '+response.data.error;
-              }
-            }, function failure(response) {
-              $scope.running = false;
-              $scope.runError = 'Job Validation Failed due to Unknown Error';
-            });
-        }
+      }
+      if (jobAccessions.length < 5) {
+        $scope.runError = 'Too Few Records, Minimun is 5';
+        $scope.running = false;
+      }
+      else if (jobAccessions.length > 1000) {
+        $scope.runError = 'Too Many Records, Maximum is 1000';
+        $scope.running = false;
       }
       else {
-        $scope.runError = 'Invalid Email';
-        $scope.running = false;
+        //Submit the job to appropriate URL
+          var jobSequences = [];
+          for (var i = 0; i < records.length; i++) {
+            if (records[i].includeInJob) {
+              var jobSequence = {
+                id:records[i].accession,
+                collectionDate:records[i].date,
+                geonameID:records[i].geonameid,
+                rawSequence:records[i].sequence,
+                resourceSource:records[i].resourceSource
+              }
+              jobSequences.push(jobSequence);
+            }
+          }
+          var runUri = SERVER_URI+'/job/run';
+          var email = String($scope.jobEmail).trim();
+          var currentJobName = null;
+          if ($scope.jobName) {
+            currentJobName = String($scope.jobName).trim();
+          }
+          var hasCustomPredictors = Boolean(!($scope.customPredictors === null || $scope.customPredictors === undefined));
+          var glm = Boolean($scope.useDefaultGLM || hasCustomPredictors);
+          var predictors = $scope.customPredictors;
+          var subModel = String($scope.substitutionModel);
+          var clockModel = String($scope.clockModel);
+          var gamma = Boolean($scope.gamma);
+          var invariantSites = Boolean($scope.invariantSites);
+          var prior = String($scope.treePrior).trim();
+          var chain = Number($scope.chainLength);
+          var rate = Number($scope.subSampleRate);
+          var jobData = {
+            replyEmail: email,
+            jobName: currentJobName,
+            records: jobSequences,
+            useGLM: glm,
+            predictors: predictors,
+            isGenbankJob: isGenbankJob,
+            xmlOptions: {
+              substitutionModel: subModel,
+              gamma: gamma,
+              invariantSites: invariantSites,
+              clockModel: clockModel,
+              treePrior: prior,
+              chainLength: chain,
+              subSampleRate: rate
+            }
+          };
+          $http.post(runUri, jobData).then(function success(response) {
+            $scope.running = false;
+            if (response.status === 202) {
+              if (currentJobName) {
+                $scope.success = 'Successfully Started the ZooPhy Job: '+currentJobName;
+              }
+              else {
+                $scope.success = response.data.message;
+              }
+              if (response.data.accessionsRemoved) {
+                $scope.success = null;
+                $scope.successWithExclusion = true;
+                $scope.currentJobName = currentJobName;
+                $scope.ExcludedRecordCount = $scope.numSelected - response.data.jobSize;
+                $scope.ExcludedRecordDownloadLink = SERVER_URI+response.data.downloadPath;
+                document.getElementById("ExclusionList").innerHTML = response.data.accessionsRemoved;
+              }
+            }
+            else {
+              $scope.runError = 'Job Validation Failed: '+response.data.error;
+            }
+          }, function failure(response) {
+            $scope.running = false;
+            $scope.runError = 'Job Validation Failed: ' + response.data.error;
+          });
       }
-    }else{
-      $scope.runError = 'Invalid Job Name';
-        $scope.running = false;
-    }
     }
   };
 
@@ -256,7 +273,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.runError = null;
       $scope.success = null;
       $scope.warning = null;
-      var locationList = [];
       var locationMap = new Map();
       var locationValueMap = new Map();
       var examplePredictor = "123.456";
@@ -264,35 +280,35 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       templateString = "state" + delimiter + "lat" + delimiter + "long" +
        delimiter + "SampleSize" + delimiter + "ExamplePredictor" + "\n";
       var records = RecordData.getRecords();
-        for (var i = 0; i < records.length; i++) {
-          if (records[i].includeInJob) {
-            var glmTemplateObject = {
-              location: "",
-              latitude: 0,
-              longitude: 0
-            };
-            glmTemplateObject.location = records[i].location;
-            glmTemplateObject.latitude = records[i].latitude;
-            glmTemplateObject.longitude = records[i].longitude;
+      for (var i = 0; i < records.length; i++) {
+        if (records[i].includeInJob) {
+          var glmTemplateObject = {
+            location: "",
+            latitude: 0,
+            longitude: 0
+          };
+          glmTemplateObject.location = records[i].location;
+          glmTemplateObject.latitude = records[i].latitude;
+          glmTemplateObject.longitude = records[i].longitude;
 
-            var count = locationMap.get(records[i].location);
-            if(count!=null){
-              locationMap.set(records[i].location,++count);
-            }else{
-              locationMap.set(records[i].location,1);
-            }
-            locationValueMap.set(records[i].location,glmTemplateObject); 
+          var count = locationMap.get(records[i].location);
+          if(count!=null){
+            locationMap.set(records[i].location,++count);
+          }else{
+            locationMap.set(records[i].location,1);
           }
+          locationValueMap.set(records[i].location,glmTemplateObject); 
         }
-        for (var [loc, count] of locationMap) {
-          templateString += loc + delimiter;
-          templateString += locationValueMap.get(loc).latitude + delimiter;
-          templateString += locationValueMap.get(loc).longitude + delimiter;
-          templateString += count + delimiter;
-          templateString += examplePredictor + "\n";
-        }
-        $scope.generating = false;
-        $scope.downloadLink = true;
+      }
+      for (var [loc, count] of locationMap) {
+        templateString += loc + delimiter;
+        templateString += locationValueMap.get(loc).latitude + delimiter;
+        templateString += locationValueMap.get(loc).longitude + delimiter;
+        templateString += count + delimiter;
+        templateString += examplePredictor + "\n";
+      }
+      $scope.generating = false;
+      $scope.downloadLink = true;
     }
   };
 
@@ -311,6 +327,28 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       title: 'Custom Predictors Upload Help',
       message: 'Follow the steps below to use custom GLM predictors for your ZooPhy Job:\n 1) Generate .tsv template with Job locations\n 2) Fill template with your own Predictor data\n 3) Upload completed template\n\nFor more details on Predictor file formatting, visit the <a target="_new" href="https://github.com/djmagee5/BEAST_GLM#predictor-data-file-requirements">BEAST_GLM</a> page.'
     });
+  };
+
+  $scope.verifyCaptcha = function(){
+    var response = grecaptcha.getResponse();
+    var captchaUri = SERVER_URI+'/job/siteverify';
+    if(response.length > 0){
+      var CaptchaVerify = {
+        recaptchRes: response
+      }
+      $http.post(captchaUri, CaptchaVerify).then(function success(response) {
+        if (response.status === 200) {
+          $scope.runJob();
+        }
+        else {
+          $scope.runError = 'Captcha Validation Failed: '+response.error;   
+        }
+      }, function failure(response) {
+        $scope.runError = 'Captcha Validation Failed';
+      });
+    }else{
+      $scope.runError = 'Captcha Validation Required to Run the Job';
+    }
   };
 
 });

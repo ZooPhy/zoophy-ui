@@ -31,7 +31,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
-  const MAX_COLUMNS = 8;
+  const MAX_COLUMNS = 11;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
 
   if($scope.geoLocMap == null){
@@ -51,14 +51,19 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.$watch(function () {return RecordData.getSearchCount();}, function (newValue, oldValue) {
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
+      $scope.sampleAmount = 20;
       if ($scope.results.length > 0) {
-        var totalRecords = $scope.results.length
-        $scope.searchedVirusName = $scope.results[totalRecords-1].virus;
+        $scope.searchedVirusName = $scope.results[0].virus;
         $scope.clearLayerFeatures();
-        $scope.LoadDetails($scope.results[totalRecords-1]);
+        $scope.LoadDetails($scope.results[0]);
         $scope.loadHeatmapLayer($scope.results);
         $('#probThreshold').val(0);
         $('#probThrVal').text("0%");
+        $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
+      }else{
+        $scope.clearLayerFeatures();
+        $scope.showDetails = false;
+        $scope.percentOfRecords = 0;
       }
       $scope.groupIsSelected = false;
       $scope.numSelected = 0;
@@ -70,11 +75,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.downloadError = null;
       $scope.sampleType = 'percent';
       $scope.combineResults = 'false';
-      $scope.sampleAmount = 20;
       $scope.fastaFilename = 'none';
       $scope.fastaFile = null;
       $scope.fastaError = null;
-      $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
       $scope.completeRecordsCount = 0;
       $scope.distinctLocationsCount = 0;
     }
@@ -210,7 +213,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           }
         }, function failure(response) {
           $scope.generating = false;
-          $scope.downloadError = 'Error generating download';
+          if(response.status === 413){
+            $scope.downloadError = 'Too many records selected';
+          }else{
+            $scope.downloadError = 'Error generating download';
+          }
         });
       }
       else {
@@ -271,9 +278,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if (samples.indexOf($scope.results[i].accession) > -1) {
         $scope.results[i].includeInJob = true;
         $scope.numSelected++;
+        $scope.updateSelections($scope.results[i],true);
       }
       else {
         $scope.results[i].includeInJob = false;
+        $scope.updateSelections($scope.results[i],false);
       }
     }
     RecordData.setRecords($scope.results);
@@ -379,7 +388,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(selected.length>0){
         $('#toSelectBox').append($(selected).clone());
         $(selected).remove();
-        $scope.downloadColumnsCount++;
+        $scope.downloadColumnsCount += selected.length;
       }
     };
 
@@ -397,7 +406,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(selected.length>0){
         $('#fromSelectBox').append($(selected).clone());
         $(selected).remove();
-        $scope.downloadColumnsCount--;
+        $scope.downloadColumnsCount -= selected.length;
       }
     };
 
@@ -412,8 +421,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
     $scope.downloadColumn = function() {
       var downloadColumns = [];
-      var selected = $('#toSelectBox option').each(function(i, option){
-        downloadColumns[i] = $(option).text();
+      $('#toSelectBox option').each(function(i, option){
+        downloadColumns[i] = $(option).val();
       });
       $scope.setupDownload(downloadColumns);
     };
@@ -529,7 +538,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             var record = records[i]
             var longitude = parseFloat(record.longitude);
             var latitude = parseFloat(record.latitude);
-            if(record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
+            if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(latitude)||
                longitude<-180||longitude>180||latitude<-90||latitude>90){
               // ignore such records
               count += 1
@@ -558,23 +567,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.highlightLocation = function(record) {
       var features = [];
       var center = [0,0];
-      if(record.possibleLocations.length>0){
-        var maxProb = 0;
-        for(var i=0; i<record.possibleLocations.length;i++){
-          var posLoc = record.possibleLocations[i];
-          var coord = ol.proj.transform([parseFloat(posLoc.longitude), parseFloat(posLoc.latitude)], 'EPSG:4326', 'EPSG:3857');
-          var pointonmap = new ol.Feature(new ol.geom.Point(coord));
-          pointonmap.set('name',posLoc.location);
-          pointonmap.set('accession',record.accession);
-          pointonmap.set('probability',posLoc.probability);
-          features.push(pointonmap);
-          if(posLoc.probability>maxProb){
-            center = coord; maxProb = posLoc.probability;
-          }
-        }
-        $('#probThreshold').show();
-        $('#probThrVal').show();
-      } else {
+      var longitude = parseFloat(record.longitude);
+      var latitude = parseFloat(record.latitude);
+      if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
+              longitude<-180||longitude>180||latitude<-90||latitude>90){
+                console.log("Missing location info for highlighted record");
+      }else{
         var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
         var pointonmap = new ol.Feature(new ol.geom.Point(coord));
         pointonmap.set('name',record.location);
@@ -583,22 +581,22 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         center = coord;
         $('#probThreshold').hide();
         $('#probThrVal').hide();
+        $scope.viewLayerfeatures = features;
+        var mapLayers = $scope.geoLocMap.getLayers().getArray();
+        mapLayers.forEach(function (layer, i) {
+          if (layer.get('zodolayer')=='view'){
+            // console.log("updating view layer");
+            layer.getSource().clear();
+            layer.getSource().addFeatures(features);
+            // $scope.geoLocMap.getView().setCenter(center);
+            $scope.geoLocMap.getView().animate({
+              center: center,
+              duration: 1000
+            });
+            //$scope.geoLocMap.getView().setZoom(3);
+          }
+        });
       }
-      $scope.viewLayerfeatures = features;
-      var mapLayers = $scope.geoLocMap.getLayers().getArray();
-      mapLayers.forEach(function (layer, i) {
-        if (layer.get('zodolayer')=='view'){
-          // console.log("updating view layer");
-          layer.getSource().clear();
-          layer.getSource().addFeatures(features);
-          // $scope.geoLocMap.getView().setCenter(center);
-          $scope.geoLocMap.getView().animate({
-            center: center,
-            duration: 1000
-          });
-          //$scope.geoLocMap.getView().setZoom(3);
-        }
-      });
     };
 
     function setTooltip(info) {
@@ -639,22 +637,30 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.updateSelections = function(record, add) {
-      console.log("record selected " + record.accession + " " + add);
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, i) {
         if (layer.get('zodolayer')=='selection'){
-          console.log("updating selection layer");
+         // console.log("updating selection layer");
           if(add){
-            var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
-            var pointonmap = new ol.Feature(new ol.geom.Point(coord));
-            console.log('name: '+record.location);
-            pointonmap.setId(record.accession);
-            pointonmap.set('name',record.location);
-            pointonmap.set('accession',record.accession);
-            layer.getSource().addFeature(pointonmap);
-            $scope.geoLocMap.getView().setCenter(coord);
+            var longitude = parseFloat(record.longitude);
+            var latitude = parseFloat(record.latitude);
+            if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(latitude)||
+               longitude<-180||longitude>180||latitude<-90||latitude>90){
+              //console.log("No coordinates found for " + record.accession);
+            }else{
+              console.log("record selected " + record.accession +", " +record.longitude+", " +record.latitude+ " " + add);
+              var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
+              var pointonmap = new ol.Feature(new ol.geom.Point(coord));
+              console.log('name: '+record.location);
+              pointonmap.setId(record.accession);
+              pointonmap.set('name',record.location);
+              pointonmap.set('accession',record.accession);
+              layer.getSource().addFeature(pointonmap);
+              $scope.geoLocMap.getView().setCenter(coord);
+            }
           } else {
-            layer.getSource().removeFeature(layer.getSource().getFeatureById(record.accession)); 
+            if(layer.getSource().getFeatureById(record.accession))
+              layer.getSource().removeFeature(layer.getSource().getFeatureById(record.accession)); 
           }
         }
       });
@@ -669,7 +675,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             var features = [];
             for(var j=0; j<records.length; j++){
               var record = records[j];
-              if(record.latitude!='Unknown' && record.longitude!='Unknown'){
+              var longitude = parseFloat(record.longitude);
+              var latitude = parseFloat(record.latitude);
+              if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(latitude)||
+                 longitude<-180||longitude>180||latitude<-90||latitude>90){
+                // console.log("No coordinates found for " + record.accession);
+              }else{
                 var longitude = parseFloat(record.longitude);
                 var latitude = parseFloat(record.latitude);
                 if(isNaN(longitude)||isNaN(longitude)||longitude<-180||longitude>180||latitude<-90||latitude>90)
@@ -680,8 +691,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
                 pointonmap.set('name',record.location);
                 pointonmap.set('accession',record.accession);
                 features.push(pointonmap);
-              } else {
-                // console.log("No coordinates found for " + record.accession);
               }
             }
             // var vectorSource = new ol.source.Vector({features: features});
