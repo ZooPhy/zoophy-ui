@@ -538,7 +538,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             var record = records[i]
             var longitude = parseFloat(record.longitude);
             var latitude = parseFloat(record.latitude);
-            if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
+            if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(latitude)||
                longitude<-180||longitude>180||latitude<-90||latitude>90){
               // ignore such records
               count += 1
@@ -642,8 +642,13 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         if (layer.get('zodolayer')=='selection'){
          // console.log("updating selection layer");
           if(add){
-            if(record.latitude!='Unknown' && record.longitude!='Unknown'){
-              console.log("record selected " + record.accession +", " +record.latitude+", " +record.latitude+ " " + add);
+            var longitude = parseFloat(record.longitude);
+            var latitude = parseFloat(record.latitude);
+            if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(latitude)||
+               longitude<-180||longitude>180||latitude<-90||latitude>90){
+              //console.log("No coordinates found for " + record.accession);
+            }else{
+              console.log("record selected " + record.accession +", " +record.longitude+", " +record.latitude+ " " + add);
               var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
               var pointonmap = new ol.Feature(new ol.geom.Point(coord));
               console.log('name: '+record.location);
@@ -670,7 +675,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             var features = [];
             for(var j=0; j<records.length; j++){
               var record = records[j];
-              if(record.latitude!='Unknown' && record.longitude!='Unknown'){
+              var longitude = parseFloat(record.longitude);
+              var latitude = parseFloat(record.latitude);
+              if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(latitude)||
+                 longitude<-180||longitude>180||latitude<-90||latitude>90){
+                // console.log("No coordinates found for " + record.accession);
+              }else{
                 var longitude = parseFloat(record.longitude);
                 var latitude = parseFloat(record.latitude);
                 if(isNaN(longitude)||isNaN(longitude)||longitude<-180||longitude>180||latitude<-90||latitude>90)
@@ -681,8 +691,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
                 pointonmap.set('name',record.location);
                 pointonmap.set('accession',record.accession);
                 features.push(pointonmap);
-              } else {
-                // console.log("No coordinates found for " + record.accession);
               }
             }
             // var vectorSource = new ol.source.Vector({features: features});
