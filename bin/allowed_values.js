@@ -62,7 +62,7 @@ const VIRUSES = [
     ]
   },
   {
-    name: 'MERS-C',
+    name: 'MERS-CoV',
     tax_id: 1335626,
     genes: [
       'M',
