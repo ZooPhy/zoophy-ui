@@ -1,6 +1,18 @@
 body {
   background-color: #fcfcfc;
   color: #263238;
+  padding-top: 70px;
+}
+
+.container {
+  padding-right: 0px;
+  padding-left: 0px;
+  width: 1190px;
+}
+
+#model-container{
+  padding-right: 15px;
+  padding-left: 15px;
 }
 
 .title {
@@ -106,7 +118,6 @@ input::-webkit-inner-spin-button {
 
 h6{
   padding-bottom: 6px;
-  padding-right: 10px;
   margin: 0px;
 }
 
@@ -124,19 +135,19 @@ h6{
   float: left;
   width: 65%;
   padding-left: 0px;
-  padding-right: 2px;
+  padding-right: 0px;
 }
 
 #detail-panel {
-  width: 34%;
-  padding-left: 6px;
-  padding-right: 2px;
-  margin-right: 4px;
+  width: 35%;
+  padding-left: 10px;
+  padding-right: 0px;
   float:right;
 }
 
 #detailed-view {
   font-size: 1.25rem;
+  padding: 10px;
 }
 
 .borderless {
@@ -169,4 +180,20 @@ h6{
 
 #buttons-layer {
   padding-right: 8px;
+}
+
+#nav-toolbar{
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 13px;
+  color: #31708f;
+  background-color: #d9edf7;
+  border-color: #bce8f1;
+  min-height:20px !important;
+  margin-bottom: 0px;
+}
+
+#toolbar-button{
+  padding: 3px 20px;
+  background-color: Transparent;
+  outline:none;
 }
