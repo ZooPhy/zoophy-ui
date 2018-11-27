@@ -67,6 +67,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.fastaFile = null;
     $scope.searchCount = 0;
     RecordData.setRecords([]);
+    RecordData.setSearchCount(0);
     RecordData.incrementSearchCount();
     };
 
@@ -254,6 +255,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         RecordData.setRecords(combinedRecords);
         combinedRecords =[];
         RecordData.setTypeGenbank(true);
+        RecordData.setSearchCount(0);
         RecordData.incrementSearchCount();
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
@@ -267,7 +269,12 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
     });
     $(window).scroll(function() {
-      $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
+      var windowPosition = $(window).scrollTop();
+      var panelHeight = $('#detail-panel').height();
+      var tabelHeight = $('table').height();
+      if(windowPosition < tabelHeight - panelHeight){
+        $("#detail-panel").stop().animate({"marginTop": (windowPosition) + "px"}, "fast", "swing");
+      }
     });
   };
 
@@ -282,9 +289,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       else {
         $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
       }
-    });
-    $(window).scroll(function() {
-      $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
     });
   };
 
@@ -324,6 +328,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Search returned 0 results.';
         }
+        RecordData.setSearchCount(0);
         RecordData.incrementSearchCount();
       }, function(error) {
         if (error.status !== 500) {
@@ -383,6 +388,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Processed 0 results.';
         }
+        RecordData.setSearchCount(0);
         RecordData.incrementSearchCount();
       }, function(error) {
         if (error.status !== 500) {
@@ -414,6 +420,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Processed 0 results.';
         }
+        RecordData.setSearchCount(0);
         RecordData.incrementSearchCount();
       }, function(error) {
         if (error.status !== 500) {
