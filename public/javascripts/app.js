@@ -28,6 +28,9 @@ ZooPhyApp.factory('RecordData', function() {
     setNumSelected: function(newNum) {
       recordData.numSelected = Number(newNum);
     },
+    setSearchCount: function(newNum) {
+      recordData.searchCount = Number(newNum);
+    },
     getSearchCount: function() {
       return recordData.searchCount;
     },
