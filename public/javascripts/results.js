@@ -28,11 +28,18 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.distinctLocationsCount = 0;
   $scope.geoLocMap = null;
   $scope.viewLayerfeatures = [];
+  $scope.accessionFile = null;
+  $scope.accessionFileName = 'none';
+  $scope.accessionUploadError = null;
+  $scope.filterDate = false;
+  $scope.filterLocation = false;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
   const MAX_COLUMNS = 11;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
+  var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
+  var allRecords;
 
   if($scope.geoLocMap == null){
     console.log('initializing map');
@@ -52,6 +59,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
       $scope.sampleAmount = 20;
+      if(RecordData.getSearchCount() === 1){
+        allRecords = RecordData.getRecords();
+        $scope.filterDate = false;
+        $scope.filterLocation = false;
+      }
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
         $scope.clearLayerFeatures();
@@ -80,6 +92,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaError = null;
       $scope.completeRecordsCount = 0;
       $scope.distinctLocationsCount = 0;
+      $scope.accessionFile = null;
+      $scope.accessionFileName = 'none';
+      $scope.accessionUploadError = null;
     }
   });
 
@@ -339,14 +354,14 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.setRecords(CombinedRecords);
           RecordData.setTypeGenbank(false);
           if (response.data.records.length > 0) {
-            $scope.$parent.switchTabs('results');
-            $('<div id="warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center">Successfully added '+ response.data.records.length+' records</div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
+            $('<div id="warning-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center"> <b>Successfully added '+ response.data.records.length+' records</b></div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
           }
           else {
             $scope.warning = 'Processed 0 results.';
           }
           $scope.groupIsSelected = false;
           $scope.toggleAll();
+          RecordData.setSearchCount(0);
           RecordData.incrementSearchCount();
         }, function(error) {
           if (error.status !== 500) {
@@ -369,9 +384,97 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       });
     };
 
+    $scope.uploadAccessions = function(rawFile) {
+      $scope.accessionUploadError = null;
+      var newFile = rawFile[0];
+      if (newFile && newFile.size < 4000000) { //4MB
+        var filename = newFile.name.trim();
+        if (ACCESSION_FILE_RE.test(filename)) {
+          $scope.accessionFile = newFile;
+          $scope.accessionFileName = String(filename).trim();
+        }
+        else {
+          $scope.accessionUploadError = 'Invalid File Name. Must be .txt file.';
+        }
+      }
+      else {
+        $scope.accessionUploadError = 'Invalid File Size. Limit is 5kb.';
+      }
+      $scope.$apply();
+    };
+
+    $scope.sendAccessions = function() {
+      $scope.accessionUploadError = null;
+      if ($scope.accessionFile) {
+        var form = new FormData();
+        var uri = SERVER_URI+'/upload';
+        form.append('accessionFile', $scope.accessionFile);
+        $http.post(uri, form, {
+            headers: {'Content-Type': undefined}
+        }).then(function (response) {
+          RecordData.setRecords(response.data.records);
+          RecordData.setTypeGenbank(true);
+          if (response.data.records.length > 0) {
+            $('<div id="warning-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center"> <b>Successfully added '+ response.data.records.length+' records</b></div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
+          }
+          else {
+            $scope.warning = 'Search returned 0 results.';
+          }
+          RecordData.setSearchCount(0);
+          RecordData.incrementSearchCount();
+        }, function(error) {
+          if (error.status !== 500) {
+            $scope.warning = error.data.error;
+          }
+          else {
+            $scope.warning = 'Search Failed on Server. Please refresh and try again.';
+          }
+        });
+      }
+      else {
+        $scope.warning = 'No Accession File Selected';
+      }
+    };
+
+    $scope.showAccessionUploadHelp = function() {
+      BootstrapDialog.show({
+        title: 'Accession Upload Help',
+        message: 'The Accession file needs to be a new line delimited .txt file containing 1 Accession per line. The current search limit is 2500 Accessions.'
+      });
+    };
+
     $scope.updatePercentOfRecords = function() {
       $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
     };
+
+    $scope.filterRecords = function(filterType){
+      var filteredRecords = [];
+      if(filterType === 1){
+        for (var i = 0; i < allRecords.length; i++) {
+          var record = allRecords[i];
+          if(($scope.filterDate && record.date === "Unknown") || ($scope.filterLocation && record.country === "Unknown")){
+            //ignore
+          }else{
+            filteredRecords.push(record);
+          }
+        }
+      }else{
+        $scope.filterDate=false;
+        $scope.filterLocation=false;
+        filteredRecords = allRecords;
+      }
+      if(filteredRecords.length > 0){
+        RecordData.setRecords(filteredRecords);
+        RecordData.setTypeGenbank(true);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.incrementSearchCount();
+      }
+    }
+
+    $("#dropdown-filter").click(function(e){
+      e.stopPropagation();
+    });
 
     $scope.columnUp = function() {
       let $selected = $('#toSelectBox').find('option:selected');
