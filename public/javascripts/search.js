@@ -67,7 +67,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.fastaFile = null;
     $scope.searchCount = 0;
     RecordData.setRecords([]);
-    RecordData.setSearchCount(0);
+    RecordData.setFilter(false);
     RecordData.incrementSearchCount();
     };
 
@@ -255,7 +255,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         RecordData.setRecords(combinedRecords);
         combinedRecords =[];
         RecordData.setTypeGenbank(true);
-        RecordData.setSearchCount(0);
+        RecordData.setFilter(false);
         RecordData.incrementSearchCount();
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
@@ -328,7 +328,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Search returned 0 results.';
         }
-        RecordData.setSearchCount(0);
+        RecordData.setFilter(false);
         RecordData.incrementSearchCount();
       }, function(error) {
         if (error.status !== 500) {
@@ -388,7 +388,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Processed 0 results.';
         }
-        RecordData.setSearchCount(0);
+        RecordData.setFilter(false);
         RecordData.incrementSearchCount();
       }, function(error) {
         if (error.status !== 500) {
@@ -420,7 +420,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         else {
           $scope.searchError = 'Processed 0 results.';
         }
-        RecordData.setSearchCount(0);
+        RecordData.setFilter(false);
         RecordData.incrementSearchCount();
       }, function(error) {
         if (error.status !== 500) {

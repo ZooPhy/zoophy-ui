@@ -59,7 +59,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
       $scope.sampleAmount = 20;
-      if(RecordData.getSearchCount() === 1){
+      if(!RecordData.isFilter()){
         allRecords = RecordData.getRecords();
         $scope.filterDate = false;
         $scope.filterLocation = false;
@@ -361,7 +361,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           }
           $scope.groupIsSelected = false;
           $scope.toggleAll();
-          RecordData.setSearchCount(0);
+          RecordData.setFilter(false);
           RecordData.incrementSearchCount();
         }, function(error) {
           if (error.status !== 500) {
@@ -420,7 +420,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           else {
             $scope.warning = 'Search returned 0 results.';
           }
-          RecordData.setSearchCount(0);
+          RecordData.setFilter(false);
           RecordData.incrementSearchCount();
         }, function(error) {
           if (error.status !== 500) {
@@ -450,6 +450,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.filterRecords = function(filterType){
       var filteredRecords = [];
       if(filterType === 1){
+        RecordData.setFilter(true);
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
           if(($scope.filterDate && record.date === "Unknown") || ($scope.filterLocation && record.country === "Unknown")){
@@ -459,6 +460,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           }
         }
       }else{
+        RecordData.setFilter(false);
         $scope.filterDate=false;
         $scope.filterLocation=false;
         filteredRecords = allRecords;

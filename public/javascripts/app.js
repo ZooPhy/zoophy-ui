@@ -13,7 +13,8 @@ ZooPhyApp.factory('RecordData', function() {
     records: [],
     numSelected: 0,
     searchCount: 0,
-    typeGenbank: true
+    typeGenbank: true,
+    filer: false
   };
   return {
     getRecords: function() {
@@ -28,9 +29,6 @@ ZooPhyApp.factory('RecordData', function() {
     setNumSelected: function(newNum) {
       recordData.numSelected = Number(newNum);
     },
-    setSearchCount: function(newNum) {
-      recordData.searchCount = Number(newNum);
-    },
     getSearchCount: function() {
       return recordData.searchCount;
     },
@@ -42,6 +40,12 @@ ZooPhyApp.factory('RecordData', function() {
     },
     isTypeGenbank: function() {
       return recordData.typeGenbank;
+    },
+    setFilter: function(newBoolVal) {
+      recordData.filer = Boolean(newBoolVal);
+    },
+    isFilter: function() {
+      return recordData.filer;
     }
   };
 });
