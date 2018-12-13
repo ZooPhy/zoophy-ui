@@ -5,6 +5,12 @@
         <i class="fa fa-exclamation-triangle" aria-hidden="true"></i> {{warning}}
       </div>
     </div>
+    <div class="row">
+      <div class="alert alert-success col-md-10 col-md-offset-1 text-center" style="display: table-cell;vertical-align:middle" ng-show="hideable_alert">
+        <p id="exclusionList" class="col-md-11" style="display:inline;"></p>
+        <button id="hideFastaAlert" type="button" style="outline:none;" class="close col-md-1" ng-click="hideable_alert = null">&times;</button>
+      </div>
+    </div>
 
     <div class="row">
         <div class="col text-center">

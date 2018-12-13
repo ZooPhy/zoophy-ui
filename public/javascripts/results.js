@@ -33,6 +33,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.accessionUploadError = null;
   $scope.filterDate = false;
   $scope.filterLocation = false;
+  $scope.hideable_alert = null;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -354,7 +355,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.setRecords(CombinedRecords);
           RecordData.setTypeGenbank(false);
           if (response.data.records.length > 0) {
-            $('<div id="warning-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center"> <b>Successfully added '+ response.data.records.length+' records</b></div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
+          $scope.hideable_alert = "show";
+            document.getElementById("exclusionList").innerHTML = '<b>Successfully added '+ 
+            response.data.records.length+' records! </b>'+ response.data.invalidRecords +'</div>'; 
           }
           else {
             $scope.warning = 'Processed 0 results.';
