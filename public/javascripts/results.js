@@ -31,8 +31,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.accessionFile = null;
   $scope.accessionFileName = 'none';
   $scope.accessionUploadError = null;
-  $scope.filterDate = false;
-  $scope.filterLocation = false;
   $scope.hideable_alert = null;
 
   const SOURCE_GENBANK = 1;
@@ -62,8 +60,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.sampleAmount = 20;
       if(!RecordData.isFilter()){
         allRecords = RecordData.getRecords();
-        $scope.filterDate = false;
-        $scope.filterLocation = false;
+        $(".filterCheckBoxClass").prop('checked', false);
+        $("#filerAllCheckBox").prop('checked', false);
       }
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
@@ -450,26 +448,65 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
     };
 
-    $scope.filterRecords = function(filterType){
+    $scope.toggleFilter = function(type){
+      if(type!=null && type === 'ALL'){
+        if($("#filerAllCheckBox").prop('checked')){
+          $(".filterCheckBoxClass").prop('checked', true);
+        }else{
+          $(".filterCheckBoxClass").prop('checked', false);
+        }
+      }else{
+        if ($('.filterCheckBoxClass:checked').length == $('.filterCheckBoxClass').length ){
+          $("#filerAllCheckBox").prop('checked', true);
+        }else{
+          $("#filerAllCheckBox").prop('checked', false);
+        }
+      }
+    }
+
+    $scope.fadeableAlert = function(message){
+      $('<div class="alert alert-success col-md-10 col-md-offset-1 text-center"> <b>'+message+'</b></div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
+    }
+
+    $scope.filterRecords = function(){
       var filteredRecords = [];
-      if(filterType === 1){
+      var filterDate = $("input[value='Date']").prop('checked');
+      var filterCountry = $("input[value='Country']").prop('checked');
+      var filterState = $("input[value='State']").prop('checked');
+      var filterGene = $("input[value='Gene']").prop('checked');
+      var filterHost = $("input[value='Host']").prop('checked');
+      var filterLength = $("input[value='Length']").prop('checked');
+      var count =0;
+      if(allRecords!=null){
         RecordData.setFilter(true);
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
-          if(($scope.filterDate && record.date === "Unknown") || ($scope.filterLocation && record.country === "Unknown")){
+          if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "None")
+            || (filterState && record.state === "Unknown") || (filterGene && record.gene === "None") ||
+            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown")){
             //ignore
+            count++;
           }else{
             filteredRecords.push(record);
           }
         }
-      }else{
-        RecordData.setFilter(false);
-        $scope.filterDate=false;
-        $scope.filterLocation=false;
-        filteredRecords = allRecords;
       }
       if(filteredRecords.length > 0){
+        $scope.fadeableAlert("Successfully removed "+count+" incomplete records!")
         RecordData.setRecords(filteredRecords);
+        RecordData.setTypeGenbank(true);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.incrementSearchCount();
+      }
+    }
+
+    $scope.filterReset = function(){
+      $(".filterCheckBoxClass").prop('checked', false);
+      $("#filerAllCheckBox").prop('checked', false);
+      if(allRecords!=null && allRecords.length > 0){
+        RecordData.setFilter(false);
+        RecordData.setRecords(allRecords);
         RecordData.setTypeGenbank(true);
         $scope.groupIsSelected = false;
         $scope.toggleAll();

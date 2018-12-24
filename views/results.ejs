@@ -33,26 +33,16 @@
               </li>
           </ul>
           <ul class="nav navbar-nav">
-              <li class="dropdown">
-                  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="padding: 8px !important;color:#31708f">Import <span class="caret"></span></a>
-                  <ul class="dropdown-menu">
-                      <li><input id="toolbar-button" type="button" class="btn" ng-click="uploadFormat = 'fasta'" value="FASTA" data-toggle="modal" data-target="#fastaModel"/></li>
-                      <li><input id="toolbar-button" type="button" class="btn" ng-click="uploadFormat = 'Accessions'" value="GenBank Accessions" data-toggle="modal" data-target="#accessionModel"/></li>
-                  </ul>
-                </li>
-            </ul>
-          <ul class="nav navbar-nav">
             <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="padding: 8px !important;color:#31708f">Filter <span class="caret"></span></a>
-                <ul id="dropdown-filter" class="dropdown-menu">
-                    <li> <label class="checkbox-inline" style="margin: 5px 5px 5px 10px"><input type="checkbox" ng-model="filterDate" ng-click="filterRecords(1);" />
-                      <p style="display:inline" >Unknown Date</p> </label></li>
-                    <li> <label class="checkbox-inline" style="margin: 5px 5px 5px 10px"><input type="checkbox" ng-model="filterLocation" ng-click="filterRecords(1); " />
-                      <p style="display:inline" >Unknown Location</p></li>
-                      <li role="separator" class="divider"></li>
-                    <li><input id="toolbar-button" type="button" class="btn" value="Reset" ng-click="filterRecords(0);"/></li>
-               </ul>
-              </li>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="padding: 8px !important;color:#31708f">Import <span class="caret"></span></a>
+              <ul class="dropdown-menu">
+                  <li><input id="toolbar-button" type="button" class="btn" ng-click="uploadFormat = 'fasta'" value="FASTA" data-toggle="modal" data-target="#fastaModel"/></li>
+                  <li><input id="toolbar-button" type="button" class="btn" ng-click="uploadFormat = 'Accessions'" value="GenBank Accessions" data-toggle="modal" data-target="#accessionModel"/></li>
+              </ul>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav">
+            <li><a href="#" data-toggle="modal" data-target="#filterModel" style="padding: 8px !important; color:#31708f">Filter</a></li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
               <li><a href="#" data-toggle="modal" data-target="#sampleSelectionModel" style="padding: 8px !important; color:#31708f">Random Sample</a></li>
@@ -213,6 +203,40 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-default" ng-click="confirmSendFasta()" ng-disabled="fastaFile === null || fastaFile === undefined">Upload</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="filterModel" role="dialog">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Filter Incomplete Records <span class="help-info" data-toggle="tooltip" data-placement="right" 
+            title="Filter out records with missing or unknown value for certain fields"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></h4>
+        </div>
+        <div class="modal-body">
+          <div id="model-container" class="container">
+            <div class="row">
+              <div class="col-md-1">
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter('ALL');" ><input id="filerAllCheckBox" type="checkbox" value="All"/><p style="display:inline">All</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Gene"/><p style="display:inline">Gene</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Date"/><p style="display:inline">Date</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Host"/><p style="display:inline">Host</p> </label>
+              </div> 
+              <div class="col-md-1">
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="State"/><p style="display:inline">State</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Country"/><p style="display:inline">Country</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Length"/><p style="display:inline">Length</p> </label>
+              </div>
+            </div>  
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-warning pull-left" data-dismiss="modal" ng-click="filterReset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>  
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-default" ng-click="filterRecords();" data-dismiss="modal">Confirm</button>
         </div>
       </div>
     </div>
