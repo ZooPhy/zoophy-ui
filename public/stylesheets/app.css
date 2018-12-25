@@ -196,3 +196,7 @@ h6{
   background-color: Transparent;
   outline:none;
 }
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}

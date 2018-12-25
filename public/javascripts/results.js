@@ -32,6 +32,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.accessionFileName = 'none';
   $scope.accessionUploadError = null;
   $scope.hideable_alert = null;
+  $scope.filterSubmitButton = false;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -62,6 +63,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         allRecords = RecordData.getRecords();
         $(".filterCheckBoxClass").prop('checked', false);
         $("#filerAllCheckBox").prop('checked', false);
+        $scope.filterSubmitButton = false;
       }
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
@@ -452,14 +454,21 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(type!=null && type === 'ALL'){
         if($("#filerAllCheckBox").prop('checked')){
           $(".filterCheckBoxClass").prop('checked', true);
+          $scope.filterSubmitButton = true;
         }else{
           $(".filterCheckBoxClass").prop('checked', false);
+          $scope.filterSubmitButton = false;
         }
       }else{
         if ($('.filterCheckBoxClass:checked').length == $('.filterCheckBoxClass').length ){
           $("#filerAllCheckBox").prop('checked', true);
         }else{
           $("#filerAllCheckBox").prop('checked', false);
+        }
+        if($('.filterCheckBoxClass:checked').length > 0){
+          $scope.filterSubmitButton = true;
+        }else{
+          $scope.filterSubmitButton = false;
         }
       }
     }
@@ -514,8 +523,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       }
     }
 
-    $("#dropdown-filter").click(function(e){
-      e.stopPropagation();
+    $('.dropdown-toggle').click(function(e) {
+      e.preventDefault();
+      var url = $(this).attr('href');
+      if (url !== '#') {
+        window.location.href = url;
+      }
     });
 
     $scope.columnUp = function() {
