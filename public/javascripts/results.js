@@ -33,6 +33,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.accessionUploadError = null;
   $scope.hideable_alert = null;
   $scope.filterSubmitButton = false;
+  $scope.searchQuery = null;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -40,6 +41,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var allRecords;
+  var filteredRecords;
 
   if($scope.geoLocMap == null){
     console.log('initializing map');
@@ -478,7 +480,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.filterRecords = function(){
-      var filteredRecords = [];
+      filteredRecords = [];
       var filterDate = $("input[value='Date']").prop('checked');
       var filterCountry = $("input[value='Country']").prop('checked');
       var filterState = $("input[value='State']").prop('checked');
@@ -490,7 +492,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         RecordData.setFilter(true);
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
-          if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "None")
+          if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
             || (filterState && record.state === "Unknown") || (filterGene && record.gene === "None") ||
             (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown")){
             //ignore
@@ -507,6 +509,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.groupIsSelected = false;
         $scope.toggleAll();
         RecordData.incrementSearchCount();
+        $scope.searchQuery = null;
       }
     }
 
@@ -517,6 +520,33 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         RecordData.setFilter(false);
         RecordData.setRecords(allRecords);
         RecordData.setTypeGenbank(true);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.incrementSearchCount();
+        filteredRecords = null;
+      }
+    }
+
+    $scope.searchResult = function(){
+      var records = [];
+      var searchResult = [];
+      if(RecordData.isFilter() && filteredRecords!=null){
+        records = filteredRecords;
+      }else{
+        records = allRecords;
+      }
+      if(records!=null && $scope.searchQuery!=null){
+        for (var i = 0; i < records.length; i++) {
+          var record = records[i];
+          if(record.state.toLowerCase().indexOf($scope.searchQuery) >= 0 || 
+          record.country.toLowerCase().indexOf($scope.searchQuery) >= 0 ||
+          record.accession.toLowerCase().indexOf($scope.searchQuery) >= 0){
+            searchResult.push(record);
+          }
+        }
+        RecordData.setRecords(searchResult);
+        RecordData.setTypeGenbank(true);
+        RecordData.setFilter(true);
         $scope.groupIsSelected = false;
         $scope.toggleAll();
         RecordData.incrementSearchCount();

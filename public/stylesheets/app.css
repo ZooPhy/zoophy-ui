@@ -200,3 +200,23 @@ h6{
 .dropdown:hover .dropdown-menu {
   display: block;
 }
+
+.navbar-form{
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 0px ;
+  width: 20%
+}
+
+#nav-searchbar{
+  height: 26px;
+}
+
+#nav-button{
+  font-size: 13px;
+  padding: 3px 5px;
+}
+
+.input-group-addon{
+  padding: 0px 10px;
+}

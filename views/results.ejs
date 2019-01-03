@@ -22,7 +22,7 @@
 
     <nav id="nav-toolbar" class="navbar navbar-default">
       <div class="container-fluid">
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav" style="margin-left:-15px">
             <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="padding: 8px !important; color:#31708f">Export <span class="caret"></span></a>
@@ -44,9 +44,15 @@
           <ul class="nav navbar-nav">
             <li><a href="#" data-toggle="modal" data-target="#filterModel" style="padding: 8px !important; color:#31708f">Filter</a></li>
           </ul>
-          <ul class="nav navbar-nav navbar-right">
+          <ul class="nav navbar-nav">
               <li><a href="#" data-toggle="modal" data-target="#sampleSelectionModel" style="padding: 8px !important; color:#31708f">Random Sample</a></li>
           </ul>
+          <form class="navbar-form navbar-right">
+            <div class="input-group">
+              <span class="input-group-addon" id="basic-addon1" data-toggle="tooltip" data-placement="top" title="Search among the results for a State, Country or an ID"><i class="fa fa-search"></i></span>
+              <input id="nav-searchbar" type="text" class="form-control" placeholder="Search..." ng-model="searchQuery" ng-change="searchResult();" >
+            </div>
+          </form>
         </div>
       </div>
     </nav>
