@@ -80,7 +80,13 @@ input::-webkit-inner-spin-button {
 }
 
 #results-table {
-  font-size: 1.1rem;
+  table-layout: fixed;
+}
+
+#results-table-col {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .selected {
@@ -129,7 +135,7 @@ h6{
   margin-right: 0rem;
 }
 
-#results-table {
+#results-panel {
   font-size: 1.2rem;
   float: left;
   width: 65%;

@@ -34,6 +34,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.hideable_alert = null;
   $scope.filterSubmitButton = false;
   $scope.searchQuery = null;
+  $scope.tableLayout = 'compress';
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -553,6 +554,26 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       }
     }
 
+    $scope.TableLayout = function(){
+      if($scope.tableLayout === 'compress'){
+        $scope.tableLayout = 'expand';
+      }else{
+        $scope.tableLayout = 'compress';
+      }
+      var records = [];
+      if(RecordData.isFilter() && filteredRecords!=null){
+        records = filteredRecords;
+      }else{
+        records = allRecords;
+      }
+      if(records!=null && records.length > 0){
+        RecordData.setRecords(records);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.incrementSearchCount();
+      }
+    }
+
     $('.dropdown-toggle').click(function(e) {
       e.preventDefault();
       var url = $(this).attr('href');
@@ -634,7 +655,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         text: new ol.style.Text({
           text: '\uf041',
           font: 'normal 20px FontAwesome',
-          textBaseline: 'Bottom',
+          textBaseline: 'bottom',
           fill: new ol.style.Fill({
             color: 'black'
           })
@@ -652,7 +673,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         text: new ol.style.Text({
           text: '\uf041',
           font: 'normal 22px FontAwesome',
-          textBaseline: 'Bottom',
+          textBaseline: 'bottom',
           fill: new ol.style.Fill({
             color: 'blue'
           })
