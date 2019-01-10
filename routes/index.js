@@ -42,14 +42,6 @@ let upfasta = multer(multerOptionsFasta);
 const FASTA_UPLOAD_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
 const FASTA_UPLOAD_LIMIT = 1000;
 const FASTA_MET_ITEMS = 3;
-const FASTA_MET_UID_RE = /^(\w|\d){1,20}?$/;
-// const FASTA_MET_NORM_DATE_RE = /^\d{4}((\-(0?[1-9]|1[012])?\-(0?[1-9]|[12][0-9]|3[01]))|(\.\d{1,4}))?$/;
-const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\-)\d{4})$/;
-const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
-const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
-const FASTA_MET_LOCNAME_RE = /^(\w|-|\.|\,| |\’|\'){1,60}?$/;
-const FASTA_MET_SEQ_RE = /^([ACGTYNKacgtynk-]){1,20000}$/;
-
 
 let router = express.Router();
 
@@ -511,29 +503,13 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                     let uid = metitems[0];
                     let loc = metitems[1];
                     let date = metitems[2];
-                    if (checkInput(uid, 'string', FASTA_MET_UID_RE)){
-                      if(checkInput(loc, 'string', FASTA_MET_LOCNAME_RE) || checkInput(loc, 'string', FASTA_MET_GEOID_RE)){
-                        if(checkInput(date, 'string', FASTA_MET_HUM_DATE_RE) || checkInput(date, 'string', FASTA_MET_DEC_DATE_RE)){
-                          if(checkInput(seqData, 'string', FASTA_MET_SEQ_RE)){
-                            let cust_record = {
-                              "id" : uid,
-                              "collectionDate": date,
-                              "geonameID" : loc,
-                              "rawSequence" : seqData
-                            }
-                            cleanRecords.push(cust_record);
-                          }else{
-                            fileErrors.push(String('Metadata errors: Invalid Sequence on item #'+String(i)));
-                          }
-                        }else{
-                          fileErrors.push(String('Metadata errors "'+date+'" on item #'+String(i)));
-                        }
-                      }else{
-                        fileErrors.push(String('Metadata errors "'+loc+'" on item #'+String(i)));
+                      let cust_record = {
+                        "id" : uid,
+                        "collectionDate": date,
+                        "geonameID" : loc,
+                        "rawSequence" : seqData
                       }
-                    }else{
-                      fileErrors.push(String('Metadata errors "'+uid+'" on item #'+String(i)));
-                    }
+                      cleanRecords.push(cust_record);
                   } else {
                     fileErrors.push(String('Entries "'+metitems.length+'" Expected "'+ FASTA_MET_ITEMS +'" on item #'+String(i)));
                   }
@@ -575,15 +551,31 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                   res.status(result.status).send(result);
                 }
                 else {
-                  let rawRecords = JSON.parse(body);
+                  let rawResponse = JSON.parse(body);
+                  let rawRecords = rawResponse.fastaRecord
+                  var rawInvalidRecords = rawResponse.invalidRecords
+                  var exclusionList = "Following records were exclused: <br>";
                   let records = [];
                   for (let i = 0; i < rawRecords.length; i++) {
                     let record = new GenBankRecord.CustomRecord(rawRecords[i]);
                     records.push(record);
                   }
+                  for(var key in rawInvalidRecords){
+                    exclusionList += " <strong>"+key + "</strong>: "
+                    let invalidRecords = rawInvalidRecords[key]
+                    for (var i = 0; i < invalidRecords.length; i++) {
+                      exclusionList += invalidRecords[i] + ", "
+                    }
+                    exclusionList = exclusionList.substring(0,exclusionList.length-2)
+                  }
+                  if(exclusionList === "Following records were exclused: <br>"){
+                    exclusionList = "";
+                  }
+                  console.log("invalid: "+exclusionList)
                   result = {
                     status: 200,
-                    records: records
+                    records: records,
+                    invalidRecords: exclusionList
                   };
                   res.status(result.status).send(result);
                 }

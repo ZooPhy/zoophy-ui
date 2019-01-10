@@ -7,7 +7,6 @@ body {
 .container {
   padding-right: 0px;
   padding-left: 0px;
-  width: 1190px;
 }
 
 #model-container{
@@ -81,7 +80,13 @@ input::-webkit-inner-spin-button {
 }
 
 #results-table {
-  font-size: 1.1rem;
+  table-layout: fixed;
+}
+
+#results-table-col {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .selected {
@@ -130,7 +135,7 @@ h6{
   margin-right: 0rem;
 }
 
-#results-table {
+#results-panel {
   font-size: 1.2rem;
   float: left;
   width: 65%;
@@ -196,4 +201,28 @@ h6{
   padding: 3px 20px;
   background-color: Transparent;
   outline:none;
+}
+
+.dropdown:hover .dropdown-menu {
+  display: block;
+}
+
+.navbar-form{
+  margin-top: 5px;
+  margin-bottom: 5px;
+  padding: 0px ;
+  width: 20%
+}
+
+#nav-searchbar{
+  height: 26px;
+}
+
+#nav-button{
+  font-size: 13px;
+  padding: 3px 5px;
+}
+
+.input-group-addon{
+  padding: 0px 10px;
 }

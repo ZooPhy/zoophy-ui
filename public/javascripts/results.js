@@ -31,8 +31,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.accessionFile = null;
   $scope.accessionFileName = 'none';
   $scope.accessionUploadError = null;
-  $scope.filterDate = false;
-  $scope.filterLocation = false;
+  $scope.hideable_alert = null;
+  $scope.filterSubmitButton = false;
+  $scope.searchQuery = null;
+  $scope.tableLayout = 'compress';
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -40,6 +42,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var allRecords;
+  var filteredRecords;
 
   if($scope.geoLocMap == null){
     console.log('initializing map');
@@ -61,8 +64,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.sampleAmount = 20;
       if(!RecordData.isFilter()){
         allRecords = RecordData.getRecords();
-        $scope.filterDate = false;
-        $scope.filterLocation = false;
+        $(".filterCheckBoxClass").prop('checked', false);
+        $("#filerAllCheckBox").prop('checked', false);
+        $scope.filterSubmitButton = false;
       }
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
@@ -354,7 +358,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.setRecords(CombinedRecords);
           RecordData.setTypeGenbank(false);
           if (response.data.records.length > 0) {
-            $('<div id="warning-alert" class="alert alert-success col-md-10 col-md-offset-1 text-center"> <b>Successfully added '+ response.data.records.length+' records</b></div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
+          $scope.hideable_alert = "show";
+            document.getElementById("exclusionList").innerHTML = '<b>Successfully added '+ 
+            response.data.records.length+' records! </b>'+ response.data.invalidRecords +'</div>'; 
           }
           else {
             $scope.warning = 'Processed 0 results.';
@@ -447,35 +453,133 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
     };
 
-    $scope.filterRecords = function(filterType){
-      var filteredRecords = [];
-      if(filterType === 1){
+    $scope.toggleFilter = function(type){
+      if(type!=null && type === 'ALL'){
+        if($("#filerAllCheckBox").prop('checked')){
+          $(".filterCheckBoxClass").prop('checked', true);
+          $scope.filterSubmitButton = true;
+        }else{
+          $(".filterCheckBoxClass").prop('checked', false);
+          $scope.filterSubmitButton = false;
+        }
+      }else{
+        if ($('.filterCheckBoxClass:checked').length == $('.filterCheckBoxClass').length ){
+          $("#filerAllCheckBox").prop('checked', true);
+        }else{
+          $("#filerAllCheckBox").prop('checked', false);
+        }
+        if($('.filterCheckBoxClass:checked').length > 0){
+          $scope.filterSubmitButton = true;
+        }else{
+          $scope.filterSubmitButton = false;
+        }
+      }
+    }
+
+    $scope.fadeableAlert = function(message){
+      $('<div class="alert alert-success col-md-10 col-md-offset-1 text-center"> <b>'+message+'</b></div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
+    }
+
+    $scope.filterRecords = function(){
+      filteredRecords = [];
+      var filterDate = $("input[value='Date']").prop('checked');
+      var filterCountry = $("input[value='Country']").prop('checked');
+      var filterState = $("input[value='State']").prop('checked');
+      var filterGene = $("input[value='Gene']").prop('checked');
+      var filterHost = $("input[value='Host']").prop('checked');
+      var filterLength = $("input[value='Length']").prop('checked');
+      var count =0;
+      if(allRecords!=null){
         RecordData.setFilter(true);
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
-          if(($scope.filterDate && record.date === "Unknown") || ($scope.filterLocation && record.country === "Unknown")){
+          if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
+            || (filterState && record.state === "Unknown") || (filterGene && record.gene === "None") ||
+            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown")){
             //ignore
+            count++;
           }else{
             filteredRecords.push(record);
           }
         }
-      }else{
-        RecordData.setFilter(false);
-        $scope.filterDate=false;
-        $scope.filterLocation=false;
-        filteredRecords = allRecords;
       }
       if(filteredRecords.length > 0){
+        $scope.fadeableAlert("Successfully removed "+count+" incomplete records!")
         RecordData.setRecords(filteredRecords);
         RecordData.setTypeGenbank(true);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.incrementSearchCount();
+        $scope.searchQuery = null;
+      }
+    }
+
+    $scope.filterReset = function(){
+      $(".filterCheckBoxClass").prop('checked', false);
+      $("#filerAllCheckBox").prop('checked', false);
+      if(allRecords!=null && allRecords.length > 0){
+        RecordData.setFilter(false);
+        RecordData.setRecords(allRecords);
+        RecordData.setTypeGenbank(true);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.incrementSearchCount();
+        filteredRecords = null;
+      }
+    }
+
+    $scope.searchResult = function(){
+      var records = [];
+      var searchResult = [];
+      if(RecordData.isFilter() && filteredRecords!=null){
+        records = filteredRecords;
+      }else{
+        records = allRecords;
+      }
+      if(records!=null && $scope.searchQuery!=null){
+        for (var i = 0; i < records.length; i++) {
+          var record = records[i];
+          if(record.state.toLowerCase().indexOf($scope.searchQuery) >= 0 || 
+          record.country.toLowerCase().indexOf($scope.searchQuery) >= 0 ||
+          record.accession.toLowerCase().indexOf($scope.searchQuery) >= 0){
+            searchResult.push(record);
+          }
+        }
+        RecordData.setRecords(searchResult);
+        RecordData.setTypeGenbank(true);
+        RecordData.setFilter(true);
         $scope.groupIsSelected = false;
         $scope.toggleAll();
         RecordData.incrementSearchCount();
       }
     }
 
-    $("#dropdown-filter").click(function(e){
-      e.stopPropagation();
+    $scope.TableLayout = function(){
+      if($scope.tableLayout === 'compress'){
+        $scope.tableLayout = 'expand';
+      }else{
+        $scope.tableLayout = 'compress';
+      }
+      var records = [];
+      if(RecordData.isFilter() && filteredRecords!=null){
+        records = filteredRecords;
+      }else{
+        records = allRecords;
+      }
+      if(records!=null && records.length > 0){
+        RecordData.setRecords(records);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.incrementSearchCount();
+      }
+    }
+
+    $('.dropdown-toggle').click(function(e) {
+      e.preventDefault();
+      var url = $(this).attr('href');
+      if (url !== '#') {
+        window.location.href = url;
+      }
     });
 
     $scope.columnUp = function() {
@@ -551,7 +655,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         text: new ol.style.Text({
           text: '\uf041',
           font: 'normal 20px FontAwesome',
-          textBaseline: 'Bottom',
+          textBaseline: 'bottom',
           fill: new ol.style.Fill({
             color: 'black'
           })
@@ -569,7 +673,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         text: new ol.style.Text({
           text: '\uf041',
           font: 'normal 22px FontAwesome',
-          textBaseline: 'Bottom',
+          textBaseline: 'bottom',
           fill: new ol.style.Fill({
             color: 'blue'
           })
