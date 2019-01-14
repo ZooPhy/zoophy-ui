@@ -121,7 +121,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.selectedRecord = selrecord;
       $scope.showDetails = false;
       $scope.showCustDetails = true;
-}
+      $scope.highlightLocation($scope.selectedRecord);
+    }
   };
 
   $scope.toggleRecord = function(record) {
