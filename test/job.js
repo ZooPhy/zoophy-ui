@@ -128,7 +128,7 @@ describe('Run Genbank Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Job Name: $(cat /etc/ssl/private.key)');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid or Too Short Job Name: $(cat /etc/ssl/private.key)');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });
@@ -279,7 +279,7 @@ describe('Run FASTA Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Job Name: $(cat /etc/ssl/private.key)');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid or Too Short Job Name: $(cat /etc/ssl/private.key)');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });
@@ -412,7 +412,7 @@ describe('Run Combined Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Job Name: $(cat /etc/ssl/private.key)');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid or Too Short Job Name: $(cat /etc/ssl/private.key)');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });
@@ -522,5 +522,18 @@ describe('Run Combined Job', function() {
     });
   });
 */
+});
 
+describe('Recaptcha', function() {
+  let response = "abc";
+  it('Should return error', function(done) {
+    request(app)
+      .post('/job/siteverify')
+      .send(response)
+      .end(function(err, res) {
+      if (err) done(err);
+      assert.notStrictEqual(res.body.error, 'invalid-input-secret')
+      done();
+    });
+  });
 });
