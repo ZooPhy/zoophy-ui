@@ -13,8 +13,8 @@ ZooPhyApp.factory('RecordData', function() {
     records: [],
     numSelected: 0,
     searchCount: 0,
-    typeGenbank: true,
-    filer: false
+    filer: false,
+    message: null
   };
   return {
     getRecords: function() {
@@ -35,17 +35,17 @@ ZooPhyApp.factory('RecordData', function() {
     incrementSearchCount: function() {
       recordData.searchCount++;
     },
-    setTypeGenbank: function(newBoolVal) {
-      recordData.typeGenbank = Boolean(newBoolVal);
-    },
-    isTypeGenbank: function() {
-      return recordData.typeGenbank;
-    },
     setFilter: function(newBoolVal) {
       recordData.filer = Boolean(newBoolVal);
     },
     isFilter: function() {
       return recordData.filer;
+    },
+    getMessage: function() {
+      return recordData.message;
+    },
+    setMessage: function(message) {
+      recordData.message = message;
     }
   };
 });

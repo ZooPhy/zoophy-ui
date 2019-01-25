@@ -6,12 +6,16 @@
       </div>
     </div>
     <div class="row">
-      <div class="alert alert-success col-md-10 col-md-offset-1 text-center" style="display: table-cell;vertical-align:middle" ng-show="hideable_alert">
-        <p id="exclusionList" class="col-md-11" style="display:inline;"></p>
-        <button id="hideFastaAlert" type="button" style="outline:none;" class="close col-md-1" ng-click="hideable_alert = null">&times;</button>
+      <div class="alert alert-success col-md-10 col-md-offset-1 text-center" style="display: table-cell;vertical-align:middle" ng-show="hideable_success">
+        <p id="success_message" class="col-md-11" style="display:inline;"></p>
+        <button type="button" style="outline:none;" class="close col-md-1" ng-click="hideable_success = null">&times;</button>
       </div>
     </div>
-    
+    <div class="row">
+      <div class="col text-center">
+          <b ng-show="uploading" style="margin:10px"><i class="fa fa-spinner fa-pulse" aria-hidden="true"></i> Uploading File... </b>
+      </div>
+  </div>
     <div class="row">
         <div class="col text-center">
             <b ng-show="generating" style="margin:10px"><i class="fa fa-spinner fa-pulse" aria-hidden="true"></i> Generating Download... </b>
@@ -47,20 +51,10 @@
           <ul class="nav navbar-nav">
               <li><a href="#" data-toggle="modal" data-target="#sampleSelectionModel" style="padding: 8px !important; color:#31708f">Random Sample</a></li>
           </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li><a href="#" style="padding-top: 9px; padding-bottom: 0px; padding-right: 0px" ng-click="TableLayout()">
-              <span class="help-info" data-toggle="tooltip" data-placement="top" title="Compress table view"> 
-                  <i ng-show="tableLayout == 'expand'" class="fa fa-compress" aria-hidden="true"></i>
-              </span>
-              <span class="help-info" data-toggle="tooltip" data-placement="top" title="Expand table view">
-                <i ng-show="tableLayout == 'compress'" class="fa fa-expand" aria-hidden="true"></i></a>
-              </span>
-            </li>
-          </ul>
           <form class="navbar-form navbar-right">
             <div class="input-group">
               <span class="input-group-addon" id="basic-addon1" data-toggle="tooltip" data-placement="top" title="Search among the results for a State, Country or an ID"><i class="fa fa-search"></i></span>
-              <input id="nav-searchbar" type="text" class="form-control" placeholder="Search..." ng-model="searchQuery" ng-change="searchResult();" >
+              <input id="nav-searchbar" type="text" class="form-control" placeholder="Search..." ng-model="searchQuery" ng-change="searchBarResult();" >
             </div>
           </form>
         </div>
@@ -105,15 +99,11 @@
       	<tr ng-class="(selectedRecord.accession === record.accession) ? 'selected' : ''" dir-paginate="record in results | orderBy:sortField:sortReverse | itemsPerPage:recordsPerPage" ng-click="LoadDetails(record);">
           <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob"></td>
           <td class="col-sm-1"><a href="https://www.ncbi.nlm.nih.gov/nuccore/{{record.accession}}" target="_blank">{{record.accession}}</a></td>
-          <td ng-show="tableLayout == 'expand'" class="col-sm-1" >{{record.genes}}</td>
-          <td ng-show="tableLayout == 'compress'"id="results-table-col" class="col-sm-1" >{{record.genes}}</td>
+          <td  class="col-sm-1" >{{record.genes}}</td>
       		<td class="col-sm-2">{{record.date}}</td>
-          <td ng-show="tableLayout == 'expand'" class="col-sm-2 hidden-xs">{{record.host}}</td>
-          <td ng-show="tableLayout == 'compress'" id="results-table-col" class="col-sm-2 hidden-xs">{{record.host}}</td>
-          <td ng-show="tableLayout == 'expand'" class="col-sm-2">{{record.state}}</td>
-          <td ng-show="tableLayout == 'compress'" id="results-table-col" class="col-sm-2">{{record.state}}</td>
-          <td ng-show="tableLayout == 'expand'" id="results-table-col" class="col-sm-2">{{record.country}}</td>
-          <td ng-show="tableLayout == 'compress'" id="results-table-col" class="col-sm-2">{{record.country}}</td>
+          <td class="col-sm-2 hidden-xs">{{record.host}}</td>
+          <td class="col-sm-2">{{record.state}}</td>
+          <td class="col-sm-2">{{record.country}}</td>
           <td class="col-sm-1 hidden-xs">{{record.segmentLength}}</td>
       	</tr>
     	</tbody>

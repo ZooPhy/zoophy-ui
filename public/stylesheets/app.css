@@ -80,7 +80,7 @@ input::-webkit-inner-spin-button {
 }
 
 #results-table {
-  table-layout: fixed;
+  margin-bottom: 0px;
 }
 
 #results-table-col {

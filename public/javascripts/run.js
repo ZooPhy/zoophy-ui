@@ -108,7 +108,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       $scope.warning = null;
       var jobAccessions = [];
       var records = RecordData.getRecords();
-      var isGenbankJob = Boolean(RecordData.isTypeGenbank());
       for (var i = 0; i < records.length; i++) {
         if (records[i].includeInJob) {
           jobAccessions.push(records[i].accession);
@@ -159,7 +158,6 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
             records: jobSequences,
             useGLM: glm,
             predictors: predictors,
-            isGenbankJob: isGenbankJob,
             xmlOptions: {
               substitutionModel: subModel,
               gamma: gamma,
@@ -193,7 +191,11 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
             }
           }, function failure(response) {
             $scope.running = false;
-            $scope.runError = 'Job Validation Failed: ' + response.data.error;
+            if(response.status === 413){
+              $scope.runError = 'Job Validation Failed: Network Error(Payload) ' ;
+            }else{
+              $scope.runError = 'Job Validation Failed: ' +  response.data.error;
+            }
           });
       }
     }
