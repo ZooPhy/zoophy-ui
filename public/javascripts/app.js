@@ -1,7 +1,7 @@
 'use strict';
 
 //TODO: update on server if using reverse proxy
-var SERVER_URI = 'https://zodo.asu.edu/zoophy';
+var SERVER_URI = 'https://zodo.asu.edu/zoophy/test';
 //var SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
 
 // Main Angular App
