@@ -37,7 +37,7 @@ const FASTA_MET_HUM_DATE_RE = /^(((0[1-9]|[12][0-9]|3[01])\-)?((Jan|Feb|Mar|Apr|
 const FASTA_MET_DEC_DATE_RE = /^\d{4}(\.\d{1,4})?$/;
 const FASTA_MET_GEOID_RE = /^\d{4,10}$/;
 const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
-const FASTA_MET_SEQ_RE = /^([ACGTacgt-]){1,20000}$/;
+const FASTA_MET_SEQ_RE = /^([ACGTURYSWKMBDHVNacgturyswkmbdhvn-]){1,30000}$/;
 const SOURCE_GENBANK = 1;
 const SOURCE_FASTA = 2;
 const RECAPTCHA_SECRET_KEY = "6LdOlHoUAAAAAEsOwiu3rnxsgzaqu9sV-4G8uH3_";
@@ -64,7 +64,6 @@ router.post('/siteverify', function(req, res) {
     }
     else {
       let resBody = JSON.parse(body);
-      logger.info("response: "+ body);
       if (response.statusCode === 200 && resBody.success){
         result = {
           status: 200,
@@ -97,8 +96,8 @@ router.post('/run', function(req, res) {
     else {
       logger.info(req.body.records.length + " records")
       records = [];
+      var recordErrorMessage = 'Invalid Record(s): ';
       for (let i = 0; i < req.body.records.length; i++) {
-        
         if(req.body.records[i].resourceSource==SOURCE_FASTA){
           if (checkInput(req.body.records[i].id, 'string', FASTA_MET_UID_RE) &&
           (checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_GEOID_RE) || checkInput(req.body.records[i].geonameID, 'string', FASTA_MET_LOCNAME_RE)) &&
@@ -113,15 +112,7 @@ router.post('/run', function(req, res) {
             };
             records.push(rec);
           }else {
-            if(!jobErrors.includes("Invalid Records:"))
-              jobErrors += 'Invalid Records: ';
-            jobErrors += req.body.records[i].id+', ';
-            let object = req.body.records[i];
-            let output = '';
-            for (let property in object) {
-              output += property + ': ' + object[property]+'; ';
-            }
-            logger.info(output);
+            recordErrorMessage += req.body.records[i].id + ', ';
           }
         }
         else if(req.body.records[i].resourceSource==SOURCE_GENBANK){
@@ -135,12 +126,12 @@ router.post('/run', function(req, res) {
             };
             records.push(rec);
           }else{
-            if(!jobErrors.includes("Invalid Records:"))
-              jobErrors += 'Invalid Records: ';
-            jobErrors += req.body.records[i].id+', ';
-            break;
+            recordErrorMessage += req.body.records[i].id + ', ';
           }
         }
+      }
+      if(recordErrorMessage != 'Invalid Record(s): '){
+        jobErrors += recordErrorMessage;
       }
     }
     let email = null;
@@ -154,7 +145,7 @@ router.post('/run', function(req, res) {
       jobErrors += 'Invalid Email: '+req.body.replyEmail+', ';
     }
     let jobName = null;
-    if (req.body.jobName) {
+    if (!req.body.jobName) {
       if (checkInput(req.body.jobName, 'string', JOB_NAME_RE)) {
         jobName = String(req.body.jobName);
       }
@@ -182,35 +173,43 @@ router.post('/run', function(req, res) {
       }
     }
     let xmlOptions = null;
-    if (checkInput(req.body.xmlOptions.substitutionModel, 'string', SUB_MODEL_RE)){
-      if (checkInput(req.body.xmlOptions.gamma, 'boolean', null)){
-        if (checkInput(req.body.xmlOptions.invariantSites, 'boolean', null)){
-          if (checkInput(req.body.xmlOptions.clockModel, 'string', CLOCK_MODEL_RE)){
-            if (checkInput(req.body.xmlOptions.treePrior, 'string', PRIOR_RE)){
-              if (checkInput(req.body.xmlOptions.chainLength, 'number', null)& 
-              (Number(req.body.xmlOptions.chainLength) >=10000000 && Number(req.body.xmlOptions.chainLength) <=250000000)){
-                if (checkInput(req.body.xmlOptions.subSampleRate, 'number', null) & 
-                (Number(req.body.xmlOptions.subSampleRate) >=1000 && Number(req.body.xmlOptions.subSampleRate) <=25000)){
-                  xmlOptions = {
-                    substitutionModel: String(req.body.xmlOptions.substitutionModel),
-                    gamma: Boolean(req.body.xmlOptions.gamma),
-                    invariantSites: Boolean(req.body.xmlOptions.invariantSites),
-                    clockModel: String(req.body.xmlOptions.clockModel),
-                    treePrior: String(req.body.xmlOptions.treePrior),
-                    chainLength: Number(req.body.xmlOptions.chainLength),
-                    subSampleRate: Number(req.body.xmlOptions.subSampleRate)
-                  };
-                  console.log(xmlOptions);
-                } else {jobErrors += 'Invalid XML Parameters: '+'subSampleRate';}
-              } else {jobErrors += 'Invalid XML Parameters: '+'chainLength';}
-            } else {jobErrors += 'Invalid XML Parameters: '+'treePrior';}
-          } else {jobErrors += 'Invalid XML Parameters: '+'clockModel';}
-        } else {jobErrors += 'Invalid XML Parameters: '+'invariantSites';}
-      } else {jobErrors += 'Invalid XML Parameters: '+'gamma';}
-    } else {jobErrors += 'Invalid XML Parameters: '+'substitutionModel';}
-    // else {
-    //    jobErrors += 'Invalid XML Parameters, ';
-    // }
+    var xmlErrorMessage = 'Invalid XML Parameters: ';
+    if (!checkInput(req.body.xmlOptions.substitutionModel, 'string', SUB_MODEL_RE)){
+      xmlErrorMessage += 'substitutionModel, ';
+    }
+    if (!checkInput(req.body.xmlOptions.gamma, 'boolean', null)){
+      xmlErrorMessage += 'gamma, ';
+    }
+    if (!checkInput(req.body.xmlOptions.invariantSites, 'boolean', null)){
+      xmlErrorMessage += 'invariantSites, ';
+    }
+    if (!checkInput(req.body.xmlOptions.clockModel, 'string', CLOCK_MODEL_RE)){
+      xmlErrorMessage += 'clockModel, ';
+    }
+    if (!checkInput(req.body.xmlOptions.treePrior, 'string', PRIOR_RE)){
+      xmlErrorMessage += 'treePrior, ';
+    }
+    if (!checkInput(req.body.xmlOptions.chainLength, 'number', null) &&
+      (Number(req.body.xmlOptions.chainLength) < 10000000 && Number(req.body.xmlOptions.chainLength) > 250000000)){
+        xmlErrorMessage += 'chainLength, ';
+    }
+    if (!checkInput(req.body.xmlOptions.subSampleRate, 'number', null) & 
+      (Number(req.body.xmlOptions.subSampleRate) < 1000 && Number(req.body.xmlOptions.subSampleRate) > 25000)){
+        xmlErrorMessage += 'subSampleRate, ';
+    }
+    if(xmlErrorMessage != 'Invalid XML Parameters: '){
+      jobErrors += xmlErrorMessage;
+    }else{
+      xmlOptions = {
+        substitutionModel: String(req.body.xmlOptions.substitutionModel),
+        gamma: Boolean(req.body.xmlOptions.gamma),
+        invariantSites: Boolean(req.body.xmlOptions.invariantSites),
+        clockModel: String(req.body.xmlOptions.clockModel),
+        treePrior: String(req.body.xmlOptions.treePrior),
+        chainLength: Number(req.body.xmlOptions.chainLength),
+        subSampleRate: Number(req.body.xmlOptions.subSampleRate)
+      };
+    }
     if (jobErrors === BASE_ERROR) {
       const zoophyJob = JSON.stringify({
         records: records,
