@@ -145,7 +145,7 @@ router.post('/run', function(req, res) {
       jobErrors += 'Invalid Email: '+req.body.replyEmail+', ';
     }
     let jobName = null;
-    if (!req.body.jobName) {
+    if (req.body.jobName) {
       if (checkInput(req.body.jobName, 'string', JOB_NAME_RE)) {
         jobName = String(req.body.jobName);
       }
