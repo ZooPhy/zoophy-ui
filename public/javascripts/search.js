@@ -162,6 +162,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.searchError = null;
     var virus = Number($scope.virus);
     var pdmo9 = false;
+    var isInfluenzaA = false;
     if (virus === 197911) {
       var subH = Number($scope.fluAH);
       var subN = Number($scope.fluAN);
@@ -169,13 +170,14 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       if (subH === 1 && subN === 1) {
         pdmo9 = Boolean($scope.isPDMO9 === true);
       }
+      isInfluenzaA = true;
     }
     var host = Number($scope.host);
     if (host === 8782) {
       host = Number($scope.avianHost);
     }
     var query = 'OrganismID:' + virus + ' AND HostID:' + host;
-    if(virus == '114727'){   //Influenza A
+    if(isInfluenzaA){
       var subType = 'H' + Number($scope.fluAH) + 'N' + Number($scope.fluAN);
       query = 'OrganismID:' + virus + ' OR Definition:' + subType + ' AND HostID:' + host;
     }
@@ -332,11 +334,11 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         RecordData.setMessage(null);
         RecordData.incrementSearchCount();
       }, function(error) {
-        if (error.status !== 500) {
-          $scope.searchError = error.data.error;
-        }
-        else if(error.status === 413){
+        if(error.status === 413){
           $scope.searchError = 'Payload Error: Too many records selected.';
+        }
+        else if (error.status !== 500) {
+          $scope.searchError = error.data.error;
         }
         else {
           $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
@@ -402,11 +404,11 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         RecordData.incrementSearchCount();
       }, function(error) {
         $scope.uploading = false;
-        if (error.status !== 500) {
-          $scope.searchError = error.data.error;
-        }
-        else if(error.status === 413){
+        if(error.status === 413){
           $scope.searchError = 'Payload Error: Too many records selected.';
+        }
+        else if (error.status !== 500) {
+          $scope.searchError = error.data.error;
         }
         else {
           $scope.searchError = 'Parsing Failed on Server. Please refresh and try again.';
