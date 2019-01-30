@@ -376,11 +376,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.incrementSearchCount();
         }, function(error) {
           $scope.uploading = false;
-          if (error.status !== 500) {
-            $scope.fadeableErrorAlert(error.data.error);
-          }
-          else if(error.status === 413){
+          if(error.status === 413){
             $scope.fadeableErrorAlert('Payload Error: Too many records selected.');
+          }
+          else if (error.status !== 500) {
+            $scope.fadeableErrorAlert(error.data.error);
           }
           else {
             $scope.fadeableErrorAlert('Parsing Failed on Server. Please refresh and try again.');
@@ -438,11 +438,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.setMessage(null);
           RecordData.incrementSearchCount();
         }, function(error) {
-          if (error.status !== 500) {
-            $scope.fadeableErrorAlert(error.data.error);
-          }
-          else if(error.status === 413){
+          if(error.status === 413){
             $scope.fadeableErrorAlert('Payload Error: Too many records selected.');
+          }
+          else if (error.status !== 500) {
+            $scope.fadeableErrorAlert(error.data.error);
           }
           else {
             $scope.fadeableErrorAlert('Search Failed on Server. Please refresh and try again.');
@@ -506,7 +506,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       var filterLength = $("input[value='Length']").prop('checked');
       var count =0;
       if(allRecords!=null){
-        RecordData.setFilter(true);
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
           if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
@@ -519,7 +518,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           }
         }
       }
-      if(filteredRecords.length > 0){
+      if(count > 0){
+        RecordData.setFilter(true);
         $scope.fadeableSuccessAlert("Successfully removed "+count+" incomplete records!")
         RecordData.setRecords(filteredRecords);
         $scope.groupIsSelected = false;
@@ -527,6 +527,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         RecordData.setMessage(null);
         RecordData.incrementSearchCount();
         $scope.searchQuery = null;
+      }
+      else{
+        $scope.fadeableSuccessAlert("0 incomplete records!")
       }
     }
 
