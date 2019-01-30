@@ -1,7 +1,7 @@
 'use strict';
 
 //TODO: update on server if using reverse proxy
-var SERVER_URI = 'https://zodo.asu.edu/zoophy';
+var SERVER_URI = 'https://zodo.asu.edu/zoophy/test';
 //var SERVER_URI = location.protocol + '//' + location.hostname + ':' + location.port;
 
 // Main Angular App
@@ -13,7 +13,8 @@ ZooPhyApp.factory('RecordData', function() {
     records: [],
     numSelected: 0,
     searchCount: 0,
-    typeGenbank: true
+    filer: false,
+    message: null
   };
   return {
     getRecords: function() {
@@ -34,11 +35,17 @@ ZooPhyApp.factory('RecordData', function() {
     incrementSearchCount: function() {
       recordData.searchCount++;
     },
-    setTypeGenbank: function(newBoolVal) {
-      recordData.typeGenbank = Boolean(newBoolVal);
+    setFilter: function(newBoolVal) {
+      recordData.filer = Boolean(newBoolVal);
     },
-    isTypeGenbank: function() {
-      return recordData.typeGenbank;
+    isFilter: function() {
+      return recordData.filer;
+    },
+    getMessage: function() {
+      return recordData.message;
+    },
+    setMessage: function(message) {
+      recordData.message = message;
     }
   };
 });

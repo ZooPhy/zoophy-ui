@@ -193,7 +193,7 @@ const DOWNLOAD_COLUMNS = [
     'Genes',
     'VirusID',
     'Virus',
-    'Date',
+    'Human_Date',
     'HostID',
     'Host',
     'Country',

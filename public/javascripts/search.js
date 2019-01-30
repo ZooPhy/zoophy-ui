@@ -37,6 +37,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.showDetails = false;
   $scope.selectedRecord = null;
   $scope.searchError = null;
+  $scope.uploading = false;
 
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
@@ -66,7 +67,10 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.fastaFilename = 'none';
     $scope.fastaFile = null;
     $scope.searchCount = 0;
+    $scope.uploading = false;
     RecordData.setRecords([]);
+    RecordData.setFilter(false);
+    RecordData.setMessage(null);
     RecordData.incrementSearchCount();
     };
 
@@ -158,6 +162,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.searchError = null;
     var virus = Number($scope.virus);
     var pdmo9 = false;
+    var isInfluenzaA = false;
     if (virus === 197911) {
       var subH = Number($scope.fluAH);
       var subN = Number($scope.fluAN);
@@ -165,12 +170,17 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       if (subH === 1 && subN === 1) {
         pdmo9 = Boolean($scope.isPDMO9 === true);
       }
+      isInfluenzaA = true;
     }
     var host = Number($scope.host);
     if (host === 8782) {
       host = Number($scope.avianHost);
     }
-    var query = 'TaxonID:'+virus+' AND HostID:'+host;
+    var query = 'OrganismID:' + virus + ' AND HostID:' + host;
+    if(isInfluenzaA){
+      var subType = 'H' + Number($scope.fluAH) + 'N' + Number($scope.fluAN);
+      query = 'OrganismID:' + virus + ' OR Definition:' + subType + ' AND HostID:' + host;
+    }
     if (pdmo9) {
       query += ' AND PH1N1:true';
     }
@@ -223,15 +233,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         fromYear = '0'+fromYear;
       }
       fromYear += '0000';
-      if ($scope.to >= $scope.from) {
-        toYear = $scope.to + '';
-        while (toYear.length < 4) {
-          toYear = '0'+toYear;
-        }
-      }
-      else {
-        $scope.to = Number(new Date().getFullYear());
-        toYear = $scope.to + '';
+      toYear = $scope.to + '';
+      while (toYear.length < 4) {
+        toYear = '0'+toYear;
       }
       query += ' AND Date:['+fromYear+' TO '+toYear+'1231]';
     }
@@ -253,7 +257,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
         combinedRecords = combinedRecords.concat(response.data.records);
         RecordData.setRecords(combinedRecords);
         combinedRecords =[];
-        RecordData.setTypeGenbank(true);
+        RecordData.setFilter(false);
+        RecordData.setMessage(null);
         RecordData.incrementSearchCount();
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
@@ -267,7 +272,12 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
     });
     $(window).scroll(function() {
-      $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
+      var windowPosition = $(window).scrollTop();
+      var panelHeight = $('#detail-panel').height();
+      var tabelHeight = $('table').height();
+      if(windowPosition < tabelHeight - panelHeight){
+        $("#detail-panel").stop().animate({"marginTop": (windowPosition) + "px"}, "fast", "swing");
+      }
     });
   };
 
@@ -282,9 +292,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       else {
         $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
       }
-    });
-    $(window).scroll(function() {
-      $("#detail-panel").stop().animate({"marginTop": ($(window).scrollTop()) + "px"}, "fast", "swing");
     });
   };
 
@@ -317,16 +324,20 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
           headers: {'Content-Type': undefined}
       }).then(function (response) {
         RecordData.setRecords(response.data.records);
-        RecordData.setTypeGenbank(true);
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
         }
         else {
           $scope.searchError = 'Search returned 0 results.';
         }
+        RecordData.setFilter(false);
+        RecordData.setMessage(null);
         RecordData.incrementSearchCount();
       }, function(error) {
-        if (error.status !== 500) {
+        if(error.status === 413){
+          $scope.searchError = 'Payload Error: Too many records selected.';
+        }
+        else if (error.status !== 500) {
           $scope.searchError = error.data.error;
         }
         else {
@@ -368,6 +379,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.sendFasta = function() {
     $scope.searchError = null;
     if ($scope.fastaFile) {
+      $scope.uploading = true;
       var form = new FormData();
       var uri = SERVER_URI+'/upfasta';
       form.append('fastaFile', $scope.fastaFile);
@@ -376,47 +388,26 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
           headers: {'Content-Type': undefined}
       }).then(function (response) {
         RecordData.setRecords(response.data.records);
-        RecordData.setTypeGenbank(false);
         if (response.data.records.length > 0) {
           $scope.$parent.switchTabs('results');
         }
         else {
           $scope.searchError = 'Processed 0 results.';
         }
+        var message = '<b>Successfully added '+ response.data.records.length+' records! </b>'
+        if (response.data.invalidRecords.length > 0) {
+          message += response.data.invalidRecords
+        }
+        $scope.uploading = false;
+        RecordData.setFilter(false);
+        RecordData.setMessage(message);
         RecordData.incrementSearchCount();
       }, function(error) {
-        if (error.status !== 500) {
-          $scope.searchError = error.data.error;
+        $scope.uploading = false;
+        if(error.status === 413){
+          $scope.searchError = 'Payload Error: Too many records selected.';
         }
-        else {
-          $scope.searchError = 'Parsing Failed on Server. Please refresh and try again.';
-        }
-      });
-    }
-    else {
-      $scope.searchError = 'No FASTA File Selected';
-    }
-  };
-
-  $scope.sendFastaNgenbank = function() {
-    $scope.searchError = null;
-    if ($scope.fastaFile) {
-      var form = new FormData();
-      var uri = SERVER_URI+'/upfasta';
-      form.append('fastaFile', $scope.fastaFile);
-      $http.post(uri, form, {
-          headers: {'Content-Type': undefined}
-      }).then(function (response) {
-        if (response.data.records.length > 0) {
-          combinedRecords = response.data.records;
-          $scope.search();
-        }
-        else {
-          $scope.searchError = 'Processed 0 results.';
-        }
-        RecordData.incrementSearchCount();
-      }, function(error) {
-        if (error.status !== 500) {
+        else if (error.status !== 500) {
           $scope.searchError = error.data.error;
         }
         else {

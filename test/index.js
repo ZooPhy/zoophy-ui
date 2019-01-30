@@ -62,7 +62,7 @@ describe('Get Record', function() {
         assert.strictEqual('A/Maryland/02/2017', dbRecord.strain , 'Should contain correct Strain');
         assert.strictEqual('Unknown', dbRecord.isolate , 'Should contain Unknown Isolate');
         assert.strictEqual('Homo sapiens; gender M; age 3', dbRecord.host , 'Should contain correct Host name');
-        assert.strictEqual('maryland,US', dbRecord.location , 'Should contain correct Location');
+        assert.strictEqual('Maryland', dbRecord.location , 'Should contain correct Location');
         assert.isString(dbRecord.genes, 'Should contain String of Genes');
         assert.strictEqual('NS', dbRecord.genes , 'Should contain correct Gene names');
         assert.strictEqual('Influenza A virus (A/Maryland/02/2017(H1N1)) nuclear export protein (NEP) and nonstructural protein 1 (NS1) genes, complete cds.', dbRecord.definition , 'Should contain correct Definition');
@@ -320,18 +320,6 @@ describe('File Upload and Download tests', function(done) {
         .end(function(err, res) {
         if (err) done(err);
         assert.strictEqual(res.body.error, 'Invalid FASTA entries: Entries "2" Expected "3" on item #3', 'Should return error');
-        assert.strictEqual(res.status, 400, "Should not perform upload search");
-        done();
-      });
-    });
-    it('Should require valid metadata', function(done) {
-      let path = __dirname+'/bad-fasta2.fasta';
-      request(app)
-        .post('/upfasta')
-        .attach('fastaFile', path)
-        .end(function(err, res) {
-        if (err) done(err);
-        assert.strictEqual(res.body.error, 'Invalid FASTA entries: Metadata errors "2004." on item #4', 'Should return error');
         assert.strictEqual(res.status, 400, "Should not perform upload search");
         done();
       });

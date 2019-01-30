@@ -1,6 +1,6 @@
 ## ZooPhy: Reconstructing Virus Spread using Phylogeography
 
-Web Interface for [ZooPhy](https://zodo.asu.edu/zoophy/). The Web Services are available [here](https://github.com/developerDemetri/zoophy-services).
+Web Interface for [ZooPhy](https://zodo.asu.edu/zoophy/). The Web Services are available [here](https://github.com/ZooPhy/zoophy-services).
 
 ### Dependencies:
 

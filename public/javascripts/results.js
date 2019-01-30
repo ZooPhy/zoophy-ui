@@ -9,6 +9,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.selectedRecord = null;
   $scope.downloadLink = null;
   $scope.generating = false;
+  $scope.uploading = false;
   $scope.downloadFormat = "csv";
   $scope.downloadError = null;
   $scope.sortField = 'accession';
@@ -28,11 +29,20 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.distinctLocationsCount = 0;
   $scope.geoLocMap = null;
   $scope.viewLayerfeatures = [];
+  $scope.accessionFile = null;
+  $scope.accessionFileName = 'none';
+  $scope.accessionUploadError = null;
+  $scope.hideable_success = null;
+  $scope.filterSubmitButton = false;
+  $scope.searchQuery = null;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
   const MAX_COLUMNS = 11;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
+  var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
+  var allRecords;
+  var filteredRecords;
 
   if($scope.geoLocMap == null){
     console.log('initializing map');
@@ -52,6 +62,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     if (newValue !== oldValue) {
       $scope.results = RecordData.getRecords();
       $scope.sampleAmount = 20;
+      if(!RecordData.isFilter()){
+        allRecords = RecordData.getRecords();
+        $(".filterCheckBoxClass").prop('checked', false);
+        $("#filerAllCheckBox").prop('checked', false);
+        $scope.filterSubmitButton = false;
+      }
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
         $scope.clearLayerFeatures();
@@ -65,11 +81,18 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.showDetails = false;
         $scope.percentOfRecords = 0;
       }
+      if(RecordData.getMessage()!=null){
+        $scope.hideable_success = "show";
+        document.getElementById("success_message").innerHTML = RecordData.getMessage();
+      }else{
+        $scope.hideable_success = null;
+      }
       $scope.groupIsSelected = false;
       $scope.numSelected = 0;
       RecordData.setNumSelected($scope.numSelected);
       $scope.downloadLink = null;
       $scope.generating = false;
+      $scope.uploading = false;
       $scope.downloadFormat = "csv";
       $scope.warning = null;
       $scope.downloadError = null;
@@ -80,6 +103,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaError = null;
       $scope.completeRecordsCount = 0;
       $scope.distinctLocationsCount = 0;
+      $scope.accessionFile = null;
+      $scope.accessionFileName = 'none';
+      $scope.accessionUploadError = null;
     }
   });
 
@@ -102,7 +128,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.selectedRecord = selrecord;
       $scope.showDetails = false;
       $scope.showCustDetails = true;
-}
+      $scope.highlightLocation($scope.selectedRecord);
+    }
   };
 
   $scope.toggleRecord = function(record) {
@@ -323,6 +350,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     var combinedSearch = String($scope.combineResults);
       $scope.fastaError = null;
       if ($scope.fastaFile) {
+        $scope.uploading = true;
         var form = new FormData();
         var uri = SERVER_URI+'/upfasta';
         form.append('fastaFile', $scope.fastaFile);
@@ -337,28 +365,30 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
             CombinedRecords = CombinedRecords.concat(AccessionRecords);
           }
           RecordData.setRecords(CombinedRecords);
-          RecordData.setTypeGenbank(false);
-          if (response.data.records.length > 0) {
-            $scope.$parent.switchTabs('results');
-            $('<div id="warning-alert" class="alert alert-warning col-md-10 col-md-offset-1 text-center">Successfully added '+ response.data.records.length+' records</div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
-          }
-          else {
-            $scope.warning = 'Processed 0 results.';
+          var message = '<b>Successfully added '+ response.data.records.length+' records! </b>'
+          if (response.data.invalidRecords.length > 0) {
+            message += response.data.invalidRecords
           }
           $scope.groupIsSelected = false;
+          RecordData.setMessage(message);
           $scope.toggleAll();
+          RecordData.setFilter(false);
           RecordData.incrementSearchCount();
         }, function(error) {
+          $scope.uploading = false;
           if (error.status !== 500) {
-            $scope.warning = error.data.error;
+            $scope.fadeableErrorAlert(error.data.error);
+          }
+          else if(error.status === 413){
+            $scope.fadeableErrorAlert('Payload Error: Too many records selected.');
           }
           else {
-            $scope.warning = 'Parsing Failed on Server. Please refresh and try again.';
+            $scope.fadeableErrorAlert('Parsing Failed on Server. Please refresh and try again.');
           }
         });
       }
       else {
-        $scope.warning = 'No FASTA File Selected';
+        $scope.fadeableErrorAlert('No FASTA File Selected');
       }
     };
 
@@ -369,9 +399,185 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       });
     };
 
+    $scope.uploadAccessions = function(rawFile) {
+      $scope.accessionUploadError = null;
+      var newFile = rawFile[0];
+      if (newFile && newFile.size < 4000000) { //4MB
+        var filename = newFile.name.trim();
+        if (ACCESSION_FILE_RE.test(filename)) {
+          $scope.accessionFile = newFile;
+          $scope.accessionFileName = String(filename).trim();
+        }
+        else {
+          $scope.accessionUploadError = 'Invalid File Name. Must be .txt file.';
+        }
+      }
+      else {
+        $scope.accessionUploadError = 'Invalid File Size. Limit is 5kb.';
+      }
+      $scope.$apply();
+    };
+
+    $scope.sendAccessions = function() {
+      $scope.accessionUploadError = null;
+      if ($scope.accessionFile) {
+        var form = new FormData();
+        var uri = SERVER_URI+'/upload';
+        form.append('accessionFile', $scope.accessionFile);
+        $http.post(uri, form, {
+            headers: {'Content-Type': undefined}
+        }).then(function (response) {
+          RecordData.setRecords(response.data.records);
+          if (response.data.records.length > 0) {
+            $scope.fadeableSuccessAlert('Successfully added '+ response.data.records.length+' records')
+          }
+          else {
+            $scope.fadeableErrorAlert('Search returned 0 results.')
+          }
+          RecordData.setFilter(false);
+          RecordData.setMessage(null);
+          RecordData.incrementSearchCount();
+        }, function(error) {
+          if (error.status !== 500) {
+            $scope.fadeableErrorAlert(error.data.error);
+          }
+          else if(error.status === 413){
+            $scope.fadeableErrorAlert('Payload Error: Too many records selected.');
+          }
+          else {
+            $scope.fadeableErrorAlert('Search Failed on Server. Please refresh and try again.');
+          }
+        });
+      }
+      else {
+        $scope.fadeableErrorAlert('No Accession File Selected');
+      }
+    };
+
+    $scope.showAccessionUploadHelp = function() {
+      BootstrapDialog.show({
+        title: 'Accession Upload Help',
+        message: 'The Accession file needs to be a new line delimited .txt file containing 1 Accession per line. The current search limit is 2500 Accessions.'
+      });
+    };
+
     $scope.updatePercentOfRecords = function() {
       $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
     };
+
+    $scope.toggleFilter = function(type){
+      if(type!=null && type === 'ALL'){
+        if($("#filerAllCheckBox").prop('checked')){
+          $(".filterCheckBoxClass").prop('checked', true);
+          $scope.filterSubmitButton = true;
+        }else{
+          $(".filterCheckBoxClass").prop('checked', false);
+          $scope.filterSubmitButton = false;
+        }
+      }else{
+        if ($('.filterCheckBoxClass:checked').length == $('.filterCheckBoxClass').length ){
+          $("#filerAllCheckBox").prop('checked', true);
+        }else{
+          $("#filerAllCheckBox").prop('checked', false);
+        }
+        if($('.filterCheckBoxClass:checked').length > 0){
+          $scope.filterSubmitButton = true;
+        }else{
+          $scope.filterSubmitButton = false;
+        }
+      }
+    }
+
+    $scope.fadeableSuccessAlert = function(message){
+      $('<div class="alert alert-success col-md-10 col-md-offset-1 text-center"> <b>'+message+'</b></div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
+    }
+
+    $scope.fadeableErrorAlert = function(message){
+      $('<div class="alert alert-danger col-md-10 col-md-offset-1 text-center"> <b> <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>  '+message+'</b></div>').insertBefore('#warning-alert').delay(3000).fadeOut();  
+    }
+
+    $scope.filterRecords = function(){
+      filteredRecords = [];
+      var filterDate = $("input[value='Date']").prop('checked');
+      var filterCountry = $("input[value='Country']").prop('checked');
+      var filterState = $("input[value='State']").prop('checked');
+      var filterGene = $("input[value='Gene']").prop('checked');
+      var filterHost = $("input[value='Host']").prop('checked');
+      var filterLength = $("input[value='Length']").prop('checked');
+      var count =0;
+      if(allRecords!=null){
+        RecordData.setFilter(true);
+        for (var i = 0; i < allRecords.length; i++) {
+          var record = allRecords[i];
+          if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
+            || (filterState && record.state === "Unknown") || (filterGene && record.gene === "None") ||
+            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown")){
+            //ignore
+            count++;
+          }else{
+            filteredRecords.push(record);
+          }
+        }
+      }
+      if(filteredRecords.length > 0){
+        $scope.fadeableSuccessAlert("Successfully removed "+count+" incomplete records!")
+        RecordData.setRecords(filteredRecords);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.setMessage(null);
+        RecordData.incrementSearchCount();
+        $scope.searchQuery = null;
+      }
+    }
+
+    $scope.filterReset = function(){
+      $(".filterCheckBoxClass").prop('checked', false);
+      $("#filerAllCheckBox").prop('checked', false);
+      if(allRecords!=null && allRecords.length > 0){
+        RecordData.setFilter(false);
+        RecordData.setRecords(allRecords);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.setMessage(null);
+        RecordData.incrementSearchCount();
+        filteredRecords = null;
+      }
+    }
+
+    $scope.searchBarResult = function(){
+      var records = [];
+      var searchResult = [];
+      if(RecordData.isFilter() && filteredRecords!=null){
+        records = filteredRecords;
+      }else{
+        records = allRecords;
+      }
+      if(records!=null && $scope.searchQuery!=null){
+        for (var i = 0; i < records.length; i++) {
+          var record = records[i];
+          if(record.state.toLowerCase().indexOf($scope.searchQuery.toLowerCase()) >= 0 || 
+          record.country.toLowerCase().indexOf($scope.searchQuery.toLowerCase()) >= 0 ||
+          record.accession.toLowerCase().indexOf($scope.searchQuery.toLowerCase()) >= 0 ||
+          record.host.toLowerCase().indexOf($scope.searchQuery.toLowerCase()) >= 0){
+            searchResult.push(record);
+          }
+        }
+        RecordData.setRecords(searchResult);
+        RecordData.setFilter(true);
+        $scope.groupIsSelected = false;
+        $scope.toggleAll();
+        RecordData.setMessage(null);
+        RecordData.incrementSearchCount();
+      }
+    }
+
+    $('.dropdown-toggle').click(function(e) {
+      e.preventDefault();
+      var url = $(this).attr('href');
+      if (url !== '#') {
+        window.location.href = url;
+      }
+    });
 
     $scope.columnUp = function() {
       let $selected = $('#toSelectBox').find('option:selected');
@@ -446,7 +652,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         text: new ol.style.Text({
           text: '\uf041',
           font: 'normal 20px FontAwesome',
-          textBaseline: 'Bottom',
+          textBaseline: 'bottom',
           fill: new ol.style.Fill({
             color: 'black'
           })
@@ -464,7 +670,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         text: new ol.style.Text({
           text: '\uf041',
           font: 'normal 22px FontAwesome',
-          textBaseline: 'Bottom',
+          textBaseline: 'bottom',
           fill: new ol.style.Fill({
             color: 'blue'
           })
