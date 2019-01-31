@@ -38,6 +38,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.selectedRecord = null;
   $scope.searchError = null;
   $scope.uploading = false;
+  $scope.searching = false;
+  $scope.isInfluenzaA = false;
 
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
@@ -68,6 +70,8 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.fastaFile = null;
     $scope.searchCount = 0;
     $scope.uploading = false;
+    $scope.searching = false;
+    $scope.isInfluenzaA = false;
     RecordData.setRecords([]);
     RecordData.setFilter(false);
     RecordData.setMessage(null);
@@ -86,8 +90,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       // $scope.search-btn = 
     } else {
       //search-btn
-
     }
+    if($scope.allowed_values.viruses[virusIndex].tax_id == '197911'){   //InfluenzaA
+      $scope.isInfluenzaA = true;
+    }else{
+      $scope.isInfluenzaA = false;
+    }
+    console.log("isInfleunzaA: "+$scope.isInfluenzaA);
   };
 
   $scope.updateCountries = function() {
@@ -162,7 +171,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.searchError = null;
     var virus = Number($scope.virus);
     var pdmo9 = false;
-    var isInfluenzaA = false;
     if (virus === 197911) {
       var subH = Number($scope.fluAH);
       var subN = Number($scope.fluAN);
@@ -170,14 +178,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       if (subH === 1 && subN === 1) {
         pdmo9 = Boolean($scope.isPDMO9 === true);
       }
-      isInfluenzaA = true;
     }
     var host = Number($scope.host);
     if (host === 8782) {
       host = Number($scope.avianHost);
     }
     var query = 'OrganismID:' + virus + ' AND HostID:' + host;
-    if(isInfluenzaA){
+    if($scope.isInfluenzaA){
       var subType = 'H' + Number($scope.fluAH) + 'N' + Number($scope.fluAN);
       query = 'OrganismID:' + virus + ' OR Definition:' + subType + ' AND HostID:' + host;
     }
@@ -250,9 +257,11 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   }
 
   $scope.search = function() {
+    $scope.searching = true;
     var query = $scope.generateQuery();
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
+      $scope.searching = false;
       if (response.status === 200) {
         combinedRecords = combinedRecords.concat(response.data.records);
         RecordData.setRecords(combinedRecords);
