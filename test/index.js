@@ -124,7 +124,7 @@ describe('Search', function() {
         assert.strictEqual('Influenza A', indexRecord.virus, 'Should contain correct Virus name');
         assert.isString(indexRecord.date, 'Should contain String date');
         assert.strictEqual('03-Jan-2017', indexRecord.date, 'Should contain correct date')
-        assert.strictEqual('homo sapiens; gender f; age 76', indexRecord.host, 'Should contain correct Host name');
+        assert.strictEqual('human', indexRecord.host, 'Should contain correct Host name');
         assert.strictEqual('United States', indexRecord.country, 'Should contain correct Country');
         assert.strictEqual(2316, indexRecord.segmentLength, 'Should contain correct Segment Length');
         assert.strictEqual(false, indexRecord.includeInJob, 'Should not be included in Job');

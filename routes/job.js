@@ -189,12 +189,12 @@ router.post('/run', function(req, res) {
     if (!checkInput(req.body.xmlOptions.treePrior, 'string', PRIOR_RE)){
       xmlErrorMessage += 'treePrior, ';
     }
-    if (!checkInput(req.body.xmlOptions.chainLength, 'number', null) &&
-      (Number(req.body.xmlOptions.chainLength) < 10000000 && Number(req.body.xmlOptions.chainLength) > 250000000)){
+    if (!checkInput(req.body.xmlOptions.chainLength, 'number', null) ||
+      (Number(req.body.xmlOptions.chainLength) < 10000000 || Number(req.body.xmlOptions.chainLength) > 250000000)){
         xmlErrorMessage += 'chainLength, ';
     }
-    if (!checkInput(req.body.xmlOptions.subSampleRate, 'number', null) & 
-      (Number(req.body.xmlOptions.subSampleRate) < 1000 && Number(req.body.xmlOptions.subSampleRate) > 25000)){
+    if(!checkInput(req.body.xmlOptions.subSampleRate, 'number', null) || 
+    Number(req.body.xmlOptions.subSampleRate) < 1000 || Number(req.body.xmlOptions.subSampleRate) > 25000){
         xmlErrorMessage += 'subSampleRate, ';
     }
     if(xmlErrorMessage != 'Invalid XML Parameters: '){
