@@ -41,6 +41,7 @@ const FASTA_MET_SEQ_RE = /^([ACGTURYSWKMBDHVNacgturyswkmbdhvn-]){1,30000}$/;
 const SOURCE_GENBANK = 1;
 const SOURCE_FASTA = 2;
 const RECAPTCHA_SECRET_KEY = "6LdOlHoUAAAAAEsOwiu3rnxsgzaqu9sV-4G8uH3_";
+const MAX_EMAIL_ADDRESS = 2;
 
 let router = express.Router();
 
@@ -134,16 +135,30 @@ router.post('/run', function(req, res) {
         jobErrors += recordErrorMessage;
       }
     }
-    let email = null;
+    let email = '';
     if (!req.body.replyEmail) {
       jobErrors += 'Missing Reply Email, ';
+    }else{
+      var emails = req.body.replyEmail.split(',');
+      if(emails.length > MAX_EMAIL_ADDRESS){
+        jobErrors += 'Too many emails. Max ' + MAX_EMAIL_ADDRESS + ' email addresses allowed'
+      }else{
+        var emailError = 'Invalid Email(s): ';
+        for (var i=0; i<emails.length; i++){
+          if (checkInput(emails[i].trim(), 'string', EMAIL_RE)) {
+            email += String(emails[i].trim()) + ",";
+          }else{
+            emailError += emails[i].trim() + ",";
+          }
+        }
+        if(emailError != 'Invalid Email(s): '){
+          jobErrors += emailError;
+        }else{
+          email = email.slice(0,-1);
+        }
+      }
     }
-    else if (checkInput(req.body.replyEmail, 'string', EMAIL_RE)) {
-      email = String(req.body.replyEmail);
-    }
-    else {
-      jobErrors += 'Invalid Email: '+req.body.replyEmail+', ';
-    }
+    console.log(email)
     let jobName = null;
     if (req.body.jobName) {
       if (checkInput(req.body.jobName, 'string', JOB_NAME_RE)) {

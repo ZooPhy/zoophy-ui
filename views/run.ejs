@@ -38,9 +38,13 @@
     <h5 class="text-center">Selected Records: {{numSelected}}</h5>
     <div class="pushed-down">
       <div class="col-sm-3 col-sm-offset-3 col-xs-6">
-        <label for="jobEmail">Email:</label>
+        <label for="jobEmail">Email:
+          <span class="help-info" data-toggle="tooltip" data-placement="top" title="Add upto 2 emails by separating them with a comma (',')"> 
+            <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          </span>
+        </label>
         <div>
-          <input id="jobEmail" type="email" ng-model="jobEmail" placeholder="email@domain.com" class="form-control"></input>
+          <input id="jobEmail" type="text" ng-model="jobEmail" placeholder="email@domain.com" class="form-control"></input>
         </div>
       </div>
       <div class="col-sm-3 col-xs-6">
