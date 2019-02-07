@@ -35,6 +35,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.hideable_success = null;
   $scope.filterSubmitButton = false;
   $scope.searchQuery = null;
+  $scope.canPlotLocation = true;
+  $scope.showTips = true;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -71,8 +73,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
         $scope.clearLayerFeatures();
-        $scope.LoadDetails($scope.results[0]);
         $scope.loadHeatmapLayer($scope.results);
+        $scope.LoadDetails($scope.results[0]);
         $('#probThreshold').val(0);
         $('#probThrVal').text("0%");
         $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
@@ -376,11 +378,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.incrementSearchCount();
         }, function(error) {
           $scope.uploading = false;
-          if (error.status !== 500) {
-            $scope.fadeableErrorAlert(error.data.error);
-          }
-          else if(error.status === 413){
+          if(error.status === 413){
             $scope.fadeableErrorAlert('Payload Error: Too many records selected.');
+          }
+          else if (error.status !== 500) {
+            $scope.fadeableErrorAlert(error.data.error);
           }
           else {
             $scope.fadeableErrorAlert('Parsing Failed on Server. Please refresh and try again.');
@@ -438,11 +440,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.setMessage(null);
           RecordData.incrementSearchCount();
         }, function(error) {
-          if (error.status !== 500) {
-            $scope.fadeableErrorAlert(error.data.error);
-          }
-          else if(error.status === 413){
+          if(error.status === 413){
             $scope.fadeableErrorAlert('Payload Error: Too many records selected.');
+          }
+          else if (error.status !== 500) {
+            $scope.fadeableErrorAlert(error.data.error);
           }
           else {
             $scope.fadeableErrorAlert('Search Failed on Server. Please refresh and try again.');
@@ -506,7 +508,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       var filterLength = $("input[value='Length']").prop('checked');
       var count =0;
       if(allRecords!=null){
-        RecordData.setFilter(true);
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
           if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
@@ -519,7 +520,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           }
         }
       }
-      if(filteredRecords.length > 0){
+      if(count > 0){
+        RecordData.setFilter(true);
         $scope.fadeableSuccessAlert("Successfully removed "+count+" incomplete records!")
         RecordData.setRecords(filteredRecords);
         $scope.groupIsSelected = false;
@@ -527,6 +529,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         RecordData.setMessage(null);
         RecordData.incrementSearchCount();
         $scope.searchQuery = null;
+      }
+      else{
+        $scope.fadeableSuccessAlert("0 incomplete records!")
       }
     }
 
@@ -545,6 +550,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.searchBarResult = function(){
+      $("#basic-addon1").tooltip('hide');
       var records = [];
       var searchResult = [];
       if(RecordData.isFilter() && filteredRecords!=null){
@@ -633,6 +639,31 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.setupDownload(downloadColumns);
     };
 
+    $scope.toggleTips = function(){
+      if($scope.showTips){
+        $scope.showTips = false;
+      }else{
+        $scope.showTips = true;
+      }
+    };
+
+    $scope.selectTip = function(number){
+      $(window).scrollTop(0);
+      switch(number){
+        case 1: //filter
+          $('#filterModel').modal('show'); 
+          break;
+        case 2: //search
+          $("#basic-addon1").tooltip("show");
+          $("#nav-searchbar").focus();
+          break;
+        case 3: //import
+          //$("#nav_import").toggle()
+          $('#fastaModel').modal('show'); 
+          break;
+      }
+    }
+    
     //--- Map content starts ---//
     function initMap() {
       var heatmapLayer = new ol.layer.Heatmap();
@@ -682,6 +713,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         style: [featureStyle]
       })
       selectionLayer.set('zodolayer','selection');
+      $('#probThreshold').hide();
+      $('#probThrVal').hide();
   
       // Put all layers together in the map
       $scope.geoLocMap = new ol.Map({
@@ -778,15 +811,21 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
               longitude<-180||longitude>180||latitude<-90||latitude>90){
                 console.log("Missing location info for highlighted record");
+                $scope.canPlotLocation = false;
+                var mapLayers = $scope.geoLocMap.getLayers().getArray();
+                mapLayers.forEach(function (layer, i) {
+                if (layer.get('zodolayer')=='view'){
+                  layer.getSource().clear();
+                }
+              });
       }else{
+        $scope.canPlotLocation = true;
         var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
         var pointonmap = new ol.Feature(new ol.geom.Point(coord));
         pointonmap.set('name',record.location);
         pointonmap.set('accession',record.accession);
         features.push(pointonmap);
         center = coord;
-        $('#probThreshold').hide();
-        $('#probThrVal').hide();
         $scope.viewLayerfeatures = features;
         var mapLayers = $scope.geoLocMap.getLayers().getArray();
         mapLayers.forEach(function (layer, i) {

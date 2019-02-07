@@ -56,7 +56,11 @@
         </div>
       </div>
       <div class="pushed-down">
-        <label for="genes">Genes</label>
+        <label for="genes">Genes
+        <span class="help-info" data-toggle="tooltip" data-placement="top" title="HA or NA suggested for this virus"> 
+          <i ng-show="isInfluenzaA" class="fa fa-exclamation-circle" aria-hidden="true"></i>
+        </span>
+        </label>
         <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" ng-change="count();" class="form-control" multiple>
           <!-- handled by Angular -->
         </select>
@@ -131,7 +135,7 @@
       <p class="text-center" style="color:red;display:inline;"><b>{{searchCount}} Records</b></p>    
     </div>
     <div class="col-sm-1 pull-right pushed-down">
-      <button class="btn btn-info pull-right search-button" ng-click="search();" ng-model="searchBtn" ng-disabled="virus === 0"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+      <button class="btn btn-info pull-right search-button" ng-click="search();" ng-model="searchBtn" ng-disabled="virus === 0"><i ng-show="!searching" class="fa fa-search" aria-hidden="true"></i><i ng-show="searching" class="fa fa-spinner fa-pulse" aria-hidden="true"></i> Search</button>
     </div>
   </div>
 </div>
