@@ -550,6 +550,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.searchBarResult = function(){
+      $("#basic-addon1").tooltip('hide');
       var records = [];
       var searchResult = [];
       if(RecordData.isFilter() && filteredRecords!=null){
@@ -653,6 +654,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           $('#filterModel').modal('show'); 
           break;
         case 2: //search
+          $("#basic-addon1").tooltip("show");
           $("#nav-searchbar").focus();
           break;
         case 3: //import
