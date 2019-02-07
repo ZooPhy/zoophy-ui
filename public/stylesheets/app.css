@@ -35,10 +35,6 @@ label {
   margin-top: 2rem;
 }
 
-.search-button {
-  margin-right: 3rem;
-}
-
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -225,4 +221,36 @@ h6{
 
 .input-group-addon{
   padding: 0px 10px;
+}
+
+.modelview-header{
+  background-color: #5d6d79;
+  color: azure
+}
+
+.aboutpage-body{
+  background-color:#F6F7FA; 
+  font-family: Helvetica, sans-serif ;
+  color: #5c6572
+}
+.aboutpage-container{
+  background-color:#FFFFFF; 
+  padding:10px; 
+  margin-bottom:10px;
+}
+
+.aboutpage-header{
+  font-family: "Open Sans";
+  text-align:center;
+  color: #595e70
+}
+
+.aboutpage-row{
+  margin-left: 10px; 
+  margin-right: 10px
+}
+
+.aboutpage-answer{
+  color: #676d75;
+  margin-left: 15px
 }
