@@ -38,8 +38,8 @@
           </ul>
           <ul class="nav navbar-nav">
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="padding: 8px !important;color:#31708f">Import <span class="caret"></span></a>
-              <ul class="dropdown-menu">
+              <a  href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false" style="padding: 8px !important;color:#31708f">Import <span class="caret"></span></a>
+              <ul class="dropdown-menu" id="nav_import">
                   <li><input id="toolbar-button" type="button" class="btn" ng-click="uploadFormat = 'fasta'" value="FASTA" data-toggle="modal" data-target="#fastaModel"/></li>
                   <li><input id="toolbar-button" type="button" class="btn" ng-click="uploadFormat = 'Accessions'" value="GenBank Accessions" data-toggle="modal" data-target="#accessionModel"/></li>
               </ul>
@@ -62,13 +62,21 @@
     </nav>
       
     <div class="row" style="margin-top:10px">
-      <div class="col-sm-4"><h6 class="text-left">{{numSelected}}/{{results.length}} <b>{{searchedVirusName}}</b> records selected
-        <span class="help-info" data-toggle="tooltip" data-placement="top" 
-        title="ZooPhy Jobs must contain 5 to 1000 Records."> 
-          <i class="fa fa-question-circle" aria-hidden="true"></i></span></h6>
+      <div class="col-sm-4">
+        <h6 class="text-left">{{numSelected}}/{{results.length}} <b>{{searchedVirusName}}</b> records selected
+          <span class="help-info" data-toggle="tooltip" data-placement="top" 
+            title="ZooPhy Jobs must contain 5 to 1000 Records."> 
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </span>
+        </h6>
       </div>
       <div class="col-sm-4">
-        <h6 class="text-center">{{completeRecordsCount}} complete records selected</h6>
+        <h6 class="text-center">{{completeRecordsCount}} complete records selected
+          <span class="help-info" data-toggle="tooltip" data-placement="top" 
+          title="Records that are not missing date and location information"> 
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </span>
+        </h6>
       </div>
       <div class="col-sm-4">
         <h6 class="text-right">
@@ -143,7 +151,6 @@
               <tr><td class="detail-panel-padding"><b>Location:</b> {{selectedRecord.location}} </td><td class="detail-panel-padding"><b>Genes:</b> {{selectedRecord.genes}}</td></tr>
               <tr><td colspan="3" class="detail-panel-padding"><b>Virus:</b> {{selectedRecord.virus}}</td></tr>
               <tr><td colspan="3" class="detail-panel-padding"><b>Definition:</b> {{selectedRecord.definition}}</td></tr>
-              <tr><td colspan="3" class="text-center detail-panel-padding"><a ng-href="https://www.ncbi.nlm.nih.gov/nuccore/{{selectedRecord.accession}}" target="_new"><b>View Genbank Record</b></a></td></tr>
             </tbody>
           </table>
       </div>
@@ -153,9 +160,20 @@
         <p><b>Country:</b> {{selectedRecord.country}}</p>
         <p><b>Segment Length:</b> {{selectedRecord.segmentLength}}</p>
       </div>
+      <a ng-href="https://www.ncbi.nlm.nih.gov/nuccore/{{selectedRecord.accession}}" target="_blank">
+        <div class="panel-footer text-center" ng-show="showDetails">
+            <b>View Genbank Record</b>
+        </div>
+      </a>
     </div>
     <div class="panel panel-info">
-      <div class="panel-heading"><h5 class="panel-title text-center">Record Location</h5></div>
+      <div class="panel-heading">
+      <h5 class="panel-title text-center">Record Location
+        <span class="help-info" data-toggle="tooltip" data-placement="top" 
+        title="Highlighted record is missing some location information"> 
+          <i ng-show="!canPlotLocation" class="fa fa-exclamation-circle" style="color:#f44242" aria-hidden="true"></i>
+        </span>
+      </h5></div>
       <div id="geolocmap" class="map geolocmap"><div id="info"></div></div>
       <div id="geolocmaplegend">
         <table id="legend-table" class="table-condensed" border="0">
@@ -172,13 +190,30 @@
         </table>
       </div>
     </div>
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title text-center">Tips<a href="" style="color: inherit"><i class="fa fa-minus-square pull-right" ng-click="toggleTips()"></i></a></h3>
+      </div>
+      <div id="detailed-view" class="panel-body" ng-show="showTips">
+        <table id="detailed-view-table" class="table-condensed detail-panel-padding" border="0">
+          <tbody class="borderless detail-panel-padding">
+            <li class="detail-panel-padding" ng-click="selectTip(1)" ><a href="" style="color: #31708f"><b>Filter out records with missing information</b></a> </li>
+            <li class="detail-panel-padding" ng-click="selectTip(2)"><a href="" style="color: #31708f"><b>Search for a particular state or host</b></a></li>
+            <li class="detail-panel-padding" ng-click="selectTip(3)"><a href="" style="color: #31708f"><b>Import your own fasta data</b></a></li>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
+  
 
   <div class="modal fade" id="fastaModel" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <div class="modal-header modelview-header">
+          <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle" style="color: azure"></i></button>
           <label ng-click="showFastaHelp();">
           <h4 class="modal-title">FASTA
             <span class="help-info" data-toggle="tooltip" data-placement="right" 
@@ -221,8 +256,8 @@
   <div class="modal fade" id="filterModel" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <div class="modal-header modelview-header">
+          <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle" style="color: azure"></i></button>
           <h4 class="modal-title">Filter Incomplete Records <span class="help-info" data-toggle="tooltip" data-placement="right" 
             title="Filter out records with missing or unknown value for certain fields"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></h4>
         </div>
@@ -255,8 +290,8 @@
   <div class="modal fade" id="accessionModel" role="dialog">
       <div class="modal-dialog">
         <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <div class="modal-header modelview-header">
+            <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle" style="color: azure"></i></button>
             <label ng-click="showAccessionUploadHelp();"></label>
             <h4 class="modal-title">GenBank Accessions
               <span class="help-info" data-toggle="tooltip" data-placement="right" 
@@ -286,8 +321,8 @@
   <div class="modal fade" id="confirmFastaModel" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <div class="modal-header modelview-header">
+          <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle" style="color: azure"></i></button>
           <h4 class="modal-title">Warning</h4>
         </div>
         <div class="modal-body">
@@ -306,8 +341,8 @@
   <div class="modal fade" id="exportModel" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <div class="modal-header modelview-header">
+          <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle" style="color: azure"></i></button>
           <h4 class="modal-title">Download Options</h4>
         </div>
          <div class="modal-body">
@@ -361,8 +396,8 @@
   <div class="modal fade" id="sampleSelectionModel" role="dialog">
     <div class="modal-dialog">
       <div class="modal-content">
-        <div class="modal-header">
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <div class="modal-header modelview-header">
+          <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle" style="color: azure"></i></button>
           <h4 class="modal-title">Select Random Downsample<span class="help-info" data-toggle="tooltip" data-placement="top" 
           title="Select random records for job"> <i class="fa fa-question-circle" aria-hidden="true"></i></span>
         </div>
