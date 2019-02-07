@@ -96,7 +96,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }else{
       $scope.isInfluenzaA = false;
     }
-    console.log("isInfleunzaA: "+$scope.isInfluenzaA);
   };
 
   $scope.updateCountries = function() {
@@ -278,6 +277,17 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
       else {
         $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
+      }
+    }, function(error) {
+      $scope.searching = false;
+      if(error.status === 413){
+        $scope.searchError = 'Payload Error';
+      }
+      else if (error.status !== 500) {
+        $scope.searchError = error.data.error;
+      }
+      else {
+        $scope.searchError = 'Parsing Failed on Server. Please refresh and try again.';
       }
     });
     $(window).scroll(function() {
