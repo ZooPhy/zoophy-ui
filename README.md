@@ -16,6 +16,7 @@ Web Interface for [ZooPhy](https://zodo.asu.edu/zoophy/). The Web Services are a
 ### Setup:
 
 1) Create a secret_settings.js file in the bin folder with your configuration details. Refer to [settings_template.js](bin/settings_template.js)
+2) Create a utils.js file in public/javascript folder with your uri details. Refer to [utils_template.js](public/javascript/utils_template.js)
 2) Run `npm install` to install required NodeJS packages.
 3) Run `npm test` to ensure that tests are passing.
 4) Run `npm start` to start the application. 

@@ -34,7 +34,7 @@ jspm_packages
 
 #settings people don't need to see
 bin/secret_settings.js
-public/javascript/utils.js
+public/javascripts/utils.js
 
 #redis crap
 *dump.rdb
