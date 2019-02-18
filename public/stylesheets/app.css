@@ -72,6 +72,15 @@ input::-webkit-inner-spin-button {
   background-color: #FFFFFF
 }
 
+#navbar-button{
+  padding: 5px 10px; 
+  margin: 9px;
+} 
+
+.logo-font{
+  font-family:Georgia
+}
+
 @media(max-width:767px) {
   /* XS Only */
   #main-logo {
