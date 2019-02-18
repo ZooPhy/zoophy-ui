@@ -69,6 +69,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $(".filterCheckBoxClass").prop('checked', false);
         $("#filerAllCheckBox").prop('checked', false);
         $scope.filterSubmitButton = false;
+        filteredRecords = null;
+        $scope.searchQuery = null;
       }
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
