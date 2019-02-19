@@ -37,6 +37,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.searchQuery = null;
   $scope.canPlotLocation = true;
   $scope.showTips = true;
+  $scope.incompleteDateCount = 0;
+  $scope.onlyCountryInfo = 0;
+  $scope.moreStats = false;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -107,9 +110,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaError = null;
       $scope.completeRecordsCount = 0;
       $scope.distinctLocationsCount = 0;
+      $scope.incompleteDateCount = 0;
+      $scope.onlyCountryInfo = 0;
       $scope.accessionFile = null;
       $scope.accessionFileName = 'none';
       $scope.accessionUploadError = null;
+      $scope.moreStats = false;
     }
   });
 
@@ -173,6 +179,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.recordStats = function(){
     var locationMap = new Map();
     $scope.completeRecordsCount = 0;
+    $scope.incompleteDateCount = 0;
+    $scope.onlyCountryInfo = 0;
     for (var i = 0; i < $scope.results.length; i++) {
       var record = $scope.results[i];
       if(record.includeInJob && record.country !== "Unknown" ){           //location count
@@ -185,6 +193,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         }
       }if(record.includeInJob && record.date !== "Unknown" && record.country !== "Unknown" ){   //complete record
         $scope.completeRecordsCount++;
+      }if(record.includeInJob && !record.isCompleteDate){               // incomplete date
+        $scope.incompleteDateCount++;
+      }if(record.includeInJob && record.state == "Unknown"){           // only country level
+        $scope.onlyCountryInfo++;
       }
     }
     $scope.distinctLocationsCount = locationMap.size;
