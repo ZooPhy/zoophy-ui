@@ -514,7 +514,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
     $scope.filterRecords = function(){
       filteredRecords = [];
-      var filterDate = $("input[value='Date']").prop('checked');
+      var filterMissingDate = $("input[value='Missing_Date']").prop('checked');
+      var filterUnnormalizedDate = $("input[value='Unnormalized_Date']").prop('checked');
       var filterCountry = $("input[value='Country']").prop('checked');
       var filterState = $("input[value='State']").prop('checked');
       var filterGene = $("input[value='Gene']").prop('checked');
@@ -524,9 +525,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(allRecords!=null){
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
-          if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
+          if((filterMissingDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
             || (filterState && record.state === "Unknown") || (filterGene && record.gene === "None") ||
-            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown")){
+            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown") ||
+            (filterUnnormalizedDate && !record.isCompleteDate)){
             //ignore
             count++;
           }else{

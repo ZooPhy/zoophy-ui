@@ -297,10 +297,11 @@
         <div class="modal-body">
           <div id="model-container" class="container">
             <div class="row">
-              <div class="col-md-1">
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter('ALL');" ><input id="filerAllCheckBox" type="checkbox" value="All"/><p style="display:inline">All</p> </label>
+              <div class="col-md-2">
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter('ALL');" ><input id="filerAllCheckBox" type="checkbox" value="All"/><p style="display:inline">All</p> </label><br>
                 <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Gene"/><p style="display:inline">Gene</p> </label>
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Date"/><p style="display:inline">Date</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Missing_Date"/><p style="display:inline">Date</p> <p class="text-muted" style="display:inline" >(unavailable)</p></label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Unnormalized_Date"/><p style="display:inline">Date</p> <p class="text-muted" style="display:inline" >(unnormalized)</p></label>
                 <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Host"/><p style="display:inline">Host</p> </label>
               </div> 
               <div class="col-md-1">
