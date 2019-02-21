@@ -180,9 +180,11 @@ class SQLRecord {
     this.isolate = String(recordApiRecord.sequence.isolate || UNKNOWN)
     if (recordApiRecord.host) {
       this.host = String(recordApiRecord.host.name || UNKNOWN);
+      this.hostId = String(recordApiRecord.host.taxon || UNKNOWN);
     }
     else {
       this.host = UNKNOWN;
+      this.hostId = UNKNOWN
     }
     if (recordApiRecord.geonameLocation) {
       this.geonameID = String(recordApiRecord.geonameLocation.geonameID || UNKNOWN);
