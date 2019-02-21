@@ -124,7 +124,7 @@ class LuceneRecord {
     this.virus = simplifyOrganism(searchApiRecord.sequence.organism);
     this.luceneDate = String(searchApiRecord.sequence.collectionDate);
     this.date = humanizeLuceneDate(searchApiRecord.sequence.collectionDate);
-    if(String(searchApiRecord.sequence.collectionDate) === String(searchApiRecord.sequence.date)){
+    if(String(searchApiRecord.sequence.collectionDate) === String(searchApiRecord.sequence.unNormalizedDate)){
       this.isCompleteDate = true;
     }else if(searchApiRecord.sequence.collectionDate != null){
       this.isCompleteDate = false;
