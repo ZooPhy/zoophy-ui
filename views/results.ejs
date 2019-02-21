@@ -98,20 +98,28 @@
       </div>
     </div>
     <div class="row collapse" id="more_stats">
-      <div class="col-sm-6">
-        <h6 class="text-left">{{incompleteDateCount}} incomplete date records selected
+      <div class="col-sm-4">
+        <h6 class="text-left">{{incompleteDateCount}} incomplete date records
           <span class="help-info" data-toggle="tooltip" data-placement="top" 
             title="Records with incomplete date information e.g. YYYY or MM-YYY"> 
             <i class="fa fa-question-circle" aria-hidden="true"></i>
           </span>
         </h6>
       </div>
-      <div class="col-sm-6">
+      <div class="col-sm-4">
+        <h6 class="text-center">{{missingHostCount}} records with missing host
+          <span class="help-info" data-toggle="tooltip" data-placement="top" 
+          title="Records that are missing host information"> 
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </span>
+        </h6>
+      </div>
+      <div class="col-sm-4">
         <h6 class="text-right">
           <span class="help-info" data-toggle="tooltip" data-placement="top" 
           title="Records with country(PCLI) level location information only"> 
             <i class="fa fa-question-circle" aria-hidden="true"></i></span>
-            {{onlyCountryInfo}} records at PCLI level selected
+            {{onlyCountryInfo}} records at PCLI level
         </h6>
       </div>
     </div>
@@ -138,7 +146,7 @@
           <td  class="col-sm-1" >{{record.genes}}</td>
       		<td class="col-sm-2">{{record.date}} 
             <span class="help-info" data-toggle="tooltip" data-placement="top" 
-            title="Date for this record was incomplete and has been noramlized to dd-mm-yyyy"> 
+            title="Date for this record was incomplete and has been noramlized to dd-mmm-yyyy"> 
             <i class="fa fa-circle" ng-show="!record.isCompleteDate" style="font-size: .4rem; color: red"></i>
           </span>
         </td>
