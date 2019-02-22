@@ -37,6 +37,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.searchQuery = null;
   $scope.canPlotLocation = true;
   $scope.showTips = true;
+  $scope.incompleteDateCount = 0;
+  $scope.onlyCountryInfo = 0;
+  $scope.missingHostCount = 0;
+  $scope.moreStats = false;
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -45,6 +49,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var allRecords;
   var filteredRecords;
+  var availableThumbnails = ['9606','9823','9913','9615','9641','9685','9793','9796','420550'];
 
   if($scope.geoLocMap == null){
     console.log('initializing map');
@@ -69,6 +74,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $(".filterCheckBoxClass").prop('checked', false);
         $("#filerAllCheckBox").prop('checked', false);
         $scope.filterSubmitButton = false;
+        filteredRecords = null;
+        $scope.searchQuery = null;
       }
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
@@ -105,9 +112,13 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaError = null;
       $scope.completeRecordsCount = 0;
       $scope.distinctLocationsCount = 0;
+      $scope.incompleteDateCount = 0;
+      $scope.onlyCountryInfo = 0;
+      $scope.missingHostCount = 0;
       $scope.accessionFile = null;
       $scope.accessionFileName = 'none';
       $scope.accessionUploadError = null;
+      $scope.moreStats = false;
     }
   });
 
@@ -171,6 +182,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.recordStats = function(){
     var locationMap = new Map();
     $scope.completeRecordsCount = 0;
+    $scope.incompleteDateCount = 0;
+    $scope.onlyCountryInfo = 0;
+    $scope.missingHostCount = 0;
     for (var i = 0; i < $scope.results.length; i++) {
       var record = $scope.results[i];
       if(record.includeInJob && record.country !== "Unknown" ){           //location count
@@ -183,6 +197,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         }
       }if(record.includeInJob && record.date !== "Unknown" && record.country !== "Unknown" ){   //complete record
         $scope.completeRecordsCount++;
+      }if(record.includeInJob && !record.isCompleteDate){               // incomplete date
+        $scope.incompleteDateCount++;
+      }if(record.includeInJob && record.state == "Unknown"){           // only country level
+        $scope.onlyCountryInfo++;
+      }if(record.includeInJob && record.host == "Unknown"){           // missing host
+        $scope.missingHostCount++;
       }
     }
     $scope.distinctLocationsCount = locationMap.size;
@@ -500,7 +520,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
     $scope.filterRecords = function(){
       filteredRecords = [];
-      var filterDate = $("input[value='Date']").prop('checked');
+      var filterMissingDate = $("input[value='Missing_Date']").prop('checked');
+      var filterUnnormalizedDate = $("input[value='Unnormalized_Date']").prop('checked');
       var filterCountry = $("input[value='Country']").prop('checked');
       var filterState = $("input[value='State']").prop('checked');
       var filterGene = $("input[value='Gene']").prop('checked');
@@ -510,9 +531,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(allRecords!=null){
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
-          if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
+          if((filterMissingDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
             || (filterState && record.state === "Unknown") || (filterGene && record.gene === "None") ||
-            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown")){
+            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown") ||
+            (filterUnnormalizedDate && !record.isCompleteDate)){
             //ignore
             count++;
           }else{
@@ -678,24 +700,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       });
       raster.set('zodolayer','tile');
   
-      // highlight layer
-      var featureStyle = new ol.style.Style({
-        text: new ol.style.Text({
-          text: '\uf041',
-          font: 'normal 20px FontAwesome',
-          textBaseline: 'bottom',
-          fill: new ol.style.Fill({
-            color: 'black'
-          })
-        })
-      });
-      var vectorSource = new ol.source.Vector({features: []});
-      var highlightLayer = new ol.layer.Vector({
-        source: vectorSource,
-        style: [featureStyle]
-      })
-      highlightLayer.set('zodolayer','view');
-  
       // selection layer
       var featureStyle = new ol.style.Style({
         text: new ol.style.Text({
@@ -718,7 +722,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   
       // Put all layers together in the map
       $scope.geoLocMap = new ol.Map({
-        layers: [raster, heatmapLayer, selectionLayer, highlightLayer],
+        layers: [raster, heatmapLayer, selectionLayer],
         target: 'geolocmap',
         view: new ol.View({
           center: [0, 0],
@@ -734,6 +738,61 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.updateThreshold($('#probThreshold').val()/100);
       });
     };
+
+    $scope.removeLayerMap = function(host){
+      var isSameHost = null;
+      var layerToRemove = null;
+      $scope.geoLocMap.getLayers().forEach(function (layer) {
+        if (layer.get('zodolayer') != undefined && layer.get('zodolayer') === 'view') {
+          layerToRemove = layer;
+          if (layer.get('host') != undefined && layer.get('host') == host) {
+            isSameHost = true;
+          }
+        }
+      });
+      if(isSameHost){
+        return false;
+      }else{
+        if(layerToRemove){
+          $scope.geoLocMap.removeLayer(layerToRemove);
+        }
+        return true;
+      }
+    }
+
+    $scope.addLayerToMap = function(host) {
+      console.log("host",host)
+      // highlight layer
+      var featureStyle = new ol.style.Style({
+        text: new ol.style.Text({
+          text: '\uf041',
+          font: 'normal 20px FontAwesome',
+          textBaseline: 'bottom',
+          fill: new ol.style.Fill({
+            color: 'black'
+          })
+        })
+      });
+      if(host != 'Unknown' && availableThumbnails.includes(host)){
+        featureStyle = new ol.style.Style({ 
+          image: new ol.style.Icon ({ 
+            scale:'0.4', 
+            src: 'images/host/'+host+'.png' 
+          }) 
+        });
+      }
+      var vectorSource = new ol.source.Vector({features: []});
+      var highlightLayer = new ol.layer.Vector({
+        source: vectorSource,
+        style: [featureStyle]
+      })
+      highlightLayer.set('host', host);
+      highlightLayer.set('zodolayer','view');
+      var addNewLayer = $scope.removeLayerMap(host);
+      if(addNewLayer){
+        $scope.geoLocMap.addLayer(highlightLayer);
+      }
+    }
 
     $scope.clearLayerFeatures = function() {
       // console.log("clearing features");
@@ -804,6 +863,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     };
 
     $scope.highlightLocation = function(record) {
+      $scope.addLayerToMap(record.hostId);
       var features = [];
       var center = [0,0];
       var longitude = parseFloat(record.longitude);

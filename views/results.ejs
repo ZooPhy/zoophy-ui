@@ -81,9 +81,45 @@
       <div class="col-sm-4">
         <h6 class="text-right">
           <span class="help-info" data-toggle="tooltip" data-placement="top" 
-          title="This is an approximate count of number of distinct locations among the selected records. Actual count might vary once the job is run. Select at least 2 and up to 25 distinct locations for the job to run successfully."> 
+          title="This is an approximate count of number of distinct locations among the selected records. 
+          Actual count might vary once the job is run. Select at least 2 and up to 25 distinct locations 
+          for the job to run successfully."> 
             <i class="fa fa-question-circle" aria-hidden="true"></i></span>
-            {{distinctLocationsCount}} distinct locations selected
+            {{distinctLocationsCount}} distinct locations selected &nbsp;
+            <span class="help-info" data-toggle="tooltip" data-placement="top" 
+            title="Show more stats"> 
+            <i class="fa fa-plus-square" data-toggle="collapse" data-target="#more_stats" ng-click="moreStats = true" ng-show="!moreStats"></i>
+            </span>
+            <span class="help-info" data-toggle="tooltip" data-placement="top" 
+            title="Show few stats"> 
+            <i class="fa fa-minus-square" data-toggle="collapse" data-target="#more_stats" ng-click="moreStats = false" ng-show="moreStats"></i>
+            </span>
+        </h6>
+      </div>
+    </div>
+    <div class="row collapse" id="more_stats">
+      <div class="col-sm-4">
+        <h6 class="text-left">{{incompleteDateCount}} incomplete date records
+          <span class="help-info" data-toggle="tooltip" data-placement="top" 
+            title="Records with incomplete date information e.g. YYYY or MM-YYY"> 
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </span>
+        </h6>
+      </div>
+      <div class="col-sm-4">
+        <h6 class="text-center">{{missingHostCount}} records with missing host
+          <span class="help-info" data-toggle="tooltip" data-placement="top" 
+          title="Records that are missing host information"> 
+            <i class="fa fa-question-circle" aria-hidden="true"></i>
+          </span>
+        </h6>
+      </div>
+      <div class="col-sm-4">
+        <h6 class="text-right">
+          <span class="help-info" data-toggle="tooltip" data-placement="top" 
+          title="Records with country(PCLI) level location information only"> 
+            <i class="fa fa-question-circle" aria-hidden="true"></i></span>
+            {{onlyCountryInfo}} records at PCLI level
         </h6>
       </div>
     </div>
@@ -108,7 +144,12 @@
           <td class="col-sm-1 text-center" ng-click="toggleRecord(record); $event.stopPropagation();"><input type="checkbox" ng-checked="record.includeInJob"></td>
           <td class="col-sm-1"><a href="https://www.ncbi.nlm.nih.gov/nuccore/{{record.accession}}" target="_blank">{{record.accession}}</a></td>
           <td  class="col-sm-1" >{{record.genes}}</td>
-      		<td class="col-sm-2">{{record.date}}</td>
+      		<td class="col-sm-2">{{record.date}} 
+            <span class="help-info" data-toggle="tooltip" data-placement="top" 
+            title="Date for this record was incomplete and has been noramlized to dd-mmm-yyyy"> 
+            <i class="fa fa-circle" ng-show="!record.isCompleteDate" style="font-size: .4rem; color: red"></i>
+          </span>
+        </td>
           <td class="col-sm-2 hidden-xs">{{record.host}}</td>
           <td class="col-sm-2">{{record.state}}</td>
           <td class="col-sm-2">{{record.country}}</td>
@@ -264,10 +305,11 @@
         <div class="modal-body">
           <div id="model-container" class="container">
             <div class="row">
-              <div class="col-md-1">
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter('ALL');" ><input id="filerAllCheckBox" type="checkbox" value="All"/><p style="display:inline">All</p> </label>
+              <div class="col-md-2">
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter('ALL');" ><input id="filerAllCheckBox" type="checkbox" value="All"/><p style="display:inline">All</p> </label><br>
                 <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Gene"/><p style="display:inline">Gene</p> </label>
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Date"/><p style="display:inline">Date</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Missing_Date"/><p style="display:inline">Date</p> <p class="text-muted" style="display:inline" >(unavailable)</p></label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Unnormalized_Date"/><p style="display:inline">Date</p> <p class="text-muted" style="display:inline" >(unnormalized)</p></label>
                 <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Host"/><p style="display:inline">Host</p> </label>
               </div> 
               <div class="col-md-1">
@@ -357,6 +399,7 @@
                     <option value="Virus">Virus</option>
                     <option value="Human_Date">Date (DD-MMM-YYYY)</option>
                     <option value="Decimal_Date">Date (Decimal)</option>
+                    <option value="Unnormalized_Date">Date (Unnormalized)</option>
                     <option value="HostID">Host ID</option>
                     <option value="Host">Host</option>
                     <option value="Country">Country</option>
