@@ -24,7 +24,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.selectedRegions = [];
   $scope.searchCount = 0;
 
-  $scope.from = 0;
+  $scope.from = 2010;
   $scope.to = Number(new Date().getFullYear());
   $scope.minimumSequenceLength = 0;
   $scope.isPDMO9 = false;
@@ -40,6 +40,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.uploading = false;
   $scope.searching = false;
   $scope.isInfluenzaA = false;
+  $scope.isSuggestedLength = false;
 
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
@@ -72,6 +73,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.uploading = false;
     $scope.searching = false;
     $scope.isInfluenzaA = false;
+    $scope.isSuggestedLength = false;
     RecordData.setRecords([]);
     RecordData.setFilter(false);
     RecordData.setMessage(null);
@@ -96,7 +98,23 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }else{
       $scope.isInfluenzaA = false;
     }
+    $scope.selectedGenes = $scope.genes[$scope.genes.length-1];
   };
+
+  $scope.checkMinLength = function(){
+    var genes = $scope.selectedGenes;
+    var virus = Number($scope.virus);
+    if (genes.length > 0) {
+    }
+    var lenghtMap=$scope.allowed_values.min_segemnt_length;
+    if(lenghtMap[virus] && lenghtMap[virus][genes]){
+      $scope.minimumSequenceLength = Number(lenghtMap[virus][genes])
+      $scope.isSuggestedLength = true;
+    }else{
+      $scope.minimumSequenceLength = 0
+      $scope.isSuggestedLength = false;
+    }
+  }
 
   $scope.updateCountries = function() {
     var tempCountries = [];
