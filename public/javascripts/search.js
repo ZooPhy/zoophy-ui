@@ -98,7 +98,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }else{
       $scope.isInfluenzaA = false;
     }
-    $scope.selectedGenes = $scope.genes[$scope.genes.length-1];
+    $scope.selectedGenes = $scope.genes[0];
   };
 
   $scope.checkMinLength = function(){
@@ -210,10 +210,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
     var genes = $scope.selectedGenes;
     if (genes.length > 0) {
-      var geneString = ' AND Gene:('+genes[0];
-      for (var i = 1; i < genes.length; i++) {
-        geneString += ' OR '+genes[i];
-      }
+      var geneString = ' AND Gene:(' + genes;
       if (genes.indexOf(completeGenes) === -1) {
         geneString += ' NOT Complete';
       }
