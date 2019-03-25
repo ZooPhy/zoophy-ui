@@ -41,8 +41,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.onlyCountryInfoSelected = 0;
   $scope.missingHostCountSelected = 0;
   $scope.missingLocationCountSelected = 0;
-  $scope.missingGeneCountSelected = 0;
-  $scope.missingGeneCount = 0;
   $scope.missingDateCount = 0;
   $scope.missingHostCount = 0;
   $scope.missingStateCount = 0;
@@ -123,8 +121,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.onlyCountryInfoSelected = 0;
       $scope.missingHostCountSelected = 0;
       $scope.missingLocationCountSelected = 0;
-      $scope.missingGeneCountSelected = 0;
-      $scope.missingGeneCount = 0;
       $scope.missingDateCount = 0;
       $scope.missingHostCount = 0;
       $scope.missingStateCount = 0;
@@ -201,7 +197,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.onlyCountryInfoSelected = 0;
     $scope.missingHostCountSelected = 0;
     $scope.missingLocationCountSelected = 0;
-    $scope.missingGeneCountSelected = 0;
     for (var i = 0; i < $scope.results.length; i++) {
       var record = $scope.results[i];
       if(record.includeInJob && record.country !== "Unknown" ){           //location count
@@ -222,24 +217,18 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.missingHostCountSelected++;
       }if(record.includeInJob && record.country == "Unknown"){
         $scope.missingLocationCountSelected++;
-      }if(record.includeInJob && record.gene == "Unknown"){
-        $scope.missingGeneCountSelected++;
       }
     }
     $scope.distinctLocationsCountSelected = locationMap.size;
   }
 
   $scope.allRecordStats = function(){
-    $scope.missingGeneCount = 0;
     $scope.missingDateCount = 0;
     $scope.missingHostCount = 0;
     $scope.missingStateCount = 0;
     $scope.missingCountryCount = 0;
     for (var i = 0; i < $scope.results.length; i++) {
       var record = $scope.results[i];
-      if(record.gene === "Unknown"){
-        $scope.missingGeneCount++;
-      }
       if(record.date === "Unknown" || !record.isCompleteDate){
         $scope.missingDateCount++;
       }
