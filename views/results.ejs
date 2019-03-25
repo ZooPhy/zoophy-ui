@@ -71,7 +71,7 @@
         </h6>
       </div>
       <div class="col-sm-4">
-        <h6 class="text-center">{{completeRecordsCount}} complete records selected
+        <h6 class="text-center">{{completeRecordsCountSelected}} complete records selected
           <span class="help-info" data-toggle="tooltip" data-placement="top" 
           title="Records that are not missing date and location information"> 
             <i class="fa fa-question-circle" aria-hidden="true"></i>
@@ -85,7 +85,7 @@
           Actual count might vary once the job is run. Select at least 2 and up to 25 distinct locations 
           for the job to run successfully."> 
             <i class="fa fa-question-circle" aria-hidden="true"></i></span>
-            {{distinctLocationsCount}} distinct locations selected &nbsp;
+            {{distinctLocationsCountSelected}} distinct locations selected &nbsp;
             <span class="help-info" data-toggle="tooltip" data-placement="top" 
             title="Show more stats"> 
             <i class="fa fa-plus-square" data-toggle="collapse" data-target="#more_stats" ng-click="moreStats = true" ng-show="!moreStats"></i>
@@ -99,7 +99,7 @@
     </div>
     <div class="row collapse" id="more_stats">
       <div class="col-sm-4">
-        <h6 class="text-left">{{incompleteDateCount}} incomplete date records
+        <h6 class="text-left">{{incompleteDateCountSelected}} incomplete date records
           <span class="help-info" data-toggle="tooltip" data-placement="top" 
             title="Records with incomplete date information e.g. YYYY or MM-YYY"> 
             <i class="fa fa-question-circle" aria-hidden="true"></i>
@@ -107,7 +107,7 @@
         </h6>
       </div>
       <div class="col-sm-4">
-        <h6 class="text-center">{{missingHostCount}} records with missing host
+        <h6 class="text-center">{{missingHostCountSelected}} records with missing host
           <span class="help-info" data-toggle="tooltip" data-placement="top" 
           title="Records that are missing host information"> 
             <i class="fa fa-question-circle" aria-hidden="true"></i>
@@ -119,7 +119,7 @@
           <span class="help-info" data-toggle="tooltip" data-placement="top" 
           title="Records with country(PCLI) level location information only"> 
             <i class="fa fa-question-circle" aria-hidden="true"></i></span>
-            {{onlyCountryInfo}} records at PCLI level
+            {{onlyCountryInfoSelected}} records at PCLI level
         </h6>
       </div>
     </div>
@@ -300,22 +300,20 @@
         <div class="modal-header modelview-header">
           <button type="button" class="close" data-dismiss="modal"><i class="fa fa-times-circle" style="color: azure"></i></button>
           <h4 class="modal-title">Filter Incomplete Records <span class="help-info" data-toggle="tooltip" data-placement="right" 
-            title="Filter out records with missing or unknown value for certain fields"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></h4>
+            title="Filter out records with missing or unknown value for selected fields"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></h4>
         </div>
         <div class="modal-body">
           <div id="model-container" class="container">
             <div class="row">
               <div class="col-md-2">
                 <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter('ALL');" ><input id="filerAllCheckBox" type="checkbox" value="All"/><p style="display:inline">All</p> </label><br>
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Gene"/><p style="display:inline">Gene</p> </label>
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Missing_Date"/><p style="display:inline">Date</p> <p class="text-muted" style="display:inline" >(unavailable)</p></label>
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Unnormalized_Date"/><p style="display:inline">Date</p> <p class="text-muted" style="display:inline" >(unnormalized)</p></label>
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Host"/><p style="display:inline">Host</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Gene"/><p style="display:inline">Gene</p><p class="text-muted" style="display: inline" >&nbsp;({{missingGeneCount}})</p></label><br>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Missing_Date"/><p style="display:inline">Date</p><p class="text-muted" style="display: inline" >&nbsp;({{missingDateCount}})</p></label><br>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Host"/><p style="display:inline">Host</p><p class="text-muted" style="display: inline" >&nbsp;({{missingHostCount}})</p></label>
               </div> 
               <div class="col-md-1">
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="State"/><p style="display:inline">State</p> </label>
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Country"/><p style="display:inline">Country</p> </label>
-                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Length"/><p style="display:inline">Length</p> </label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="State"/><p style="display:inline">State</p><p class="text-muted" style="display: inline" >&nbsp;({{missingStateCount}})</p></label>
+                <label class="checkbox-inline" style="margin: 0px" ng-click="toggleFilter();"><input type="checkbox" class="filterCheckBoxClass" value="Country"/><p style="display:inline">Country</p><p class="text-muted" style="display: inline" >&nbsp;({{missingCountryCount}})</p></label>
               </div>
             </div>  
           </div>
@@ -462,7 +460,7 @@
             </div>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-default" ng-click="validateDownSample(); recordStats();" data-dismiss="modal">Done</button>
+          <button type="button" class="btn btn-default" ng-click="validateDownSample(); selectedRecordStats();" data-dismiss="modal">Done</button>
         </div>
       </div>
     </div>

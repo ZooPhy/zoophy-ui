@@ -25,8 +25,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
   $scope.downloadColumnsCount = 0;
   $scope.searchedVirusName = null;
-  $scope.completeRecordsCount = 0;
-  $scope.distinctLocationsCount = 0;
   $scope.geoLocMap = null;
   $scope.viewLayerfeatures = [];
   $scope.accessionFile = null;
@@ -37,9 +35,18 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.searchQuery = null;
   $scope.canPlotLocation = true;
   $scope.showTips = true;
-  $scope.incompleteDateCount = 0;
-  $scope.onlyCountryInfo = 0;
+  $scope.distinctLocationsCountSelected = 0;
+  $scope.completeRecordsCountSelected = 0;
+  $scope.incompleteDateCountSelected = 0;
+  $scope.onlyCountryInfoSelected = 0;
+  $scope.missingHostCountSelected = 0;
+  $scope.missingLocationCountSelected = 0;
+  $scope.missingGeneCountSelected = 0;
+  $scope.missingGeneCount = 0;
+  $scope.missingDateCount = 0;
   $scope.missingHostCount = 0;
+  $scope.missingStateCount = 0;
+  $scope.missingCountryCount = 0;
   $scope.moreStats = false;
 
   const SOURCE_GENBANK = 1;
@@ -110,15 +117,23 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaFilename = 'none';
       $scope.fastaFile = null;
       $scope.fastaError = null;
-      $scope.completeRecordsCount = 0;
-      $scope.distinctLocationsCount = 0;
-      $scope.incompleteDateCount = 0;
-      $scope.onlyCountryInfo = 0;
+      $scope.completeRecordsCountSelected = 0;
+      $scope.distinctLocationsCountSelected = 0;
+      $scope.incompleteDateCountSelected = 0;
+      $scope.onlyCountryInfoSelected = 0;
+      $scope.missingHostCountSelected = 0;
+      $scope.missingLocationCountSelected = 0;
+      $scope.missingGeneCountSelected = 0;
+      $scope.missingGeneCount = 0;
+      $scope.missingDateCount = 0;
       $scope.missingHostCount = 0;
+      $scope.missingStateCount = 0;
+      $scope.missingCountryCount = 0;
       $scope.accessionFile = null;
       $scope.accessionFileName = 'none';
       $scope.accessionUploadError = null;
       $scope.moreStats = false;
+      $scope.allRecordStats();
     }
   });
 
@@ -160,7 +175,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
     record.includeInJob = !record.includeInJob;
     RecordData.setNumSelected($scope.numSelected);
-    $scope.recordStats();
+    $scope.selectedRecordStats();
   };
 
   $scope.toggleAll = function() {
@@ -175,16 +190,18 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
     $scope.updateAllSelections($scope.results, $scope.groupIsSelected);
     RecordData.setNumSelected($scope.numSelected);
-    $scope.recordStats();
+    $scope.selectedRecordStats();
   };
 
 
-  $scope.recordStats = function(){
+  $scope.selectedRecordStats = function(){
     var locationMap = new Map();
-    $scope.completeRecordsCount = 0;
-    $scope.incompleteDateCount = 0;
-    $scope.onlyCountryInfo = 0;
-    $scope.missingHostCount = 0;
+    $scope.completeRecordsCountSelected = 0;
+    $scope.incompleteDateCountSelected = 0;
+    $scope.onlyCountryInfoSelected = 0;
+    $scope.missingHostCountSelected = 0;
+    $scope.missingLocationCountSelected = 0;
+    $scope.missingGeneCountSelected = 0;
     for (var i = 0; i < $scope.results.length; i++) {
       var record = $scope.results[i];
       if(record.includeInJob && record.country !== "Unknown" ){           //location count
@@ -195,17 +212,47 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         }else{
           locationMap.set(locationString,1);
         }
-      }if(record.includeInJob && record.date !== "Unknown" && record.country !== "Unknown" ){   //complete record
-        $scope.completeRecordsCount++;
-      }if(record.includeInJob && !record.isCompleteDate){               // incomplete date
-        $scope.incompleteDateCount++;
-      }if(record.includeInJob && record.state == "Unknown"){           // only country level
-        $scope.onlyCountryInfo++;
-      }if(record.includeInJob && record.host == "Unknown"){           // missing host
-        $scope.missingHostCount++;
+      }if(record.includeInJob && record.date !== "Unknown" && record.country !== "Unknown" ){
+        $scope.completeRecordsCountSelected++;
+      }if(record.includeInJob && !record.isCompleteDate){
+        $scope.incompleteDateCountSelected++;
+      }if(record.includeInJob && record.state == "Unknown"){
+        $scope.onlyCountryInfoSelected++;
+      }if(record.includeInJob && record.host == "Unknown"){
+        $scope.missingHostCountSelected++;
+      }if(record.includeInJob && record.country == "Unknown"){
+        $scope.missingLocationCountSelected++;
+      }if(record.includeInJob && record.gene == "Unknown"){
+        $scope.missingGeneCountSelected++;
       }
     }
-    $scope.distinctLocationsCount = locationMap.size;
+    $scope.distinctLocationsCountSelected = locationMap.size;
+  }
+
+  $scope.allRecordStats = function(){
+    $scope.missingGeneCount = 0;
+    $scope.missingDateCount = 0;
+    $scope.missingHostCount = 0;
+    $scope.missingStateCount = 0;
+    $scope.missingCountryCount = 0;
+    for (var i = 0; i < $scope.results.length; i++) {
+      var record = $scope.results[i];
+      if(record.gene === "Unknown"){
+        $scope.missingGeneCount++;
+      }
+      if(record.date === "Unknown" || !record.isCompleteDate){
+        $scope.missingDateCount++;
+      }
+      if(record.host === "Unknown"){
+        $scope.missingHostCount++;
+      }
+      if(record.state === "Unknown"){
+        $scope.missingStateCount++;
+      }
+      if(record.country === "Unknown"){
+        $scope.missingCountryCount++;
+      }
+    }
   }
 
   $scope.goToRun = function() {
@@ -521,20 +568,17 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.filterRecords = function(){
       filteredRecords = [];
       var filterMissingDate = $("input[value='Missing_Date']").prop('checked');
-      var filterUnnormalizedDate = $("input[value='Unnormalized_Date']").prop('checked');
       var filterCountry = $("input[value='Country']").prop('checked');
       var filterState = $("input[value='State']").prop('checked');
       var filterGene = $("input[value='Gene']").prop('checked');
       var filterHost = $("input[value='Host']").prop('checked');
-      var filterLength = $("input[value='Length']").prop('checked');
       var count =0;
       if(allRecords!=null){
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
-          if((filterMissingDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
+          if((filterMissingDate && (record.date === "Unknown" || !record.isCompleteDate)) || (filterCountry && record.country === "Unknown")
             || (filterState && record.state === "Unknown") || (filterGene && record.gene === "None") ||
-            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown") ||
-            (filterUnnormalizedDate && !record.isCompleteDate)){
+            (filterHost && record.host === "Unknown")){
             //ignore
             count++;
           }else{

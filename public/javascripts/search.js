@@ -99,13 +99,12 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       $scope.isInfluenzaA = false;
     }
     $scope.selectedGenes = $scope.genes[0];
+    $scope.checkMinLength();
   };
 
   $scope.checkMinLength = function(){
     var genes = $scope.selectedGenes;
     var virus = Number($scope.virus);
-    if (genes.length > 0) {
-    }
     var lenghtMap=$scope.allowed_values.min_segemnt_length;
     if(lenghtMap[virus] && lenghtMap[virus][genes]){
       $scope.minimumSequenceLength = Number(lenghtMap[virus][genes])
