@@ -41,11 +41,16 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.onlyCountryInfoSelected = 0;
   $scope.missingHostCountSelected = 0;
   $scope.missingLocationCountSelected = 0;
+  $scope.onlyYearUNdateSelected = 0;
+  $scope.missingDateUNdateSelected = 0;
+  $scope.missingDateSelected = 0;
   $scope.missingDateCount = 0;
   $scope.missingHostCount = 0;
   $scope.missingStateCount = 0;
   $scope.missingCountryCount = 0;
   $scope.moreStats = false;
+  $scope.hideCharts = true;
+  $scope.selectedStat = 'location';
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -55,6 +60,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   var allRecords;
   var filteredRecords;
   var availableThumbnails = ['9606','9823','9913','9615','9641','9685','9793','9796','420550'];
+
+  var XYchart = null;
+  var PieChart = null;
 
   if($scope.geoLocMap == null){
     console.log('initializing map');
@@ -121,6 +129,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.onlyCountryInfoSelected = 0;
       $scope.missingHostCountSelected = 0;
       $scope.missingLocationCountSelected = 0;
+      $scope.onlyYearUNdateSelected = 0;
+      $scope.missingDateUNdateSelected = 0;
+      $scope.missingDateSelected = 0;
       $scope.missingDateCount = 0;
       $scope.missingHostCount = 0;
       $scope.missingStateCount = 0;
@@ -129,7 +140,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.accessionFileName = 'none';
       $scope.accessionUploadError = null;
       $scope.moreStats = false;
+      $scope.hideCharts = true;
+      $scope.selectedStat = 'location';
+      $('#more_stats').collapse('hide');
       $scope.allRecordStats();
+      $scope.loadPieChart();
+      $scope.loadXYChart();
     }
   });
 
@@ -197,6 +213,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.onlyCountryInfoSelected = 0;
     $scope.missingHostCountSelected = 0;
     $scope.missingLocationCountSelected = 0;
+    $scope.onlyYearUNdateSelected = 0;
+    $scope.missingDateUNdateSelected = 0;
+    $scope.missingDateSelected = 0;
     for (var i = 0; i < $scope.results.length; i++) {
       var record = $scope.results[i];
       if(record.includeInJob && record.country !== "Unknown" ){           //location count
@@ -215,11 +234,27 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.onlyCountryInfoSelected++;
       }if(record.includeInJob && record.host == "Unknown"){
         $scope.missingHostCountSelected++;
-      }if(record.includeInJob && record.country == "Unknown"){
+      }if(record.includeInJob && record.country == "Unknown" && record.state == "Unknown"){
         $scope.missingLocationCountSelected++;
+      }if(record.includeInJob){
+        var splitDate = record.unNormalizedDate.split('-');
+        if(record.unNormalizedDate == "Unknown"){
+          $scope.missingDateSelected++;
+        }else if(splitDate.length == 2){
+          $scope.missingDateUNdateSelected++;
+        }else if(splitDate.length == 1){
+          $scope.onlyYearUNdateSelected++;
+        }
       }
     }
     $scope.distinctLocationsCountSelected = locationMap.size;
+    if(RecordData.getNumSelected() > 0){
+      $scope.hideCharts = false;
+      $scope.updateXYChartData();
+      $scope.updatePieChartData($scope.selectedStat, false);
+    }else{
+      $scope.hideCharts = true;
+    }
   }
 
   $scope.allRecordStats = function(){
@@ -718,6 +753,205 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           break;
       }
     }
+
+    //-- Charts content starts --//
+
+  $scope.updatePieChartData = function(type, toggle){
+    if(toggle){
+      $scope.moreStats = true;
+      $('#more_stats').collapse('show');
+    }
+    $scope.selectedStat = type
+    if(type == 'host'){
+      PieChart.data = [{
+        stat: "Records with Host",
+        count: $scope.numSelected - $scope.missingHostCountSelected
+      },{
+        stat: "Records missing Host",
+        count: $scope.missingHostCountSelected
+      }]
+    }
+    if(type == 'location'){
+      PieChart.data = [{
+        stat: "Complete Location info",
+        count: $scope.numSelected - $scope.onlyCountryInfoSelected - $scope.missingLocationCountSelected
+      },{
+        stat: "No location info available",
+        count: $scope.missingLocationCountSelected
+      },{
+        stat: "Missing State info",
+        count: $scope.onlyCountryInfoSelected
+      }]
+    }
+    if(type == 'date'){
+      PieChart.data = [{
+        stat: "Only Year",
+        count: $scope.onlyYearUNdateSelected
+      },{
+        stat: "Month and year",
+        count: $scope.missingDateUNdateSelected
+      },{
+        stat: "Missing Date",
+        count: $scope.missingDateSelected
+      },{
+        stat: "Complete Date",
+        count: $scope.numSelected - $scope.onlyYearUNdateSelected - $scope.missingDateUNdateSelected - $scope.missingDateSelected
+      }]
+    }
+  }
+
+  $scope.updateXYChartData = function(){
+    XYchart.data = [{
+      "stat": "Selected Records",
+      "count": $scope.numSelected
+    },{
+      "stat": "Complete Records",
+      "count": $scope.completeRecordsCountSelected
+    },{
+      "stat": "Distinct Locations",
+      "count": $scope.distinctLocationsCountSelected
+    },{
+      "stat": "Country Level",
+      "count": $scope.onlyCountryInfoSelected
+    }];
+  }
+
+  $scope.loadXYChart = function(){
+    if(XYchart != null){
+      //$scope.updateXYChartData();
+    }else{
+      //am4core.useTheme(am4themes_animated);
+      XYchart = am4core.create("chartXYdiv", am4charts.XYChart);
+  
+      XYchart.data = [{
+        "stat": "Selected Records",
+        "count": 10
+      }, {
+        "stat": "Complete Records",
+        "count": 2
+      }, {
+        "stat": "Distinct Locations",
+        "count": 5
+      }, {
+        "stat": "Country Level",
+        "count": 5
+      }];
+      
+      var categoryAxis = XYchart.xAxes.push(new am4charts.CategoryAxis());
+      categoryAxis.dataFields.category = "stat";
+      categoryAxis.renderer.grid.template.location = 0;
+      categoryAxis.renderer.minGridDistance = 30;
+
+      categoryAxis.renderer.labels.template.tooltipText = "{category}";
+      categoryAxis.tooltip.label.wrap = true
+      categoryAxis.tooltip.label.adapter.add("textOutput", function(text) {
+        if(text == 'Complete Records'){
+          return "Records that are not missing date and location information"
+        }
+        if(text == 'Distinct Locations'){
+          return "This is an approximate count of number of distinct locations among the selected records." 
+          + " Actual count might vary once the job is run. Select at least 2 and up to 25 distinct locations" 
+          + " for the job to run successfully."
+        }
+        if(text == 'Country Level'){
+          return "Records with country level location information only. For better results select records"
+          + " with atleast state information."
+        }
+        return text;
+      });
+
+      categoryAxis.renderer.labels.template.tooltipPosition = "pointer";
+  
+      categoryAxis.renderer.labels.template.adapter.add("dy", function(dy, target) {
+        if (target.dataItem && target.dataItem.index & 2 == 2) {
+          return dy + 25;
+        }
+        return dy;
+      });
+      var valueAxis = XYchart.yAxes.push(new am4charts.ValueAxis());
+      // Create series
+      var series = XYchart.series.push(new am4charts.ColumnSeries());
+      series.dataFields.valueY = "count";
+      series.dataFields.categoryX = "stat";
+      series.name = "count";
+      series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+      series.columns.template.fillOpacity = .8;
+  
+      var columnTemplate = series.columns.template;
+      columnTemplate.strokeWidth = 2;
+      columnTemplate.strokeOpacity = 1;
+    }
+  }
+
+  $scope.loadPieChart = function(){
+    if(PieChart != null){
+      //$scope.updatePieChartData();
+    }else{
+      am4core.useTheme(am4themes_material);
+      am4core.useTheme(am4themes_animated);
+
+      PieChart = am4core.create("chartPiediv", am4charts.PieChart3D);
+      PieChart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+      PieChart.radius = am4core.percent(80);
+      PieChart.innerRadius = am4core.percent(40);
+      // PieChart.startAngle = 180;
+      // PieChart.endAngle = 360;  
+
+      PieChart.data = [{
+        stat: "Complete Location info",
+        count: 10
+      },{
+        stat: "No location info available",
+        count: 2
+      },{
+        stat: "Missing State info",
+        count: 5
+      }]
+
+      var series = PieChart.series.push(new am4charts.PieSeries3D());
+      series.labels.template.text = "{category} ({value})";
+
+      series.labels.template.tooltipText = "{category}";
+      series.tooltip.label.wrap = true
+      series.tooltip.label.adapter.add("textOutput", function(text) {
+        if(text == 'Only Year'){
+          return "Records with only year in GenBank"
+        }
+        if(text == 'Month and year'){
+          return "Records with only month and year in GenBank" 
+        }
+        if(text == 'Missing Date'){
+          return "Records missing date information in GenBank"
+        }
+        if(text == 'Complete Date'){
+          return "Records complete date information in GenBank"
+        }
+        return text;
+      });
+
+      series.labels.template.tooltipPosition = "pointer";
+
+      // var label = series.renderer.labels.template;
+      // label.wrap = true;
+      // label.maxWidth = 120;
+      series.labels.template.wrap = true;
+      series.labels.template.maxWidth = 100;
+      //series.labels.template.disabled = true;
+      //series.ticks.template.disabled = true;
+      series.colors.list = [
+        am4core.color("#845EC2"),
+        am4core.color("#D65DB1"),
+        am4core.color("#FF6F91"),
+        am4core.color("#FF9671"),
+        am4core.color("#FFC75F"),
+        am4core.color("#F9F871"),
+      ];
+      series.dataFields.value = "count";
+      series.dataFields.category = "stat";
+    }
+  }
+
+    //-- Charts content ends --//
     
     //--- Map content starts ---//
     function initMap() {

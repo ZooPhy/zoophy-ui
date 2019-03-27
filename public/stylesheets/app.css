@@ -306,3 +306,52 @@ h2::before {
   visibility: hidden; 
   pointer-events: none;
 }
+
+#chart-wrapper-div{
+  padding: 20px;
+  padding-top: 10px; 
+}
+
+#chartPiediv {
+  width: 100%; 
+  height: 200px; 
+  font-size: .9em
+}
+
+#chartXYdiv {
+  width: 100%; 
+  height: 200px;
+}
+
+#charts-container{
+  width: inherit; 
+  position:relative;
+}
+
+#chart-overlay-text{
+  position: relative;
+  text-align: center;
+  top:50%; 
+  font-size: medium
+}
+
+.rowoverlay{
+  position: absolute;
+  top: 0;
+  left:0;
+  z-index:1;
+  bottom:0;
+  right:0;
+  height:100%;
+  padding: 20px;
+  padding-right: 30px;
+  padding-left: 30px;
+  padding-top: 10px;
+  color: rgb(253, 253, 253);
+}
+
+.coloverlay{
+  background-color: rgba(87, 79, 79, 0.795);
+  border: 1px solid rgb(87, 79, 79);
+  height: 100%;
+}
