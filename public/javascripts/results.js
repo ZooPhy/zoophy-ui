@@ -762,41 +762,69 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $('#more_stats').collapse('show');
     }
     $scope.selectedStat = type
+    var data = [];
     if(type == 'host'){
-      PieChart.data = [{
-        stat: "Records with Host",
-        count: $scope.numSelected - $scope.missingHostCountSelected
-      },{
-        stat: "Records missing Host",
-        count: $scope.missingHostCountSelected
-      }]
+      if($scope.missingHostCountSelected != 0){
+        data.push({
+          stat: "Records missing Host",
+          count: $scope.missingHostCountSelected
+        })
+      }
+      if($scope.numSelected - $scope.missingHostCountSelected !=0){
+        data.push({
+          stat: "Records with Host",
+          count: $scope.numSelected - $scope.missingHostCountSelected
+        })
+      }
+      PieChart.data = data;
     }
     if(type == 'location'){
-      PieChart.data = [{
-        stat: "Complete Location info",
-        count: $scope.numSelected - $scope.onlyCountryInfoSelected - $scope.missingLocationCountSelected
-      },{
-        stat: "No location info available",
-        count: $scope.missingLocationCountSelected
-      },{
-        stat: "Missing State info",
-        count: $scope.onlyCountryInfoSelected
-      }]
+      if($scope.missingLocationCountSelected != 0){
+        data.push({
+          stat: "No location info available",
+          count: $scope.missingLocationCountSelected
+        })
+      }
+      if($scope.onlyCountryInfoSelected != 0){
+        data.push({
+          stat: "Missing State info",
+          count: $scope.onlyCountryInfoSelected
+        })
+      }
+      if($scope.numSelected - $scope.onlyCountryInfoSelected - $scope.missingLocationCountSelected != 0){
+        data.push({
+          stat: "Complete Location info",
+          count: $scope.numSelected - $scope.onlyCountryInfoSelected - $scope.missingLocationCountSelected
+        })
+      }
+      PieChart.data = data;
     }
     if(type == 'date'){
-      PieChart.data = [{
-        stat: "Only Year",
-        count: $scope.onlyYearUNdateSelected
-      },{
-        stat: "Month and year",
-        count: $scope.missingDateUNdateSelected
-      },{
-        stat: "Missing Date",
-        count: $scope.missingDateSelected
-      },{
-        stat: "Complete Date",
-        count: $scope.numSelected - $scope.onlyYearUNdateSelected - $scope.missingDateUNdateSelected - $scope.missingDateSelected
-      }]
+      if($scope.onlyYearUNdateSelected != 0){
+        data.push({
+          stat: "Only Year",
+          count: $scope.onlyYearUNdateSelected
+        })
+      }
+      if($scope.missingDateUNdateSelected != 0){
+        data.push({
+          stat: "Month and year",
+          count: $scope.missingDateUNdateSelected
+        })
+      }
+      if($scope.missingDateSelected != 0){
+        data.push({
+          stat: "Missing Date",
+          count: $scope.missingDateSelected
+        })
+      }
+      if($scope.numSelected - $scope.onlyYearUNdateSelected - $scope.missingDateUNdateSelected - $scope.missingDateSelected != 0){
+        data.push({
+          stat: "Complete Date",
+          count: $scope.numSelected - $scope.onlyYearUNdateSelected - $scope.missingDateUNdateSelected - $scope.missingDateSelected
+        })
+      }
+      PieChart.data = data
     }
   }
 
