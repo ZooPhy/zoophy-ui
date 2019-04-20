@@ -922,8 +922,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       PieChart.hiddenState.properties.opacity = 0; // this creates initial fade-in
       PieChart.radius = am4core.percent(80);
       PieChart.innerRadius = am4core.percent(40);
-      // PieChart.startAngle = 180;
-      // PieChart.endAngle = 360;  
 
       PieChart.data = [{
         stat: "Complete Location info",
@@ -959,13 +957,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
       series.labels.template.tooltipPosition = "pointer";
 
-      // var label = series.renderer.labels.template;
-      // label.wrap = true;
-      // label.maxWidth = 120;
       series.labels.template.wrap = true;
       series.labels.template.maxWidth = 100;
-      //series.labels.template.disabled = true;
-      //series.ticks.template.disabled = true;
       series.colors.list = [
         am4core.color("#845EC2"),
         am4core.color("#D65DB1"),
