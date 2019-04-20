@@ -8,6 +8,11 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.1/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <link rel="stylesheet" href="stylesheets/app.css">    
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+    <script src="https://www.amcharts.com/lib/4/core.js"></script>
+    <script src="https://www.amcharts.com/lib/4/charts.js"></script>
+    <script src="https://www.amcharts.com/lib/4/themes/material.js"></script>
+    <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+    <script type="text/javascript" src="javascripts/about.js"></script>
     <nav class="navbar navbar-default navbar-fixed-top main-navbar" role="navigation">
       <div class="container">
         <div class="navbar-header"></div>
@@ -25,7 +30,9 @@
     <div class="col-sm-2 aboutpage-sidebar">
       <a id="abouta" href="#about" class="list-group-item borderless"><b>About</b></a>
       <hr class="aboutpage-sidebar-divider"/>
-      <a href="#features" class="list-group-item borderless"><b>Features</b></a>
+      <a href="#features" class="list-group-item borderless"><b>Functionality</b></a>
+      <hr class="aboutpage-sidebar-divider"/>
+      <a href="#database" class="list-group-item borderless"><b>Database</b></a>
       <hr class="aboutpage-sidebar-divider"/>
       <a href="#citation" class="list-group-item borderless"><b>Citation</b></a>
       <hr class="aboutpage-sidebar-divider"/>
@@ -40,7 +47,7 @@
         <div class="col-sm-10">
           <div ng-controller="aboutController">
             <div class="Container aboutpage-container" >
-              <h2 class="text-muted aboutpage-header" id="about">- About -</h2>
+              <h2 class="text-muted aboutpage-header" id="about" onclick="newFun()">- About -</h2>
               <div class="row aboutpage-row">
                 <h3 style="margin-top:0px">What is ZooPhy?</h3>
                 <h4 class="aboutpage-answer">ZooPhy is a public health informatics application for phylogeography of zoonotic RNA viruses.<h4>
@@ -56,7 +63,7 @@
             </div>
           
             <div class="Container aboutpage-container" >
-              <h2 class="text-muted aboutpage-header" id="features">- Features -</h2>
+              <h2 class="text-muted aboutpage-header" id="features">- Functionality -</h2>
               <div class="row aboutpage-row">
                 <h3 style="margin-top:0px">What can I use ZooPhy for?</h3>
                 <h4 class="aboutpage-answer">
@@ -119,6 +126,39 @@
               </div>
             </div>
 
+            <div class="Container aboutpage-container" >
+              <h2 class="text-muted aboutpage-header" id="database">- Database -</h2>
+              <div class="row aboutpage-row">
+                <h4 style="margin-left: 10px;">Number of <span style="font-size: x-large">Records</span> in the ZooPhy Database</h4>
+                <div class="aboutpage-answer" style="padding: 20px">
+                  <div id="recordChart" style="min-height: 300px; margin-right: 20px;"></div>
+                </div>
+              </div>
+              <!-- <div class="row aboutpage-row">
+                <h4 style="margin-left: 10px;">Number of normalized <span style="font-size: x-large">Locations</span> in the ZooPhy Database</h4>
+                <div class="aboutpage-answer" style="padding: 20px">
+                  <div id="locationChart" style="min-height: 300px; margin-right: 20px"></div>
+                </div>
+              </div>
+              <div class="row aboutpage-row">
+                <h4 style="margin-left: 10px;">Number of normalized <span style="font-size: x-large">Hosts</span> in the ZooPhy Database</h4>
+                <div class="aboutpage-answer" style="padding: 20px">
+                  <div id="hostChart" style="min-height: 300px; margin-right: 20px"></div>
+                </div>
+              </div> -->
+
+              <div class="row aboutpage-row">
+                <div class="col-sm-6">
+                  <h4 style="margin: 20px;">Number of normalized <span style="font-size: x-large">Locations</span> in the ZooPhy Database</h4>
+                  <div id="locationChart" style="min-height: 300px; margin-right: 20px"></div>
+                </div>
+                <div class="col-sm-6">
+                  <h4 style="margin: 20px;">Number of normalized <span style="font-size: x-large">Hosts</span> in the ZooPhy Database</h4>
+                  <div id="hostChart" style="min-height: 300px; margin-right: 20px"></div>
+                </div>
+              </div>
+            </div>
+
             <div class="Container aboutpage-container">
               <h2 class="text-muted aboutpage-header" id="citation">- Citation -</h2>
               <div class="row aboutpage-row">
@@ -130,6 +170,7 @@
                     </ul></i>
                   <h4>Papers using ZooPhy:</h4>
                   <i><ul>
+                    <li>Tahsin T, Weissenbacher D, Jones-Shargani D, et al. Named entity linking of geospatial and host metadata in GenBank for advancing biomedical research. Database (Oxford). 2017;2017:bax093. Published 2017 Dec 28. doi:10.1093/database/bax093</li>
                     <li>Scotch M, Lam TT, Pabilonia KL, Anderson T, Baroch J, Kohler D, DeLiberto TJ. Diffusion of influenza viruses among migratory birds with a focus on the Southwest United States. Infect Genet Evol, 2014. 26: p. 185-93.</li>
                     <li>Scotch M, Mei C. Phylogeography of swine influenza H3N2 in the United States: translational public health for zoonotic disease surveillance. Infect Genet Evol. 2013 Jan;13:224-9.</li>
                     <li>Scotch M, Mei C, Makonnen YJ, Pinto J, Ali A, Vegso S, Kane M, Sarkar IN, Rabinowitz P. Phylogeography of influenza A H5N1 clade 2.2.1.1 in Egypt. BMC Genomics. 2013 Dec 10;14:871.</li>

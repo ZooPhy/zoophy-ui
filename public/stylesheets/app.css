@@ -307,9 +307,13 @@ h2::before {
   pointer-events: none;
 }
 
-#chart-wrapper-div{
-  padding: 20px;
-  padding-top: 10px; 
+#charts-divider{
+  border-left: 1px dashed rgb(199, 199, 199);
+}
+
+#charts-row{
+  padding: 20px; 
+  padding-top: 10px
 }
 
 #chartPiediv {
