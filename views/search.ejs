@@ -38,7 +38,14 @@
   <div class="row pushed-down">
     <div class="col-sm-3 col-xs-6">
       <div id="flu-a-sub-container" ng-show="virus === 197911">
-        <label>Flu A Sub Type</label>
+        <div class="row">
+          <div class="col-sm-6">
+            <label style="display: inline-block;">Flu A Sub Type</label>
+          </div>
+          <div class="col-sm-6">
+            <label class="pdmo9-label pull-right" ng-show="isH1N1">&nbsp; &nbsp;pdm09 Only?</label> <input class="pull-right" ng-show="isH1N1" ng-model="isPDMO9" ng-click="count();" type="checkbox"></input>
+          </div>
+        </div>
         <div class="col-sm-6">
           <label class="text-center">H</label>
           <select id="flu-a-h" class="form-control" ng-model="fluAH" ng-options="h as h for h in fluAHs" ng-change="checkH1N1(); count();">
@@ -47,17 +54,18 @@
         </div>
         <div class="col-sm-6">
           <label class="text-center">N</label>
-          <select id="flu-a-n" class="form-control" ng-model="fluAN" ng-options="n as n for n in fluANs" ng-change="checkH1N1(); count();">
+          <select id="flu-a-n" class="form-control" style="margin-bottom: 20px" ng-model="fluAN" ng-options="n as n for n in fluANs" ng-change="checkH1N1(); count();">
             <!-- handled by Angular -->
           </select>
         </div>
-        <div class="col-xs-10 col-xs-offset-2 pushed-down" ng-show="isH1N1">
-          <label class="pdmo9-label">pdm09 Only?</label> <input ng-model="isPDMO9" ng-click="count();" type="checkbox"></input>
-        </div>
       </div>
-      <div class="pushed-down">
-        <label for="genes">Genes</label>
-        <select id="genes" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" ng-change="count();" class="form-control" multiple>
+      <div>
+        <label for="genes">Genes
+        <span class="help-info" data-toggle="tooltip" data-placement="top" title="HA or NA suggested for this virus"> 
+          <i ng-show="isInfluenzaA" class="fa fa-exclamation-circle" aria-hidden="true"></i>
+        </span>
+        </label>
+        <select id="genes" class="form-control" ng-model="selectedGenes" ng-options="gene as gene for gene in genes" ng-change="checkMinLength(); count();" >
           <!-- handled by Angular -->
         </select>
       </div>
@@ -65,9 +73,19 @@
     <div class="col-sm-3 col-xs-6">
       <div id="avian-host-container" ng-show="host === 8782">
         <label for="avian-host">Avian Host</label>
-        <select id="avian-host" class="form-control" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts" ng-change="count();">
+        <select id="avian-host" class="form-control" style="margin-bottom: 20px" ng-model="avianHost" ng-options="avian.tax_id as avian.name for avian in allowed_values.avian_hosts" ng-change="count();">
           <!-- handled by Angular -->
         </select>
+      </div>
+      <div class="text-center">
+        <label for="minimumSequenceLength">Minimum Sequence Length
+          <span class="help-info" data-toggle="tooltip" data-placement="top" title="Recommended length for complete sequence of the gene that is currently selectede"> 
+            <i ng-show="isSuggestedLength" class="fa fa-exclamation-circle" aria-hidden="true"></i>
+          </span>
+        </label>
+        <div class="col-xs-6 col-sm-offset-3">
+          <input id="minimumSequenceLength" type="number" ng-model="minimumSequenceLength" ng-change="count();" min="0" max="99999" placeholder="0" class="form-control"></input>
+        </div>
       </div>
     </div>
     <div class="col-sm-3 col-xs-6">
@@ -80,12 +98,6 @@
         <select id="regions" ng-model="selectedRegions" ng-options="region as region.name for region in regions" ng-change="count();" class="form-control" multiple>
           <!-- handled by Angular -->
         </select>
-      </div>
-    </div>
-    <div class="col-sm-3 col-xs-6 text-center">
-      <label for="minimumSequenceLength">Minimum Sequence Length</label>
-      <div class="col-xs-6 col-sm-offset-3">
-        <input id="minimumSequenceLength" type="number" ng-model="minimumSequenceLength" ng-change="count();" min="0" max="99999" placeholder="0" class="form-control"></input>
       </div>
     </div>
   </div>
@@ -128,10 +140,10 @@
       <button class="btn btn-warning" ng-click="reset();"><i class="fa fa-times" aria-hidden="true"></i> Reset</button>  
     </div>
     <div class="col-sm-10 pushed-down" style="padding: 8px; text-align: center;">
-      <p class="text-center" style="color:red;display:inline;"><b>{{searchCount}} Records</b></p>    
+      <p class="text-center" style="color:#bc442c;display:inline;"><b>{{searchCount}} Records</b></p>    
     </div>
     <div class="col-sm-1 pull-right pushed-down">
-      <button class="btn btn-info pull-right search-button" ng-click="search();" ng-model="searchBtn" ng-disabled="virus === 0"><i class="fa fa-search" aria-hidden="true"></i> Search</button>
+      <button class="btn btn-info pull-right search-button" ng-click="search();" ng-model="searchBtn" ng-disabled="virus === 0"><i ng-show="!searching" class="fa fa-search" aria-hidden="true"></i><i ng-show="searching" class="fa fa-spinner fa-pulse" aria-hidden="true"></i> Search</button>
     </div>
   </div>
 </div>

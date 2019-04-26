@@ -102,6 +102,39 @@ const VIRUSES = [
   }
 ];
 
+const MIN_SEGMENT_LENGTH = {
+  197911: {
+    PB2 : '2280',
+    PB1 : '2274',
+    PA: '2151',
+    HA: '1659',
+    NP: '1494',
+    NA: '1341',
+    M: '982',
+    NS: '823'
+
+  },
+  197912: {
+    PB2 : '2259',
+    PB1 : '2313',
+    PA: '2178',
+    HA: '1749',
+    NP: '1683',
+    NA: '1398',
+    M: '1076',
+    NS: '1024'
+  },
+  197913: {
+    PB2 : '2325',
+    PB1 : '2265',
+    PA: '2130',
+    HA: '1965',
+    NP: '1698',
+    NA: '1125',
+    M: '862'
+  }
+};
+
 const INFLUENZA_A_SUB_TYPE_IDS = [
   [114727, 114728, 286279, 352775, 352776, 222770, 571502, 385680, 170500, 0, 0], //H1
 	[114730, 114729, 114731, 352777, 282134, 370290, 286284, 114732, 114733, 0, 0], //H2
@@ -3023,7 +3056,8 @@ const ALLOWED_VALUES = {
   influenza_a_sub_type_ids: INFLUENZA_A_SUB_TYPE_IDS,
   continents: CONTINENTS,
   hosts: HOSTS,
-  avian_hosts: AVIAN_HOSTS
+  avian_hosts: AVIAN_HOSTS,
+  min_segemnt_length: MIN_SEGMENT_LENGTH
 };
 
 module.exports = ALLOWED_VALUES;

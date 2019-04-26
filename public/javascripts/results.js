@@ -25,8 +25,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
   $scope.downloadColumnsCount = 0;
   $scope.searchedVirusName = null;
-  $scope.completeRecordsCount = 0;
-  $scope.distinctLocationsCount = 0;
   $scope.geoLocMap = null;
   $scope.viewLayerfeatures = [];
   $scope.accessionFile = null;
@@ -35,6 +33,24 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   $scope.hideable_success = null;
   $scope.filterSubmitButton = false;
   $scope.searchQuery = null;
+  $scope.canPlotLocation = true;
+  $scope.showTips = true;
+  $scope.distinctLocationsCountSelected = 0;
+  $scope.completeRecordsCountSelected = 0;
+  $scope.incompleteDateCountSelected = 0;
+  $scope.onlyCountryInfoSelected = 0;
+  $scope.missingHostCountSelected = 0;
+  $scope.missingLocationCountSelected = 0;
+  $scope.onlyYearUNdateSelected = 0;
+  $scope.missingDateUNdateSelected = 0;
+  $scope.missingDateSelected = 0;
+  $scope.missingDateCount = 0;
+  $scope.missingHostCount = 0;
+  $scope.missingStateCount = 0;
+  $scope.missingCountryCount = 0;
+  $scope.moreStats = false;
+  $scope.hideCharts = true;
+  $scope.selectedStat = 'location';
 
   const SOURCE_GENBANK = 1;
   const SOURCE_FASTA = 2;
@@ -43,6 +59,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var allRecords;
   var filteredRecords;
+  var availableThumbnails = ['9606','9823','9913','9615','9641','9685','9793','9796','420550'];
+
+  var XYchart = null;
+  var PieChart = null;
 
   if($scope.geoLocMap == null){
     console.log('initializing map');
@@ -67,12 +87,14 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $(".filterCheckBoxClass").prop('checked', false);
         $("#filerAllCheckBox").prop('checked', false);
         $scope.filterSubmitButton = false;
+        filteredRecords = null;
+        $scope.searchQuery = null;
       }
       if ($scope.results.length > 0) {
         $scope.searchedVirusName = $scope.results[0].virus;
         $scope.clearLayerFeatures();
-        $scope.LoadDetails($scope.results[0]);
         $scope.loadHeatmapLayer($scope.results);
+        $scope.LoadDetails($scope.results[0]);
         $('#probThreshold').val(0);
         $('#probThrVal').text("0%");
         $scope.percentOfRecords = String(Math.floor($scope.results.length*($scope.sampleAmount/100.0)));
@@ -101,11 +123,29 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.fastaFilename = 'none';
       $scope.fastaFile = null;
       $scope.fastaError = null;
-      $scope.completeRecordsCount = 0;
-      $scope.distinctLocationsCount = 0;
+      $scope.completeRecordsCountSelected = 0;
+      $scope.distinctLocationsCountSelected = 0;
+      $scope.incompleteDateCountSelected = 0;
+      $scope.onlyCountryInfoSelected = 0;
+      $scope.missingHostCountSelected = 0;
+      $scope.missingLocationCountSelected = 0;
+      $scope.onlyYearUNdateSelected = 0;
+      $scope.missingDateUNdateSelected = 0;
+      $scope.missingDateSelected = 0;
+      $scope.missingDateCount = 0;
+      $scope.missingHostCount = 0;
+      $scope.missingStateCount = 0;
+      $scope.missingCountryCount = 0;
       $scope.accessionFile = null;
       $scope.accessionFileName = 'none';
       $scope.accessionUploadError = null;
+      $scope.moreStats = false;
+      $scope.hideCharts = true;
+      $scope.selectedStat = 'location';
+      $('#more_stats').collapse('hide');
+      $scope.allRecordStats();
+      $scope.loadPieChart();
+      $scope.loadXYChart();
     }
   });
 
@@ -147,7 +187,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
     record.includeInJob = !record.includeInJob;
     RecordData.setNumSelected($scope.numSelected);
-    $scope.recordStats();
+    $scope.selectedRecordStats();
   };
 
   $scope.toggleAll = function() {
@@ -162,13 +202,20 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
     $scope.updateAllSelections($scope.results, $scope.groupIsSelected);
     RecordData.setNumSelected($scope.numSelected);
-    $scope.recordStats();
+    $scope.selectedRecordStats();
   };
 
 
-  $scope.recordStats = function(){
+  $scope.selectedRecordStats = function(){
     var locationMap = new Map();
-    $scope.completeRecordsCount = 0;
+    $scope.completeRecordsCountSelected = 0;
+    $scope.incompleteDateCountSelected = 0;
+    $scope.onlyCountryInfoSelected = 0;
+    $scope.missingHostCountSelected = 0;
+    $scope.missingLocationCountSelected = 0;
+    $scope.onlyYearUNdateSelected = 0;
+    $scope.missingDateUNdateSelected = 0;
+    $scope.missingDateSelected = 0;
     for (var i = 0; i < $scope.results.length; i++) {
       var record = $scope.results[i];
       if(record.includeInJob && record.country !== "Unknown" ){           //location count
@@ -179,11 +226,57 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         }else{
           locationMap.set(locationString,1);
         }
-      }if(record.includeInJob && record.date !== "Unknown" && record.country !== "Unknown" ){   //complete record
-        $scope.completeRecordsCount++;
+      }if(record.includeInJob && record.date !== "Unknown" && record.country !== "Unknown" ){
+        $scope.completeRecordsCountSelected++;
+      }if(record.includeInJob && !record.isCompleteDate){
+        $scope.incompleteDateCountSelected++;
+      }if(record.includeInJob && record.state == "Unknown"){
+        $scope.onlyCountryInfoSelected++;
+      }if(record.includeInJob && record.host == "Unknown"){
+        $scope.missingHostCountSelected++;
+      }if(record.includeInJob && record.country == "Unknown" && record.state == "Unknown"){
+        $scope.missingLocationCountSelected++;
+      }if(record.includeInJob){
+        var splitDate = record.unNormalizedDate.split('-');
+        if(record.unNormalizedDate == "Unknown"){
+          $scope.missingDateSelected++;
+        }else if(splitDate.length == 2){
+          $scope.missingDateUNdateSelected++;
+        }else if(splitDate.length == 1){
+          $scope.onlyYearUNdateSelected++;
+        }
       }
     }
-    $scope.distinctLocationsCount = locationMap.size;
+    $scope.distinctLocationsCountSelected = locationMap.size;
+    if(RecordData.getNumSelected() > 0){
+      $scope.hideCharts = false;
+      $scope.updateXYChartData();
+      $scope.updatePieChartData($scope.selectedStat, false);
+    }else{
+      $scope.hideCharts = true;
+    }
+  }
+
+  $scope.allRecordStats = function(){
+    $scope.missingDateCount = 0;
+    $scope.missingHostCount = 0;
+    $scope.missingStateCount = 0;
+    $scope.missingCountryCount = 0;
+    for (var i = 0; i < $scope.results.length; i++) {
+      var record = $scope.results[i];
+      if(record.date === "Unknown" || !record.isCompleteDate){
+        $scope.missingDateCount++;
+      }
+      if(record.host === "Unknown"){
+        $scope.missingHostCount++;
+      }
+      if(record.state === "Unknown"){
+        $scope.missingStateCount++;
+      }
+      if(record.country === "Unknown"){
+        $scope.missingCountryCount++;
+      }
+    }
   }
 
   $scope.goToRun = function() {
@@ -376,11 +469,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.incrementSearchCount();
         }, function(error) {
           $scope.uploading = false;
-          if (error.status !== 500) {
-            $scope.fadeableErrorAlert(error.data.error);
-          }
-          else if(error.status === 413){
+          if(error.status === 413){
             $scope.fadeableErrorAlert('Payload Error: Too many records selected.');
+          }
+          else if (error.status !== 500) {
+            $scope.fadeableErrorAlert(error.data.error);
           }
           else {
             $scope.fadeableErrorAlert('Parsing Failed on Server. Please refresh and try again.');
@@ -438,11 +531,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           RecordData.setMessage(null);
           RecordData.incrementSearchCount();
         }, function(error) {
-          if (error.status !== 500) {
-            $scope.fadeableErrorAlert(error.data.error);
-          }
-          else if(error.status === 413){
+          if(error.status === 413){
             $scope.fadeableErrorAlert('Payload Error: Too many records selected.');
+          }
+          else if (error.status !== 500) {
+            $scope.fadeableErrorAlert(error.data.error);
           }
           else {
             $scope.fadeableErrorAlert('Search Failed on Server. Please refresh and try again.');
@@ -498,20 +591,18 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
     $scope.filterRecords = function(){
       filteredRecords = [];
-      var filterDate = $("input[value='Date']").prop('checked');
+      var filterMissingDate = $("input[value='Missing_Date']").prop('checked');
       var filterCountry = $("input[value='Country']").prop('checked');
       var filterState = $("input[value='State']").prop('checked');
       var filterGene = $("input[value='Gene']").prop('checked');
       var filterHost = $("input[value='Host']").prop('checked');
-      var filterLength = $("input[value='Length']").prop('checked');
       var count =0;
       if(allRecords!=null){
-        RecordData.setFilter(true);
         for (var i = 0; i < allRecords.length; i++) {
           var record = allRecords[i];
-          if((filterDate && record.date === "Unknown") || (filterCountry && record.country === "Unknown")
+          if((filterMissingDate && (record.date === "Unknown" || !record.isCompleteDate)) || (filterCountry && record.country === "Unknown")
             || (filterState && record.state === "Unknown") || (filterGene && record.gene === "None") ||
-            (filterHost && record.host === "Unknown") || (filterLength && record.length === "Unknown")){
+            (filterHost && record.host === "Unknown")){
             //ignore
             count++;
           }else{
@@ -519,7 +610,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
           }
         }
       }
-      if(filteredRecords.length > 0){
+      if(count > 0){
+        RecordData.setFilter(true);
         $scope.fadeableSuccessAlert("Successfully removed "+count+" incomplete records!")
         RecordData.setRecords(filteredRecords);
         $scope.groupIsSelected = false;
@@ -527,6 +619,9 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         RecordData.setMessage(null);
         RecordData.incrementSearchCount();
         $scope.searchQuery = null;
+      }
+      else{
+        $scope.fadeableSuccessAlert("0 incomplete records!")
       }
     }
 
@@ -545,6 +640,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.searchBarResult = function(){
+      $("#basic-addon1").tooltip('hide');
       var records = [];
       var searchResult = [];
       if(RecordData.isFilter() && filteredRecords!=null){
@@ -633,6 +729,251 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       $scope.setupDownload(downloadColumns);
     };
 
+    $scope.toggleTips = function(){
+      if($scope.showTips){
+        $scope.showTips = false;
+      }else{
+        $scope.showTips = true;
+      }
+    };
+
+    $scope.selectTip = function(number){
+      $(window).scrollTop(0);
+      switch(number){
+        case 1: //filter
+          $('#filterModel').modal('show'); 
+          break;
+        case 2: //search
+          $("#basic-addon1").tooltip("show");
+          $("#nav-searchbar").focus();
+          break;
+        case 3: //import
+          //$("#nav_import").toggle()
+          $('#fastaModel').modal('show'); 
+          break;
+      }
+    }
+
+    //-- Charts content starts --//
+
+  $scope.updatePieChartData = function(type, toggle){
+    if(toggle){
+      $scope.moreStats = true;
+      $('#more_stats').collapse('show');
+    }
+    $scope.selectedStat = type
+    var data = [];
+    if(type == 'host'){
+      if($scope.missingHostCountSelected != 0){
+        data.push({
+          stat: "Records missing Host",
+          count: $scope.missingHostCountSelected
+        })
+      }
+      if($scope.numSelected - $scope.missingHostCountSelected !=0){
+        data.push({
+          stat: "Records with Host",
+          count: $scope.numSelected - $scope.missingHostCountSelected
+        })
+      }
+      PieChart.data = data;
+    }
+    if(type == 'location'){
+      if($scope.missingLocationCountSelected != 0){
+        data.push({
+          stat: "No location info available",
+          count: $scope.missingLocationCountSelected
+        })
+      }
+      if($scope.onlyCountryInfoSelected != 0){
+        data.push({
+          stat: "Missing State info",
+          count: $scope.onlyCountryInfoSelected
+        })
+      }
+      if($scope.numSelected - $scope.onlyCountryInfoSelected - $scope.missingLocationCountSelected != 0){
+        data.push({
+          stat: "Complete Location info",
+          count: $scope.numSelected - $scope.onlyCountryInfoSelected - $scope.missingLocationCountSelected
+        })
+      }
+      PieChart.data = data;
+    }
+    if(type == 'date'){
+      if($scope.onlyYearUNdateSelected != 0){
+        data.push({
+          stat: "Only Year",
+          count: $scope.onlyYearUNdateSelected
+        })
+      }
+      if($scope.missingDateUNdateSelected != 0){
+        data.push({
+          stat: "Month and year",
+          count: $scope.missingDateUNdateSelected
+        })
+      }
+      if($scope.missingDateSelected != 0){
+        data.push({
+          stat: "Missing Date",
+          count: $scope.missingDateSelected
+        })
+      }
+      if($scope.numSelected - $scope.onlyYearUNdateSelected - $scope.missingDateUNdateSelected - $scope.missingDateSelected != 0){
+        data.push({
+          stat: "Complete Date",
+          count: $scope.numSelected - $scope.onlyYearUNdateSelected - $scope.missingDateUNdateSelected - $scope.missingDateSelected
+        })
+      }
+      PieChart.data = data
+    }
+  }
+
+  $scope.updateXYChartData = function(){
+    XYchart.data = [{
+      "stat": "Selected Records",
+      "count": $scope.numSelected
+    },{
+      "stat": "Complete Records",
+      "count": $scope.completeRecordsCountSelected
+    },{
+      "stat": "Distinct Locations",
+      "count": $scope.distinctLocationsCountSelected
+    },{
+      "stat": "Country Level",
+      "count": $scope.onlyCountryInfoSelected
+    }];
+  }
+
+  $scope.loadXYChart = function(){
+    if(XYchart != null){
+      //$scope.updateXYChartData();
+    }else{
+      //am4core.useTheme(am4themes_animated);
+      XYchart = am4core.create("chartXYdiv", am4charts.XYChart);
+  
+      XYchart.data = [{
+        "stat": "Selected Records",
+        "count": 10
+      }, {
+        "stat": "Complete Records",
+        "count": 2
+      }, {
+        "stat": "Distinct Locations",
+        "count": 5
+      }, {
+        "stat": "Country Level",
+        "count": 5
+      }];
+      
+      var categoryAxis = XYchart.xAxes.push(new am4charts.CategoryAxis());
+      categoryAxis.dataFields.category = "stat";
+      categoryAxis.renderer.grid.template.location = 0;
+      categoryAxis.renderer.minGridDistance = 30;
+
+      categoryAxis.renderer.labels.template.tooltipText = "{category}";
+      categoryAxis.tooltip.label.wrap = true
+      categoryAxis.tooltip.label.adapter.add("textOutput", function(text) {
+        if(text == 'Complete Records'){
+          return "Records that are not missing date and location information"
+        }
+        if(text == 'Distinct Locations'){
+          return "This is an approximate count of number of distinct locations among the selected records." 
+          + " Actual count might vary once the job is run. Select at least 2 and up to 25 distinct locations" 
+          + " for the job to run successfully."
+        }
+        if(text == 'Country Level'){
+          return "Records with country level location information only. For better results select records"
+          + " with atleast state information."
+        }
+        return text;
+      });
+
+      categoryAxis.renderer.labels.template.tooltipPosition = "pointer";
+  
+      categoryAxis.renderer.labels.template.adapter.add("dy", function(dy, target) {
+        if (target.dataItem && target.dataItem.index & 2 == 2) {
+          return dy + 25;
+        }
+        return dy;
+      });
+      var valueAxis = XYchart.yAxes.push(new am4charts.ValueAxis());
+      // Create series
+      var series = XYchart.series.push(new am4charts.ColumnSeries());
+      series.dataFields.valueY = "count";
+      series.dataFields.categoryX = "stat";
+      series.name = "count";
+      series.columns.template.tooltipText = "{categoryX}: [bold]{valueY}[/]";
+      series.columns.template.fillOpacity = .8;
+  
+      var columnTemplate = series.columns.template;
+      columnTemplate.strokeWidth = 2;
+      columnTemplate.strokeOpacity = 1;
+    }
+  }
+
+  $scope.loadPieChart = function(){
+    if(PieChart != null){
+      //$scope.updatePieChartData();
+    }else{
+      am4core.useTheme(am4themes_material);
+      am4core.useTheme(am4themes_animated);
+
+      PieChart = am4core.create("chartPiediv", am4charts.PieChart3D);
+      PieChart.hiddenState.properties.opacity = 0; // this creates initial fade-in
+      PieChart.radius = am4core.percent(80);
+      PieChart.innerRadius = am4core.percent(40);
+
+      PieChart.data = [{
+        stat: "Complete Location info",
+        count: 10
+      },{
+        stat: "No location info available",
+        count: 2
+      },{
+        stat: "Missing State info",
+        count: 5
+      }]
+
+      var series = PieChart.series.push(new am4charts.PieSeries3D());
+      series.labels.template.text = "{category} ({value})";
+
+      series.labels.template.tooltipText = "{category}";
+      series.tooltip.label.wrap = true
+      series.tooltip.label.adapter.add("textOutput", function(text) {
+        if(text == 'Only Year'){
+          return "Records with only year in GenBank"
+        }
+        if(text == 'Month and year'){
+          return "Records with only month and year in GenBank" 
+        }
+        if(text == 'Missing Date'){
+          return "Records missing date information in GenBank"
+        }
+        if(text == 'Complete Date'){
+          return "Records complete date information in GenBank"
+        }
+        return text;
+      });
+
+      series.labels.template.tooltipPosition = "pointer";
+
+      series.labels.template.wrap = true;
+      series.labels.template.maxWidth = 100;
+      series.colors.list = [
+        am4core.color("#845EC2"),
+        am4core.color("#D65DB1"),
+        am4core.color("#FF6F91"),
+        am4core.color("#FF9671"),
+        am4core.color("#FFC75F"),
+        am4core.color("#F9F871"),
+      ];
+      series.dataFields.value = "count";
+      series.dataFields.category = "stat";
+    }
+  }
+
+    //-- Charts content ends --//
+    
     //--- Map content starts ---//
     function initMap() {
       var heatmapLayer = new ol.layer.Heatmap();
@@ -646,24 +987,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         })
       });
       raster.set('zodolayer','tile');
-  
-      // highlight layer
-      var featureStyle = new ol.style.Style({
-        text: new ol.style.Text({
-          text: '\uf041',
-          font: 'normal 20px FontAwesome',
-          textBaseline: 'bottom',
-          fill: new ol.style.Fill({
-            color: 'black'
-          })
-        })
-      });
-      var vectorSource = new ol.source.Vector({features: []});
-      var highlightLayer = new ol.layer.Vector({
-        source: vectorSource,
-        style: [featureStyle]
-      })
-      highlightLayer.set('zodolayer','view');
   
       // selection layer
       var featureStyle = new ol.style.Style({
@@ -682,10 +1005,12 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         style: [featureStyle]
       })
       selectionLayer.set('zodolayer','selection');
+      $('#probThreshold').hide();
+      $('#probThrVal').hide();
   
       // Put all layers together in the map
       $scope.geoLocMap = new ol.Map({
-        layers: [raster, heatmapLayer, selectionLayer, highlightLayer],
+        layers: [raster, heatmapLayer, selectionLayer],
         target: 'geolocmap',
         view: new ol.View({
           center: [0, 0],
@@ -701,6 +1026,61 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.updateThreshold($('#probThreshold').val()/100);
       });
     };
+
+    $scope.removeLayerMap = function(host){
+      var isSameHost = null;
+      var layerToRemove = null;
+      $scope.geoLocMap.getLayers().forEach(function (layer) {
+        if (layer.get('zodolayer') != undefined && layer.get('zodolayer') === 'view') {
+          layerToRemove = layer;
+          if (layer.get('host') != undefined && layer.get('host') == host) {
+            isSameHost = true;
+          }
+        }
+      });
+      if(isSameHost){
+        return false;
+      }else{
+        if(layerToRemove){
+          $scope.geoLocMap.removeLayer(layerToRemove);
+        }
+        return true;
+      }
+    }
+
+    $scope.addLayerToMap = function(host) {
+      console.log("host",host)
+      // highlight layer
+      var featureStyle = new ol.style.Style({
+        text: new ol.style.Text({
+          text: '\uf041',
+          font: 'normal 20px FontAwesome',
+          textBaseline: 'bottom',
+          fill: new ol.style.Fill({
+            color: 'black'
+          })
+        })
+      });
+      if(host != 'Unknown' && availableThumbnails.includes(host)){
+        featureStyle = new ol.style.Style({ 
+          image: new ol.style.Icon ({ 
+            scale:'0.4', 
+            src: 'images/host/'+host+'.png' 
+          }) 
+        });
+      }
+      var vectorSource = new ol.source.Vector({features: []});
+      var highlightLayer = new ol.layer.Vector({
+        source: vectorSource,
+        style: [featureStyle]
+      })
+      highlightLayer.set('host', host);
+      highlightLayer.set('zodolayer','view');
+      var addNewLayer = $scope.removeLayerMap(host);
+      if(addNewLayer){
+        $scope.geoLocMap.addLayer(highlightLayer);
+      }
+    }
 
     $scope.clearLayerFeatures = function() {
       // console.log("clearing features");
@@ -771,6 +1151,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     };
 
     $scope.highlightLocation = function(record) {
+      $scope.addLayerToMap(record.hostId);
       var features = [];
       var center = [0,0];
       var longitude = parseFloat(record.longitude);
@@ -778,15 +1159,21 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
               longitude<-180||longitude>180||latitude<-90||latitude>90){
                 console.log("Missing location info for highlighted record");
+                $scope.canPlotLocation = false;
+                var mapLayers = $scope.geoLocMap.getLayers().getArray();
+                mapLayers.forEach(function (layer, i) {
+                if (layer.get('zodolayer')=='view'){
+                  layer.getSource().clear();
+                }
+              });
       }else{
+        $scope.canPlotLocation = true;
         var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
         var pointonmap = new ol.Feature(new ol.geom.Point(coord));
         pointonmap.set('name',record.location);
         pointonmap.set('accession',record.accession);
         features.push(pointonmap);
         center = coord;
-        $('#probThreshold').hide();
-        $('#probThrVal').hide();
         $scope.viewLayerfeatures = features;
         var mapLayers = $scope.geoLocMap.getLayers().getArray();
         mapLayers.forEach(function (layer, i) {

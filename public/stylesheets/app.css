@@ -34,16 +34,12 @@ label {
 .pushed-down {
   margin-top: 2rem;
 }
-
-.search-button {
-  margin-right: 3rem;
-}
-
+/* 
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
-}
+} */
 
 .nopadding {
   padding: 0 !important;
@@ -69,6 +65,20 @@ input::-webkit-inner-spin-button {
     left: 50%;
     transform: translatex(-50%);
   }
+}
+
+.main-navbar{
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+  background-color: #FFFFFF
+}
+
+#navbar-button{
+  padding: 5px 10px; 
+  margin: 9px;
+} 
+
+.logo-font{
+  font-family:Georgia
 }
 
 @media(max-width:767px) {
@@ -169,10 +179,10 @@ h6{
   opacity: 1;
 }
 .tooltip.top .tooltip-arrow {
-  border-top-color: white;
+  border-top-color: black;
 }
 .tooltip-inner {
-  border: 2px solid white;
+  border: 2px solid black;
 }
 
 .checkboxcl {
@@ -225,4 +235,127 @@ h6{
 
 .input-group-addon{
   padding: 0px 10px;
+}
+
+.modelview-header{
+  background-color: #5d6d79;
+  color: azure
+}
+
+.aboutpage-body{
+  background-color:#F6F7FA; 
+  font-family: Helvetica, sans-serif ;
+  color: #5c6572
+}
+.aboutpage-container{
+  background-color:#FFFFFF; 
+  padding:10px; 
+  margin-bottom:10px;
+}
+
+.aboutpage-header{
+  font-family: "Open Sans";
+  text-align:center;
+  color: #595e70
+}
+
+.aboutpage-row{
+  margin-left: 10px; 
+  margin-right: 10px
+}
+
+.aboutpage-answer{
+  color: #676d75;
+  margin-left: 15px
+}
+
+.aboutpage-sidebar-divider{
+  width: 100%; 
+  color: 7a7a7a; 
+  height: 1px; 
+  background-color:7a7a7a; 
+  margin: 1px
+}
+
+.aboutpage-sidebar{
+  color:grey; 
+  font-size: medium; 
+  background-color: white; 
+  padding: 10px; 
+  box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06); 
+  position: fixed;
+}
+
+.aboutpage-body > div > a{
+  color: #595e70;
+  background-color: white
+}
+
+.aboutpage-body > div > a:hover{
+  color: #37393d;
+  background-color: white;
+  margin-left: 10px
+}
+
+/* To prevent header from overlaying with navbar on anchor link in about.js*/
+h2::before { 
+  display: block; 
+  content: " "; 
+  margin-top: -95px; 
+  height: 95px; 
+  visibility: hidden; 
+  pointer-events: none;
+}
+
+#charts-divider{
+  border-left: 1px dashed rgb(199, 199, 199);
+}
+
+#charts-row{
+  padding: 20px; 
+  padding-top: 10px
+}
+
+#chartPiediv {
+  width: 100%; 
+  height: 200px; 
+  font-size: .9em
+}
+
+#chartXYdiv {
+  width: 100%; 
+  height: 200px;
+}
+
+#charts-container{
+  width: inherit; 
+  position:relative;
+}
+
+#chart-overlay-text{
+  position: relative;
+  text-align: center;
+  top:50%; 
+  font-size: medium
+}
+
+.rowoverlay{
+  position: absolute;
+  top: 0;
+  left:0;
+  z-index:1;
+  bottom:0;
+  right:0;
+  height:100%;
+  padding: 20px;
+  padding-right: 30px;
+  padding-left: 30px;
+  padding-top: 10px;
+  color: rgb(253, 253, 253);
+}
+
+.coloverlay{
+  background-color: rgba(87, 79, 79, 0.795);
+  border: 1px solid rgb(87, 79, 79);
+  height: 100%;
 }

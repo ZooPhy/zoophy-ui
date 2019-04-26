@@ -157,7 +157,7 @@ describe('Run Genbank Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Records: w00t');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Record(s): w00t');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });
@@ -320,7 +320,7 @@ describe('Run FASTA Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Records: w00t, EPI_ISL_190187, EPI_ISL_190187, EPI_ISL_190187');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Record(s): w00t, EPI_ISL_190187, EPI_ISL_190187, EPI_ISL_190187');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });
@@ -457,7 +457,7 @@ describe('Run Combined Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Records: w00t, EPI_ISL_190187, EPI_ISL_190187, EPI_ISL_190187, w00ty');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Record(s): w00t, EPI_ISL_190187, EPI_ISL_190187, EPI_ISL_190187, w00ty');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });

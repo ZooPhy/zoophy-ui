@@ -124,6 +124,14 @@ class LuceneRecord {
     this.virus = simplifyOrganism(searchApiRecord.sequence.organism);
     this.luceneDate = String(searchApiRecord.sequence.collectionDate);
     this.date = humanizeLuceneDate(searchApiRecord.sequence.collectionDate);
+    this.unNormalizedDate = String(humanizeLuceneDate(searchApiRecord.sequence.unNormalizedDate) || UNKNOWN)
+    if(String(searchApiRecord.sequence.collectionDate) === String(searchApiRecord.sequence.unNormalizedDate)){
+      this.isCompleteDate = true;
+    }else if(searchApiRecord.sequence.collectionDate != null){
+      this.isCompleteDate = false;
+    }else{
+      this.isCompleteDate = true;
+    }
     if (searchApiRecord.host) {
       this.host = String(searchApiRecord.host.name || UNKNOWN);
     }
@@ -173,9 +181,11 @@ class SQLRecord {
     this.isolate = String(recordApiRecord.sequence.isolate || UNKNOWN)
     if (recordApiRecord.host) {
       this.host = String(recordApiRecord.host.name || UNKNOWN);
+      this.hostId = String(recordApiRecord.host.taxon || UNKNOWN);
     }
     else {
       this.host = UNKNOWN;
+      this.hostId = UNKNOWN
     }
     if (recordApiRecord.geonameLocation) {
       this.geonameID = String(recordApiRecord.geonameLocation.geonameID || UNKNOWN);

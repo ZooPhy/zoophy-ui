@@ -24,7 +24,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.selectedRegions = [];
   $scope.searchCount = 0;
 
-  $scope.from = 0;
+  $scope.from = 2010;
   $scope.to = Number(new Date().getFullYear());
   $scope.minimumSequenceLength = 0;
   $scope.isPDMO9 = false;
@@ -38,6 +38,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.selectedRecord = null;
   $scope.searchError = null;
   $scope.uploading = false;
+  $scope.searching = false;
+  $scope.isInfluenzaA = false;
+  $scope.isSuggestedLength = false;
 
   var ACCESSION_FILE_RE = /^(\w|-|\.){1,250}?\.txt$/;
   var FASTA_FILE_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
@@ -68,6 +71,9 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.fastaFile = null;
     $scope.searchCount = 0;
     $scope.uploading = false;
+    $scope.searching = false;
+    $scope.isInfluenzaA = false;
+    $scope.isSuggestedLength = false;
     RecordData.setRecords([]);
     RecordData.setFilter(false);
     RecordData.setMessage(null);
@@ -86,9 +92,28 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       // $scope.search-btn = 
     } else {
       //search-btn
-
     }
+    if($scope.allowed_values.viruses[virusIndex].tax_id == '197911'){   //InfluenzaA
+      $scope.isInfluenzaA = true;
+    }else{
+      $scope.isInfluenzaA = false;
+    }
+    $scope.selectedGenes = $scope.genes[0];
+    $scope.checkMinLength();
   };
+
+  $scope.checkMinLength = function(){
+    var genes = $scope.selectedGenes;
+    var virus = Number($scope.virus);
+    var lenghtMap=$scope.allowed_values.min_segemnt_length;
+    if(lenghtMap[virus] && lenghtMap[virus][genes]){
+      $scope.minimumSequenceLength = Number(lenghtMap[virus][genes])
+      $scope.isSuggestedLength = true;
+    }else{
+      $scope.minimumSequenceLength = 0
+      $scope.isSuggestedLength = false;
+    }
+  }
 
   $scope.updateCountries = function() {
     var tempCountries = [];
@@ -162,7 +187,6 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     $scope.searchError = null;
     var virus = Number($scope.virus);
     var pdmo9 = false;
-    var isInfluenzaA = false;
     if (virus === 197911) {
       var subH = Number($scope.fluAH);
       var subN = Number($scope.fluAN);
@@ -170,14 +194,13 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       if (subH === 1 && subN === 1) {
         pdmo9 = Boolean($scope.isPDMO9 === true);
       }
-      isInfluenzaA = true;
     }
     var host = Number($scope.host);
     if (host === 8782) {
       host = Number($scope.avianHost);
     }
     var query = 'OrganismID:' + virus + ' AND HostID:' + host;
-    if(isInfluenzaA){
+    if($scope.isInfluenzaA){
       var subType = 'H' + Number($scope.fluAH) + 'N' + Number($scope.fluAN);
       query = 'OrganismID:' + virus + ' OR Definition:' + subType + ' AND HostID:' + host;
     }
@@ -186,10 +209,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
     }
     var genes = $scope.selectedGenes;
     if (genes.length > 0) {
-      var geneString = ' AND Gene:('+genes[0];
-      for (var i = 1; i < genes.length; i++) {
-        geneString += ' OR '+genes[i];
-      }
+      var geneString = ' AND Gene:(' + genes;
       if (genes.indexOf(completeGenes) === -1) {
         geneString += ' NOT Complete';
       }
@@ -250,9 +270,11 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   }
 
   $scope.search = function() {
+    $scope.searching = true;
     var query = $scope.generateQuery();
     query = encodeURIComponent(query.trim());
     $http.get(SERVER_URI+'/search?query='+query).then(function(response) {
+      $scope.searching = false;
       if (response.status === 200) {
         combinedRecords = combinedRecords.concat(response.data.records);
         RecordData.setRecords(combinedRecords);
@@ -269,6 +291,17 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
       else {
         $scope.searchError = 'Search Failed on Server. Please refresh and try again.';
+      }
+    }, function(error) {
+      $scope.searching = false;
+      if(error.status === 413){
+        $scope.searchError = 'Payload Error';
+      }
+      else if (error.status !== 500) {
+        $scope.searchError = error.data.error;
+      }
+      else {
+        $scope.searchError = 'Parsing Failed on Server. Please refresh and try again.';
       }
     });
     $(window).scroll(function() {
