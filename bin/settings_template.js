@@ -10,7 +10,8 @@ const SECRET_SETTINGS = {
   REDIS_HOST: null, //localhost for local
   REDIS_PASSWORD: null, //usually null for local
   ZOOPHY_SERVICES_URI: null, //uri for zoophy rest services
-  SERVER_PORT: null //3000 is default
+  SERVER_PORT: null, //3000 is default
+  RECAPTCHA_SECRET_KEY: null //generate using google reCAPTCHA v2 service
 };
 
 module.exports = SECRET_SETTINGS;

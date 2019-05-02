@@ -19,6 +19,7 @@ let upload = multer(multerOptions);
 let GLMPredictor = require('../bin/glm_predictor');
 
 const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
+const RECAPTCHA_SECRET_KEY = require('../bin/settings').RECAPTCHA_KEY.SECRET_KEY;
 
 const DOWNLOAD_FOLDER = path.join(__dirname, '../public/downloads/');
 const ACCESSION_RE = /^([A-Z]|\d|_|\.){5,10}?$/;
@@ -40,7 +41,6 @@ const FASTA_MET_LOCNAME_RE = /^((([\w -']){1,30})|\d{4,10})?$/;
 const FASTA_MET_SEQ_RE = /^([ACGTURYSWKMBDHVNacgturyswkmbdhvn-]){1,30000}$/;
 const SOURCE_GENBANK = 1;
 const SOURCE_FASTA = 2;
-const RECAPTCHA_SECRET_KEY = "6LdOlHoUAAAAAEsOwiu3rnxsgzaqu9sV-4G8uH3_";
 const MAX_EMAIL_ADDRESS = 2;
 
 let router = express.Router();
