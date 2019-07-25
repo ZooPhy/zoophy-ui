@@ -115,7 +115,7 @@ describe('Run Genbank Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Email: fakeAddressss');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Email(s): fakeAddressss');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });
@@ -266,7 +266,7 @@ describe('Run FASTA Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Email: fakeAddressss');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Email(s): fakeAddressss');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });
@@ -399,7 +399,7 @@ describe('Run Combined Job', function() {
       .send(job)
       .end(function(err, res) {
       if (err) done(err);
-      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Email: fakeAddressss');
+      assert.strictEqual(res.body.error, 'INVALID JOB PARAMETER(S): Invalid Email(s): fakeAddressss');
       assert.strictEqual(res.status, 400, "Should not run Job");
       done();
     });
