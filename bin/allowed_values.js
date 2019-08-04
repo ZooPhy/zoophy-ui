@@ -65,8 +65,18 @@ const VIRUSES = [
     name: 'MERS-CoV',
     tax_id: 1335626,
     genes: [
+      'S',
+      'E',
       'M',
-      'E'
+      'N',
+      'ORF1a',
+      'ORF1b',
+      'ORF1ab',
+      'ORF3',
+      'ORF4A',
+      'ORF4B',
+      'ORF5',
+      'ORF8b'
     ]
   },
   {

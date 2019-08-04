@@ -21,7 +21,14 @@ function recordChart(){
   }, {
     "year": "2019-02-23",
     "value": 707271
-  }];
+  }, {
+    "year": "2019-04-23",
+    "value": 734704
+  }, {
+    "year": "2019-06-23",
+    "value": 758056
+  }
+  ];
 
   // Create axes
   var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
@@ -83,7 +90,14 @@ function locationChart(){
   }, {
     "year": "2019-02-23",
     "value": 700798
-  }];
+  }, {
+    "year": "2019-04-23",
+    "value": 728231
+  }, {
+    "year": "2019-06-23",
+    "value": 751583
+  }
+  ];
 
   // Create axes
   var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
@@ -142,7 +156,14 @@ function hostChart(){
   }, {
     "year": "2019-02-23",
     "value": 648019
-  }];
+  }, {
+    "year": "2019-04-23",
+    "value": 683538
+  }, {
+    "year": "2019-06-23",
+    "value": 708993
+  }
+  ];
 
   // Create axes
   var categoryAxis = chart.xAxes.push(new am4charts.CategoryAxis());
