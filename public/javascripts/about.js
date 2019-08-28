@@ -27,6 +27,9 @@ function recordChart(){
   }, {
     "year": "2019-06-23",
     "value": 758056
+  }, {
+    "year": "2019-08-23",
+    "value": 780274
   }
   ];
 
@@ -96,6 +99,9 @@ function locationChart(){
   }, {
     "year": "2019-06-23",
     "value": 751583
+  }, {
+    "year": "2019-08-23",
+    "value": 773800
   }
   ];
 
@@ -162,6 +168,9 @@ function hostChart(){
   }, {
     "year": "2019-06-23",
     "value": 708993
+  }, {
+    "year": "2019-08-23",
+    "value": 731934
   }
   ];
 
