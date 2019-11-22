@@ -21,6 +21,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.clockModel = 'Strict';
   $scope.availablePriors = ['Constant', 'Skyline', 'Skygrid']
   $scope.treePrior = 'Constant';
+  $scope.possibleLocations = false;
   $scope.warning = 'Too Few Records, Minimum is 5';
   $scope.fileToSend = null;
   $scope.filename = 'none';
@@ -42,6 +43,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.gamma = false;
     $scope.clockModel = 'Strict';
     $scope.treePrior = 'Constant';
+    $scope.possibleLocations = false;
     $scope.jobName = null;
     $scope.runError = null;
     $scope.running = false;
@@ -152,6 +154,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
           var prior = String($scope.treePrior).trim();
           var chain = Number($scope.chainLength);
           var rate = Number($scope.subSampleRate);
+          var possibleLocations = Boolean($scope.possibleLocations);
           var jobData = {
             replyEmail: email,
             jobName: currentJobName,
@@ -165,7 +168,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
               clockModel: clockModel,
               treePrior: prior,
               chainLength: chain,
-              subSampleRate: rate
+              subSampleRate: rate,
+              possibleLocations: possibleLocations
             }
           };
           $http.post(runUri, jobData).then(function success(response) {

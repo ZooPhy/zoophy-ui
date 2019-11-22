@@ -127,6 +127,11 @@
               Note: The ideal chain length to sample rate ratio is 1000:1. The Sample Rate can vary between 1000 - 25000"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
             <input type="number" class="form-control" ng-model="subSampleRate"></input>
           </div>
+          <div class="col-sm-2">
+            <label>Incorporate geolocation uncertainty<span class="help" data-toggle="tooltip" data-placement="top" title="Adds uncertainty in the geospatial assignment of taxa based on automatically enriched metadata information in GenBank.
+              See: Incorporating sampling uncertainty in the geospatial assignment of taxa for virus phylogeography. - Scotch et. al. Virus Evolution 2019"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
+            <input type="number" class="form-control" ng-model="possibleLocations"></input>
+          </div>
         </div>
       </div>
     </div>
