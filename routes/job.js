@@ -158,7 +158,7 @@ router.post('/run', function(req, res) {
         }
       }
     }
-    console.log(email)
+    console.log(req.body.xmlOptions)
     let jobName = null;
     if (req.body.jobName) {
       if (checkInput(req.body.jobName, 'string', JOB_NAME_RE)) {
@@ -212,6 +212,9 @@ router.post('/run', function(req, res) {
     Number(req.body.xmlOptions.subSampleRate) < 1000 || Number(req.body.xmlOptions.subSampleRate) > 25000){
         xmlErrorMessage += 'subSampleRate, ';
     }
+    if (!checkInput(req.body.xmlOptions.geospatialUncertainties, 'boolean', null)){
+      xmlErrorMessage += 'geospatialUncertainties, ';
+    }
     if(xmlErrorMessage != 'Invalid XML Parameters: '){
       jobErrors += xmlErrorMessage;
     }else{
@@ -222,7 +225,8 @@ router.post('/run', function(req, res) {
         clockModel: String(req.body.xmlOptions.clockModel),
         treePrior: String(req.body.xmlOptions.treePrior),
         chainLength: Number(req.body.xmlOptions.chainLength),
-        subSampleRate: Number(req.body.xmlOptions.subSampleRate)
+        subSampleRate: Number(req.body.xmlOptions.subSampleRate),
+        geospatialUncertainties: Boolean(req.body.xmlOptions.geospatialUncertainties)
       };
     }
     if (jobErrors === BASE_ERROR) {
@@ -234,6 +238,7 @@ router.post('/run', function(req, res) {
         predictors: predictors,
         xmlOptions: xmlOptions
       });
+      console.log(zoophyJob)
       request.post({
         url: API_URI+'/validate',
         headers: {

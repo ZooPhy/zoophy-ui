@@ -1151,6 +1151,8 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     };
 
     $scope.highlightLocation = function(record) {
+      if (record.possibleLocations.length > 1)
+        console.log(record);
       $scope.addLayerToMap(record.hostId);
       var features = [];
       var center = [0,0];
@@ -1168,27 +1170,57 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
               });
       }else{
         $scope.canPlotLocation = true;
-        var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
-        var pointonmap = new ol.Feature(new ol.geom.Point(coord));
-        pointonmap.set('name',record.location);
-        pointonmap.set('accession',record.accession);
-        features.push(pointonmap);
-        center = coord;
-        $scope.viewLayerfeatures = features;
-        var mapLayers = $scope.geoLocMap.getLayers().getArray();
-        mapLayers.forEach(function (layer, i) {
-          if (layer.get('zodolayer')=='view'){
-            // console.log("updating view layer");
-            layer.getSource().clear();
-            layer.getSource().addFeatures(features);
-            // $scope.geoLocMap.getView().setCenter(center);
-            $scope.geoLocMap.getView().animate({
-              center: center,
-              duration: 1000
-            });
-            //$scope.geoLocMap.getView().setZoom(3);
+        if (record.possibleLocations.length > 1) {
+          for (var i=0; i< record.possibleLocations.length; i++){
+            var possLoc = record.possibleLocations[i];
+            if (possLoc.probability!="Unknown"){
+              var coord = ol.proj.transform([parseFloat(possLoc.longitude), parseFloat(possLoc.latitude)], 'EPSG:4326', 'EPSG:3857');
+              var pointonmap = new ol.Feature(new ol.geom.Point(coord));
+              pointonmap.set('name',possLoc.location);
+              pointonmap.set('accession',record.accession);
+              pointonmap.set('probability',possLoc.probability);
+              features.push(pointonmap);
+            }
           }
-        });
+          $scope.viewLayerfeatures = features;
+          var mapLayers = $scope.geoLocMap.getLayers().getArray();
+          mapLayers.forEach(function (layer, i) {
+            if (layer.get('zodolayer')=='view'){
+              // console.log("updating view layer");
+              layer.getSource().clear();
+              layer.getSource().addFeatures(features);
+              // $scope.geoLocMap.getView().setCenter(center);
+              $scope.geoLocMap.getView().animate({
+                center: center,
+                duration: 1000
+              });
+              //$scope.geoLocMap.getView().setZoom(3);
+            }
+          });
+          console.log("Done adding possible locations.");
+        } else {
+          var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
+          var pointonmap = new ol.Feature(new ol.geom.Point(coord));
+          pointonmap.set('name',record.location);
+          pointonmap.set('accession',record.accession);
+          features.push(pointonmap);
+          center = coord;
+          $scope.viewLayerfeatures = features;
+          var mapLayers = $scope.geoLocMap.getLayers().getArray();
+          mapLayers.forEach(function (layer, i) {
+            if (layer.get('zodolayer')=='view'){
+              // console.log("updating view layer");
+              layer.getSource().clear();
+              layer.getSource().addFeatures(features);
+              // $scope.geoLocMap.getView().setCenter(center);
+              $scope.geoLocMap.getView().animate({
+                center: center,
+                duration: 1000
+              });
+              //$scope.geoLocMap.getView().setZoom(3);
+            }
+          });
+        }
       }
     };
 
