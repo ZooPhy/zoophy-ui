@@ -80,6 +80,24 @@ const VIRUSES = [
     ]
   },
   {
+    name: 'COVID-19',
+    tax_id: 2697049,
+    genes: [
+      'S',
+      'E',
+      'M',
+      'N',
+      'ORF1a',
+      'ORF1b',
+      'ORF1ab',
+      'ORF3',
+      'ORF4A',
+      'ORF4B',
+      'ORF5',
+      'ORF8b'
+    ]
+  },
+  {
     name: 'Rabies',
     tax_id: 11292,
     genes: [
