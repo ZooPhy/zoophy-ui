@@ -87,14 +87,7 @@ const VIRUSES = [
       'E',
       'M',
       'N',
-      'ORF1a',
-      'ORF1b',
       'ORF1ab',
-      'ORF3',
-      'ORF4A',
-      'ORF4B',
-      'ORF5',
-      'ORF8b'
     ]
   },
   {
