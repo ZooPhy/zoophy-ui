@@ -22,6 +22,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
   $scope.availablePriors = ['Constant', 'Skyline', 'Skygrid']
   $scope.treePrior = 'Constant';
   $scope.geospatialUncertainties = false;
+  $scope.availableDisjoinerLevels = ['Auto', 'PCL', 'ADM1', 'ADM2'];
+  $scope.disjoinerLevel = 'Auto';
   $scope.warning = 'Too Few Records, Minimum is 5';
   $scope.fileToSend = null;
   $scope.filename = 'none';
@@ -44,6 +46,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.clockModel = 'Strict';
     $scope.treePrior = 'Constant';
     $scope.geospatialUncertainties = false;
+    $scope.disjoinerLevel = 'Auto';
     $scope.jobName = null;
     $scope.runError = null;
     $scope.running = false;
@@ -155,6 +158,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
           var chain = Number($scope.chainLength);
           var rate = Number($scope.subSampleRate);
           var geospatialUncertainties = Boolean($scope.geospatialUncertainties);
+          var disjoinerLevel = String($scope.disjoinerLevel);
           var jobData = {
             replyEmail: email,
             jobName: currentJobName,
@@ -169,7 +173,8 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
               treePrior: prior,
               chainLength: chain,
               subSampleRate: rate,
-              geospatialUncertainties: geospatialUncertainties
+              geospatialUncertainties: geospatialUncertainties,
+              disjoinerLevel: disjoinerLevel
             }
           };
           $http.post(runUri, jobData).then(function success(response) {

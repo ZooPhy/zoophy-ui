@@ -219,6 +219,7 @@ class CustomRecord {
     this.virus = UNKNOWN;
     this.luceneDate = UNKNOWN;
     this.host = UNKNOWN;
+    this.isCompleteDate = true; //assume correct date is uploaded in format
     if(checkInput(searchApiRecord.collectionDate, 'string', FASTA_MET_DEC_DATE_RE)){
       this.date = convertDecimalDate(searchApiRecord.collectionDate);
     } else {
