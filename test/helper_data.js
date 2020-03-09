@@ -242,7 +242,9 @@ const XML_OPTIONS = {
     clockModel :"Strict",
     treePrior:"Constant",
     chainLength:10000000,
-    subSampleRate:1000
+    subSampleRate:1000,
+    geospatialUncertainties:false,
+    disjoinerLevel:'Auto'
 };
 
 const JOBSEQUENCE_GENBANK_LIST = [{
