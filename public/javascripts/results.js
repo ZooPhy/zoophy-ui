@@ -236,7 +236,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         $scope.missingHostCountSelected++;
       }if(record.includeInJob && record.country == "Unknown" && record.state == "Unknown"){
         $scope.missingLocationCountSelected++;
-      }if(record.includeInJob){
+      }if(record.includeInJob && record.unNormalizedDate){
         var splitDate = record.unNormalizedDate.split('-');
         if(record.unNormalizedDate == "Unknown"){
           $scope.missingDateSelected++;
@@ -447,7 +447,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         var form = new FormData();
         var uri = SERVER_URI+'/upfasta';
         form.append('fastaFile', $scope.fastaFile);
-        console.log("Posting " + uri + " " + $scope.fastaFile.type)
+        // console.log("Posting " + uri + " " + $scope.fastaFile.type);
         $http.post(uri, form, {
             headers: {'Content-Type': undefined}
         }).then(function (response) {
@@ -1049,7 +1049,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.addLayerToMap = function(host) {
-      console.log("host",host)
       // highlight layer
       var featureStyle = new ol.style.Style({
         text: new ol.style.Text({
@@ -1083,7 +1082,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.clearLayerFeatures = function() {
-      // console.log("clearing features");
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, i) {
         if (layer.get('zodolayer')!='tile'){
@@ -1095,11 +1093,11 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
     
     $scope.updateThreshold = function(threshold) {
-      console.log("Updating threshold " + threshold);
+      // console.log("Updating threshold " + threshold);
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, j) {
         if (layer.get('zodolayer')=='view'){
-          console.log("updating view layer");
+          // console.log("updating view layer");
           var features = [];
           for(var i=0; i< $scope.viewLayerfeatures.length; i++){
             var feature = $scope.viewLayerfeatures[i];
@@ -1114,7 +1112,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     }
 
     $scope.loadHeatmapLayer = function(records) {
-      console.log("loading heatmap with "+records.length+ " records");
+      // console.log("loading heatmap with "+records.length+ " records");
       var mapLayers = $scope.geoLocMap.getLayers().getArray();
       mapLayers.forEach(function (layer, i) {
         if (layer instanceof ol.layer.Heatmap) {
@@ -1138,7 +1136,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
               features.push(pointonmap);
             }
           }
-          console.log(count+" records from " + records.length + " ignored")
+          // console.log(count+" records from " + records.length + " ignored");
           var heatmapSource = new ol.source.Vector({
             features: features
           });
@@ -1151,8 +1149,6 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     };
 
     $scope.highlightLocation = function(record) {
-      if (record.possibleLocations.length > 1)
-        console.log(record);
       $scope.addLayerToMap(record.hostId);
       var features = [];
       var center = [0,0];
@@ -1160,7 +1156,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       var latitude = parseFloat(record.latitude);
       if(record.location=="unknown"||record.location=="Unknown"||isNaN(longitude)||isNaN(longitude)||
               longitude<-180||longitude>180||latitude<-90||latitude>90){
-                console.log("Missing location info for highlighted record");
+                // console.log("Missing location info for highlighted record");
                 $scope.canPlotLocation = false;
                 var mapLayers = $scope.geoLocMap.getLayers().getArray();
                 mapLayers.forEach(function (layer, i) {
@@ -1170,7 +1166,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
               });
       }else{
         $scope.canPlotLocation = true;
-        if (record.possibleLocations.length > 1) {
+        if (record.possibleLocations && record.possibleLocations.length > 1) {
           for (var i=0; i< record.possibleLocations.length; i++){
             var possLoc = record.possibleLocations[i];
             if (possLoc.probability!="Unknown"){
@@ -1197,7 +1193,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
               //$scope.geoLocMap.getView().setZoom(3);
             }
           });
-          console.log("Done adding possible locations.");
+          // console.log("Done adding possible locations.");
         } else {
           var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
           var pointonmap = new ol.Feature(new ol.geom.Point(coord));
@@ -1273,10 +1269,10 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
                longitude<-180||longitude>180||latitude<-90||latitude>90){
               //console.log("No coordinates found for " + record.accession);
             }else{
-              console.log("record selected " + record.accession +", " +record.longitude+", " +record.latitude+ " " + add);
+              // console.log("record selected " + record.accession +", " +record.longitude+", " +record.latitude+ " " + add);
               var coord = ol.proj.transform([parseFloat(record.longitude), parseFloat(record.latitude)], 'EPSG:4326', 'EPSG:3857');
               var pointonmap = new ol.Feature(new ol.geom.Point(coord));
-              console.log('name: '+record.location);
+              // console.log('name: '+record.location);
               pointonmap.setId(record.accession);
               pointonmap.set('name',record.location);
               pointonmap.set('accession',record.accession);

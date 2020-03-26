@@ -128,9 +128,30 @@
             <input type="number" class="form-control" ng-model="subSampleRate"></input>
           </div>
           <div class="col-sm-2">
-            <label>Incorporate Geolocation Uncertainty <input type="checkbox" ng-model="geospatialUncertainties"></input> <span class="help" data-toggle="tooltip" data-placement="right" title="Adds uncertainty in the geospatial assignment of taxa based on automatically enriched metadata information in GenBank.
-              [Scotch M, 2019, Virus Evolution]"> <i class="fa fa-question-circle" aria-hidden="true"></i></span></label>
-            
+            <label>Include Geolocation Uncertainty <input ng-model="geospatialUncertainties" type="checkbox"></input> &nbsp 
+              <span class="help" data-toggle="tooltip" data-placement="top" title="Adds uncertainty in the geospatial assignment of taxa based on automatically enriched metadata information in GenBank. [Scotch M, 2019, Virus Evolution]"> 
+                <i class="fa fa-question-circle" aria-hidden="true"></i>
+              </span>
+              <span class="help" data-toggle="tooltip" data-placement="top" title="This feature is currently in development mode. The option may be reset to default for certain inputs."> 
+                <i class="fa fa-info-circle" style="color:indianred" aria-hidden="true"></i>
+              </span>
+            </label>
+          </div>
+          <div class="col-sm-2">
+            <label>Geolocation Level
+              <span class="help" data-toggle="tooltip" data-placement="top" title="Locations will be aggregated and normalized to this Geonames division for discretized states. If accessions do not have sufficient granularity of locations, they are excluded.
+                Auto: Automatically picked such that least amount of locations are excluded for the job.
+                PCL: Country Level e.g. United States, China, India.
+                ADM1: State/Province Level e.g. Arizona, Guangdong, Kerala.
+                ADM2: County/District/City Level e.g. Maricopa, Zhuhai Shi, Kozhikode.">
+              <i class="fa fa-question-circle" aria-hidden="true"></i>
+              </span>
+              <span class="help" data-toggle="tooltip" data-placement="top" title="This feature is currently in development mode. The option may be reset to default for certain inputs."> 
+                <i class="fa fa-info-circle" style="color:indianred" aria-hidden="true"></i>
+              </span>
+            </label>
+            <select class="form-control" ng-model="disjoinerLevel" ng-options="level as level for level in availableDisjoinerLevels">
+            </select>
           </div>
         </div>
       </div>

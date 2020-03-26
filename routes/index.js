@@ -499,10 +499,10 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                 }
                 if(metaData != "" && seqData.length > 0){
                   let metitems = metaData.split("|");
-                  if(metitems.length == FASTA_MET_ITEMS){
+                  if(metitems.length >= FASTA_MET_ITEMS){
                     let uid = metitems[0];
-                    let loc = metitems[1];
-                    let date = metitems[2];
+                    let loc = metitems[metitems.length-2];
+                    let date = metitems[metitems.length-1];
                       let cust_record = {
                         "id" : uid,
                         "collectionDate": date,
@@ -554,7 +554,7 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                   let rawResponse = JSON.parse(body);
                   let rawRecords = rawResponse.fastaRecord
                   var rawInvalidRecords = rawResponse.invalidRecords
-                  var exclusionList = "Following records were exclused: <br>";
+                  var exclusionList = "Following records were excluded: <br>";
                   let records = [];
                   for (let i = 0; i < rawRecords.length; i++) {
                     let record = new GenBankRecord.CustomRecord(rawRecords[i]);
@@ -568,7 +568,7 @@ router.post('/upfasta', upfasta.single('fastaFile'), function (req, res) {
                     }
                     exclusionList = exclusionList.substring(0,exclusionList.length-2)
                   }
-                  if(exclusionList === "Following records were exclused: <br>"){
+                  if(exclusionList === "Following records were excluded: <br>"){
                     exclusionList = "";
                   }
                   console.log("invalid: "+exclusionList)
