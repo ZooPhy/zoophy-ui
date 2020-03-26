@@ -33,6 +33,9 @@ function recordChart(){
   }, {
     "year": "2019-10-23",
     "value": 787671
+  }, {
+    "year": "2020-02-23",
+    "value": 826088
   }
   ];
 
@@ -108,6 +111,9 @@ function locationChart(){
   }, {
     "year": "2019-10-23",
     "value": 781195
+  }, {
+    "year": "2020-02-23",
+    "value": 792166
   }
   ];
 
@@ -180,6 +186,9 @@ function hostChart(){
   }, {
     "year": "2019-10-23",
     "value": 739280
+  }, {
+    "year": "2020-02-23",
+    "value": 777473
   }
   ];
 
