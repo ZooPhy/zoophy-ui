@@ -23,7 +23,7 @@ const API_URI = require('../bin/settings').API_CONFIG.ZOOPHY_URI;
 const DOWNLOAD_FOLDER = path.join(__dirname, '../public/downloads/');
 
 const QUERY_RE = /^(\w| |:|\[|\]|\(|\)){5,5000}?$/;
-const ACCESSION_RE = /^([A-Z]|\d){5,10}?$/;
+const ACCESSION_RE = /^([A-Z]|\d|_){5,10}?$/;
 const DOWNLOAD_FORMAT_RE = /^(csv)|(fasta)$/;
 const ACCESSION_UPLOAD_RE = /^(\w|-|\.){1,250}?\.txt$/;
 const ACCESSION_VERSION_RE = /^([A-Z]|\d|_|\.){5,10}?\.\d{1,2}?$/;
@@ -369,11 +369,11 @@ router.post('/upload', upload.single('accessionFile'), function (req, res) {
             let cleanAccessions = [];
             let fileErrors = [];
             for (let i = 0; i < rawAccessions.length && i < UPLOAD_QUERY_LIMIT; i++) {
-              if (checkInput(rawAccessions[i], 'string', ACCESSION_RE)) {
-                cleanAccessions.push(String(rawAccessions[i]));
+              if (checkInput(rawAccessions[i].trim(), 'string', ACCESSION_RE)) {
+                cleanAccessions.push(String(rawAccessions[i]).trim());
               }
-              else if (checkInput(rawAccessions[i], 'string', ACCESSION_VERSION_RE)) {
-                cleanAccessions.push(String(rawAccessions[i].substr(0,rawAccessions[i].indexOf('.'))));
+              else if (checkInput(rawAccessions[i].trim(), 'string', ACCESSION_VERSION_RE)) {
+                cleanAccessions.push(String(rawAccessions[i].substr(0,rawAccessions[i].indexOf('.'))).trim());
               }
               else {
                 fileErrors.push(String('"'+rawAccessions[i]+'" on line #'+String(i+1)));
