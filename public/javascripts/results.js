@@ -677,12 +677,16 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
 
     $scope.columnUp = function() {
       let $selected = $('#toSelectBox').find('option:selected');
-      $selected.insertBefore($selected.prev());
+      if($selected.length){
+        $selected.first().prev().before($selected);
+      }
     };
 
     $scope.columnDown = function() {
       let $selected = $('#toSelectBox').find('option:selected');
-      $selected.insertAfter($selected.next());
+      if($selected.length){
+        $selected.last().next().after($selected);
+      }
     };
 
     $scope.columnAdd = function() {
