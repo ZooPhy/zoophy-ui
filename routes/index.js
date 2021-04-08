@@ -34,7 +34,7 @@ const SOURCE_FASTA = 2;
 const multerOptionsFasta = {
   dest: 'upfasta/',
   limits: {
-    fileSize: 10000000 //10mb
+    fileSize: 20000000 //20mb
   }
 };
 let upfasta = multer(multerOptionsFasta);
