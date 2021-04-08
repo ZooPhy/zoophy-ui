@@ -220,7 +220,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
     $scope.runError = null;
     $scope.success = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 50000) { //50kb
+    if (newFile && newFile.size < 500000) { //500kb
       var filename = newFile.name.trim();
       if (PREDICTOR_FILE_RE.test(filename)) {
         $scope.fileToSend = newFile;
@@ -232,7 +232,7 @@ angular.module('ZooPhy').controller('runController', function ($scope, $http, Re
       }
     }
     else {
-      $scope.runError = 'Invalid File Size. Limit is 50kb.';
+      $scope.runError = 'Invalid File Size. Limit is 500kb.';
     }
     $scope.$apply();
   };

@@ -413,7 +413,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
     $scope.fastaError = null;
     $scope.warning = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 10000000) { //10mb
+    if (newFile && newFile.size < 20000000) { //20mb
       var filename = newFile.name.trim();
       if (FASTA_FILE_RE.test(filename)) {
         $scope.fastaFile = newFile;
@@ -424,7 +424,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
       }
     }
     else {
-      $scope.fastaError = 'Invalid File Size. Limit is 1mb.';
+      $scope.fastaError = 'Invalid File Size. Limit is 20MB.';
     }
     $scope.$apply();
   };
@@ -506,7 +506,7 @@ angular.module('ZooPhy').controller('resultsController', function ($scope, $http
         }
       }
       else {
-        $scope.accessionUploadError = 'Invalid File Size. Limit is 5kb.';
+        $scope.accessionUploadError = 'Invalid File Size. Limit is 4MB.';
       }
       $scope.$apply();
     };

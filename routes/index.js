@@ -40,7 +40,7 @@ const multerOptionsFasta = {
 let upfasta = multer(multerOptionsFasta);
 
 const FASTA_UPLOAD_RE = /^([\w\s-\(\)]){1,250}?\.(txt|fasta)$/;
-const FASTA_UPLOAD_LIMIT = 1000;
+const FASTA_UPLOAD_LIMIT = 2500;
 const FASTA_MET_ITEMS = 3;
 
 let router = express.Router();

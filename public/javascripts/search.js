@@ -342,7 +342,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
     }
     else {
-      $scope.searchError = 'Invalid File Size. Limit is 5kb.';
+      $scope.searchError = 'Invalid File Size. Limit is 4MB.';
     }
     $scope.$apply();
   };
@@ -393,7 +393,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
   $scope.uploadFasta = function(rawFile) {
     $scope.searchError = null;
     var newFile = rawFile[0];
-    if (newFile && newFile.size < 10000000) { //10MB
+    if (newFile && newFile.size < 20000000) { //20MB
       var filename = newFile.name.trim();
       if (FASTA_FILE_RE.test(filename)) {
         $scope.fastaFile = newFile;
@@ -404,7 +404,7 @@ angular.module('ZooPhy').controller('searchController', function ($scope, $http,
       }
     }
     else {
-      $scope.searchError = 'Invalid File Size. Limit is 1mb.';
+      $scope.searchError = 'Invalid File Size. Limit is 20MB.';
     }
     $scope.$apply();
   };
